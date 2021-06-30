@@ -38,7 +38,7 @@ pip install manual-requirements/tables-3.6.1-cp39-cp39-win_amd64.whl
 <br>
 
 **Recommended Install**
-1. `pip install requirements.txt`
+1. `pip install -r requirements.txt`
 
 **Installing using a newer version of PsychoPy**
 1. `pip install psychopy`
