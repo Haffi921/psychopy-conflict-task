@@ -1,4 +1,4 @@
-# psychopy-conflict-task
+# PsychoPy Conflict Task
 A generic Conflict Task boilerplate made in PsychoPy
 
 ## Installation
