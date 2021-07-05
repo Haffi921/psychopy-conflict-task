@@ -1,7 +1,3 @@
-from subprocess import run
-import psychopy
-
-
 from psychopy import visual, core
 from psychopy import clock
 from psychopy.constants import FINISHED, NOT_STARTED, STARTED
