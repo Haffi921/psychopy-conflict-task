@@ -17,15 +17,15 @@ win = visual.Window(
 defaultKeyboard = keyboard.Keyboard()
 
 # Stims
-fixation_cross = visual.ShapeStim(win, lineColor=None, fillColor="white", vertices="cross", size=0.05)
+fixation_cross = visual.ShapeStim(win, lineColor=None, fillColor="white", vertices="cross", size=0.05, name="fixation_cross")
 fixation_cross.tStart = 0.0
 fixation_cross.tDuration = 1.0
 
-distractor = visual.TextStim(win, text="Down\nDown\nDown", color="white", height=0.05)
+distractor = visual.TextStim(win, text="Down\nDown\nDown", color="white", height=0.05, name="distractor")
 distractor.tStart = 1.0
 distractor.tDuration = 0.133
 
-target = visual.TextStim(win, text="Up", color="white", height=0.05)
+target = visual.TextStim(win, text="Up", color="white", height=0.05, name="target")
 target.tStart = 1.166
 target.tDuration = 0.133
 
