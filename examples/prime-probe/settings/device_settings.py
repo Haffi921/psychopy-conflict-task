@@ -1,8 +1,22 @@
-# Modify these settings to customize experiment window
+from psychopy.hardware import keyboard
+
+# ----------------------------------------------------
+#
+# Customize input device
+#
+# ----------------------------------------------------
+input_device = keyboard.Keyboard()
+
+
+# ----------------------------------------------------
+#
+# Customize experiment window
+#
+# ----------------------------------------------------
 window_settings = dict(
 
     # Size of the window in pixels (x, y)
-    size = (1920, 1200),
+    size = (1680, 1050),
 
     # Color of background as [r, g, b] list or single value. Each gun can take values between -1.0 and 1.0
     color = [-1, -1, -1],
@@ -17,6 +31,7 @@ window_settings = dict(
     screen = 0,
 
     #---- Rest are less useful settings to tinker with, so it's not recommended ----#
+    monitor='testMonitor',
 
     # Set the window type or back-end to use
     winType = 'pyglet',
