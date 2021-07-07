@@ -6,14 +6,22 @@ componentList = list[BaseComponent]
 class Trial:
     visualComponents = []
     response = None
+    any_alternating = False
+    any_random = False
 
     clock = clock.Clock()
 
     def __init__(self, window, visualComponents, response):
         for component in visualComponents:
             self.visualComponents.append(VisualComponent(window, component))
+            if self.visualComponents[-1].random:
+                self.any_random = True
+            if self.visualComponents[-1].alternating:
+                self.any_alternating = True
         
         self.response = ResponseComponent(response)
+        if self.response.alternating:
+            self.any_alternating = True
 
     def get_all_components(self) -> list[BaseComponent]:
         return [*self.visualComponents, self.response]

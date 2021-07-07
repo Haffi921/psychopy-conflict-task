@@ -49,6 +49,7 @@ class BaseComponent:
 
 class ResponseComponent(BaseComponent):
     keys = []
+    alternating = False
 
     made = False
     key = None
@@ -63,6 +64,7 @@ class ResponseComponent(BaseComponent):
             self.keys = [component_settings["keys"]]
         elif "alternating" in component_settings:
             if "keys" in component_settings["alternating"]:
+                self.alternating = True
                 self.keys = component_settings["alternating"]["keys"]
         
         if len(self.keys) == 0:
