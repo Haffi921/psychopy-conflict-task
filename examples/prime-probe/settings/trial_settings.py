@@ -35,7 +35,7 @@ target = dict(
     stop = 1.3,
     type = "TextStim",
     spec = dict(
-        name = "distractor",
+        name = "target",
         color = "white",
         height = 0.05,
     ),
@@ -52,8 +52,10 @@ target = dict(
 response = dict(
     start = 1.3,
     stop = 3.0,
-    keys = [
-        ["a", "d"],
-        ["j", "l"],
-    ]
+    alternating = dict(
+        keys = [
+            ["a", "d"],
+            ["j", "l"],
+        ]
+    )
 )

@@ -1,12 +1,12 @@
-from trial_settings import *
+from .trial_settings import *
 
-experiment = dict(
+experiment_settings = dict(
     blocks = dict(
         number = 2,
         trials = dict(
             number = 5,
-            components = [fixation_cross, distractor, target],
-            response = response
+            visualComponents = [fixation_cross, distractor, target],
+            response = response,
         )
     )
 )

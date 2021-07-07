@@ -1,19 +1,12 @@
-from psychopy import core, clock
+import sys
+from os.path import dirname, realpath
 
-from conflict_task.window import Window
+sys.path.append(dirname(dirname(dirname(realpath(__file__)))))
+
+from conflict_task.experiment import Experiment
+from settings.experiment_settings import *
 from settings.device_settings import *
 
+prime_probe = Experiment(experiment_settings, window_settings, input_device)
 
-win = Window(window_settings)
-
-# Clocks and times
-globalClock = clock.Clock()
-trialClock = clock.Clock()
-_frameTolerance = 0.001
-
-win.flip()
-
-core.wait(2)
-
-win.close()
-core.quit()
+prime_probe.run()
