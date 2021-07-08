@@ -1,27 +1,41 @@
 from psychopy import clock
 from .component import VisualComponent, ResponseComponent, BaseComponent
-
-componentList = list[BaseComponent]
+from .util import Alternator, Randomizer
 
 class Trial:
+    # TODO: Add AudioComponents, etc.
     visualComponents = []
+    
+    # Main conflict-task components
+    distractor = None
+    target = None
     response = None
-    any_alternating = False
-    any_random = False
+
+    randomizer = None
+    alternator = None
 
     clock = clock.Clock()
 
     def __init__(self, window, visualComponents, response):
         for component in visualComponents:
-            self.visualComponents.append(VisualComponent(window, component))
-            if self.visualComponents[-1].random:
-                self.any_random = True
-            if self.visualComponents[-1].alternating:
-                self.any_alternating = True
+            visualComponent = VisualComponent(window, component)
+
+            if visualComponent.visual.name == "distractor":
+                self.distractor = visualComponent
+            if visualComponent.visual.name == "target":
+                self.target = visualComponent
+            
+            self.visualComponents.append(visualComponent)
+
+        self.randomizer = Randomizer(self.target.variable_factor["random_max"])
+        if self.target.alternating:
+            self.alternator = Alternator(self.target.variable_factor["alternator"])
         
         self.response = ResponseComponent(response)
-        if self.response.alternating:
-            self.any_alternating = True
+        
+        if self.any_alternating:
+
+            self.alternator = Alternator()
 
     def get_all_components(self) -> list[BaseComponent]:
         return [*self.visualComponents, self.response]

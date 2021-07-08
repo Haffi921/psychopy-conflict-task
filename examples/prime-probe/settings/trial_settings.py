@@ -52,10 +52,5 @@ target = dict(
 response = dict(
     start = 1.3,
     stop = 3.0,
-    alternating = dict(
-        keys = [
-            ["a", "d"],
-            ["j", "l"],
-        ]
-    )
+    keys = ["a", "d", "j", "l"],
 )
