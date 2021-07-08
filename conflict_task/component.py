@@ -92,7 +92,7 @@ class VisualComponent(BaseComponent):
 
     alternating = False
 
-    variable_factor: dict = None
+    variable_factor = None
 
     def __init__(self, window, component_settings: dict):
         super().__init__(component_settings)
@@ -108,15 +108,17 @@ class VisualComponent(BaseComponent):
         
         if "random" in component_settings:
             self.variable_factor = component_settings["random"]
-            self.variable_factor["random_max"] = len(self.variable_factor.items()[0])
+            variable_list = list(self.variable_factor.values())
+            self.variable_factor["random_max"] = len(variable_list[0])
         elif "alternating" in component_settings:
             self.alternating = True
             self.variable_factor = component_settings["alternating"]["random"]
-            self.variable_factor["alternating_max"] = len(self.variable_factor.items()[0])
-            self.variable_factor["random_max"] = len(self.variable_factor.items()[0])[0]
+            variable_list = list(self.variable_factor.values())
+            self.variable_factor["alternating_max"] = len(variable_list[0])
+            self.variable_factor["random_max"] = len(variable_list[0][0])
     
     def prepare(self, random = 0, alternating = 0):
-        factor_name, factor_values = dict(self.variable_factor.items())[0]
+        factor_name, factor_values = list(self.variable_factor.items())[0]
         if self.alternating:
             factor_value = factor_values[alternating][random]
         else:

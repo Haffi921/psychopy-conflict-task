@@ -29,13 +29,9 @@ class Trial:
 
         self.randomizer = Randomizer(self.target.variable_factor["random_max"])
         if self.target.alternating:
-            self.alternator = Alternator(self.target.variable_factor["alternator"])
+            self.alternator = Alternator(self.target.variable_factor["alternating_max"])
         
         self.response = ResponseComponent(response)
-        
-        if self.any_alternating:
-
-            self.alternator = Alternator()
 
     def get_all_components(self) -> list[BaseComponent]:
         return [*self.visualComponents, self.response]
@@ -46,15 +42,29 @@ class Trial:
     
     def run(self, window, input_device, frameTolerance):
         self.refresh()
+
+        distractor_condition = self.randomizer.new_one()
+        target_condition = self.randomizer.new_one()
+
+        congruency = distractor_condition == target_condition
+
+        if self.target.alternating:
+            self.distractor.prepare(distractor_condition, self.alternator.index)
+            self.target.prepare(target_condition, self.alternator.index)
+            self.response.set_correct_key(self.randomizer.max * self.alternator.index + self.randomizer.number)
+        else:
+            self.distractor.prepare(distractor_condition)
+            self.target.prepare(target_condition)
+            self.response.set_correct_key(self.randomizer.number)
+
         running = True
-        time = 0
         self.clock.reset(-window.getFutureFlipTime(clock="now"))
 
         while running:
             if input_device.getKeys(["escape"]):
                 return False
             
-            t = self.clock.getTime()
+            time = self.clock.getTime()
             thisFlip = window.getFutureFlipTime(clock=self.clock)
             thisFlipGlobal = window.getFutureFlipTime(clock=None)
 

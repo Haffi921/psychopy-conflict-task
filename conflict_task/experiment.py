@@ -32,6 +32,9 @@ class Experiment:
         for _ in range(self.nr_blocks):
             for _ in range(self.nr_trials):
                 continue_experiment = self.trial.run(self.window, self.input_device, self._frameTolerance)
+                
+                if self.trial.target.alternating:
+                    self.trial.alternator.next()
 
                 if not continue_experiment:
                     break

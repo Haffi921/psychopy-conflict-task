@@ -1,7 +1,7 @@
-import sys
-from os.path import dirname, realpath
+# import sys
+# from os.path import dirname, realpath
 
-sys.path.append(dirname(dirname(dirname(realpath(__file__)))))
+# sys.path.append(dirname(dirname(dirname(realpath(__file__)))))
 
 from conflict_task.experiment import Experiment
 from settings.experiment_settings import *

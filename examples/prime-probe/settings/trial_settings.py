@@ -23,8 +23,8 @@ distractor = dict(
     alternating = dict(
         random = dict(
             text = [
+                ["Left\nLeft\nLeft", "Right\nRight\nRight"],
                 ["Up\nUp\nUp", "Down\nDown\nDown"],
-                ["Left\nLeft\nLeft", "Right\nRight\nRight"]
             ]
         )
     )
