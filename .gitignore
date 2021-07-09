@@ -1,2 +1,6 @@
+# VSCode
 .vscode
 workspace.code-workspace
+
+# Python
+**/__pycache__/*
