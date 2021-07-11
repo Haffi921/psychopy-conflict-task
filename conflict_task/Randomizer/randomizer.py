@@ -1,91 +1,113 @@
 import numpy as np
-from numpy.random import default_rng
+from numpy.random import randint, choice
 
-n = 24
+from conflict_task.util import Alternator
 
-weight_matrix = np.array([[1, 1], [1, 1]])
-weight_matrix_sum = weight_matrix.sum()
+trials = 32
 
-probability_matrix = np.zeros(weight_matrix.shape)
+sequential_conditions = {
+    "Congruency": 2,
+    "Value": 2,
+}
+
+alternating_conditions = {
+    "Hand": 2,
+}
+
+alternating = True
+
+levels = 1
+
+condition_keys = list(sequential_conditions.keys())
+condition_levels = list(sequential_conditions.values())
 
 
-for i in range(weight_matrix.size):
-    probability_matrix.flat[i] = n * weight_matrix.flat[i] / weight_matrix_sum
+dimensions = levels + 1
+length = np.prod(condition_levels)
+matrix_shape = [length] * dimensions
 
-shape = probability_matrix.shape
-dimensions = len(shape)
-indices = [i for i, _ in np.ndenumerate(probability_matrix)]
+if alternating:
+    condition_keys = list(alternating_conditions.keys()) + condition_keys
 
-rng = default_rng()
-print(probability_matrix)
+    # Levels of each alternating condition
+    a_condition_levels = list(alternating_conditions.values())
+
+    # Total length of alternating levels
+    alternating_length = np.prod(a_condition_levels)
+
+    # Complete the condition levels
+    condition_levels = a_condition_levels + condition_levels
+
+    # Add alternating dimension
+    matrix_shape.insert(0, alternating_length)
+
+condition_indices = [i for i, _ in np.ndenumerate(np.zeros(condition_levels))]
+base_matrix = np.zeros(matrix_shape)
+
+for i in range(base_matrix.size):
+    base_matrix.flat[i] = trials / base_matrix.size
+
+def get_initial_seed(dimensions):
+    initial_seed = []
+    for dim in range(dimensions):
+        initial_seed.append(np.random.randint(base_matrix.shape[dim]))
+    return initial_seed
+
+restart = False
 restarts = 0
 while True:
-    sequence = []
-    probability_matrix_copy = probability_matrix.copy()
-    for i in range(n):
-        new_index_valid = False
-        rand_ind = rng.choice(len(indices), len(indices), replace=False)
-        if len(sequence) == 0:
-            new_index = indices[rand_ind[0]]
-            sequence.append(new_index)
-            probability_matrix_copy[tuple(new_index)] -= 1
-            new_index_valid = True
-            continue
+    probability_matrix = base_matrix.copy()
+    raw_sequence = []
+    initial_seed = get_initial_seed(dimensions)
+
+    if alternating:
+        alternator = Alternator(alternating_length)
+        working_matrix = probability_matrix[alternator.index]
+        initial_seed.insert(0, alternator.index)
+    else:
+        working_matrix = probability_matrix
+    
+    raw_sequence.append(tuple(initial_seed))
+    probability_matrix[raw_sequence[-1]] -= 1
+
+    for _ in range(trials - 1):
+        if alternating:
+            alternator.next()
+            working_matrix = probability_matrix[alternator.index]
+
+        new_index = []
+        for dim in range(1, dimensions):
+            new_index.append(raw_sequence[-1][-dim])
+        
+        new_index.reverse()
+
+        last_digits = choice(length, length, replace=False)
+        for last_digit in last_digits:
+            if working_matrix[tuple(new_index)][last_digit] > 0:
+                new_index.append(last_digit)
+                break
         else:
-            for j in rand_ind:
-                new_index = indices[j]
-                if probability_matrix_copy[tuple(new_index)] <= 0:
-                    continue
-                if new_index[0] == sequence[-1][1]:
-                    sequence.append(new_index)
-                    probability_matrix_copy[tuple(new_index)] -= 1
-                    new_index_valid = True
-                    break
-        if new_index_valid:
-            continue
-        else:
+            restart = True
+
+        if restart:
+            restart = False
+            restarts += 1
             break
+        
+        if alternating:
+            new_index.insert(0, alternator.index)
+
+        raw_sequence.append(tuple(new_index))
+        probability_matrix[raw_sequence[-1]] -= 1
     else:
         break
-    restarts += 1
+
+print(f"Restarts: {restarts}")
+
+sequence = [condition_indices[raw_sequence[0][-2] + (length * (alternating_length - 1))]]
+for raw in raw_sequence:
+    sequence.append(condition_indices[raw[-1] + (length * raw[0])])
+print(condition_keys)
 print(sequence)
 
-first = True
-seq_text = ""
-for i in sequence:
-    if first:
-        for j in i:
-            seq_text += str(j)
-    else:
-        seq_text += str(i[-1])
 
-print(seq_text)
-
-# last_index = []
-# new_index = []
-
-# for i in shape:
-#     new_index.append(randint(i))
-
-# probability_matrix[tuple(new_index)] -= 1
-
-
-# sequence.append(new_index)
-# last_index = sequence[-1]
-
-# # Get possibilities
-# possibilities = []
-# for i in range(len(probability_matrix[last_index[-1]])):
-#     possibilities.append([last_index[-1], i])
-
-# new_index = possibilities[randint(len(possibilities))]
-
-# sequence.append(new_index)
-# last_index = new_index
-
-# print(sequence)
-
-# for i in range(len(weight_matrix.A1)):
-#     probability_matrix.A1[i] = weight_matrix.A1[i] / weight_matrix_sum
-
-# print(probability_matrix)
