@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.random import randint, choice
+from numpy.random import choice
 
 from conflict_task.util import Alternator
 
