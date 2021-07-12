@@ -1,7 +1,4 @@
-from sys import exit
-
 import numpy as np
-from numpy.lib.twodim_base import tri
 from numpy.random import choice
 
 from conflict_task.util import Alternator
