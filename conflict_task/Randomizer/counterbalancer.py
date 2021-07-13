@@ -6,7 +6,7 @@ from conflict_task.util import Alternator
 def counterbalance(
     trials: int, condition_levels: list, levels: int = 1,
     alternating: int = False, alternator_start: int = 0,
-    Force = False, verbose = False
+    Force = False, verbose = False, initial_seed = None
     ):
 
     def create_base_matrix(trials, shape):
@@ -85,26 +85,29 @@ def counterbalance(
     first_trial = None
     restarts = 0
     unsuccessful_seed_list = []
-    initial_seed = None
     seed_tried = 0
 
     while True:
-        cb_matrix = base_matrix.copy()
         cb_sequence = []
+        cb_matrix = base_matrix.copy()
+        if alternating:
+            alternator = Alternator(alternating_levels, start=alternator_start)
 
+        # Absolute initial seed
         if initial_seed is None:
             initial_seed = construct_initial_seed(dimensions, cb_matrix)
-        elif seed_tried >= cb_matrix.size:
+        
+        # If seed is tried too many times, reset and get a new seed
+        if seed_tried >= cb_matrix.size:
             unsuccessful_seed_list.append(initial_seed)
             initial_seed = construct_initial_seed(dimensions, cb_matrix, unsuccessful_seed_list)
+            if initial_seed is None:
+                raise RuntimeError("Counterbalanced sequence impossible with given parameters")
             seed_tried = 0
 
-        if initial_seed is None:
-            raise RuntimeError("Counterbalanced sequence impossible with given parameters")
-        
+        # Anytime a seed is new
         if seed_tried == 0:
             if alternating:
-                alternator = Alternator(alternating_levels, start=alternator_start)
                 initial_seed.insert(0, alternator.index)
                 first_trial = initial_seed[-2] + (length * alternator.what_was_prev())
             else:
@@ -154,8 +157,3 @@ def counterbalance(
         print(f"Restarts: {restarts}")
     
     return sequence
-
-
-print(counterbalance(32, [2, 2], alternating=True, levels=1, alternator_start=np.random.randint(2)))
-
-# TODO: Translator from condition tuples to values

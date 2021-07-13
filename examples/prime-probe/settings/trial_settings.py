@@ -20,13 +20,8 @@ distractor = dict(
         color = "white",
         height = 0.05,
     ),
-    alternating = dict(
-        random = dict(
-            text = [
-                ["Left\nLeft\nLeft", "Right\nRight\nRight"],
-                ["Up\nUp\nUp", "Down\nDown\nDown"],
-            ]
-        )
+    variable = list(
+        "text"
     )
 )
 
@@ -39,13 +34,8 @@ target = dict(
         color = "white",
         height = 0.05,
     ),
-    alternating = dict(
-        random = dict(
-            text = [
-                ["Left", "Right"],
-                ["Up", "Down"],
-            ]
-        )
+    variable = list(
+        "text"
     )
 )
 
@@ -53,4 +43,7 @@ response = dict(
     start = 1.3,
     stop = 3.0,
     keys = ["a", "d", "j", "l"],
+    variable = list(
+        "correct response"
+    )
 )

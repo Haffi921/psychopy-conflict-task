@@ -1,13 +1,8 @@
-import numpy as np
-from numpy.random import choice
+from numpy.random import randint
+from counterbalancer import counterbalance
 
-from conflict_task.util import Alternator
-
-trials = 32
-
-sequential_conditions = None
-
-alternating_conditions = {
+trials = 128
+conditions = {
     "distractor": [
         ["Left\nLeft\nLeft", "Right\nRight\nRight"],
         ["Up\nUp\nUp", "Down\nDown\nDown"],
@@ -15,9 +10,25 @@ alternating_conditions = {
     "target": [
         ["Left", "Right"],
         ["Up", "Down"],
+    ],
+    "correct_response": [
+        ["a", "d"],
+        ["j", "l"]
     ]
 }
 
-levels = 1
+sequence = counterbalance(trials, [2, 2], 2, True, randint(2))
 
-condition_keys = list(alternating_conditions.keys())
+def translate(trial):
+    alternating, distractor, target = trial
+    return {
+        "congruency": 1 - int(distractor == target),
+        "distractor": conditions["distractor"][alternating][distractor],
+        "target": conditions["target"][alternating][target],
+        "correct response": conditions["correct_response"][alternating][target]
+    }
+
+results = map(translate, sequence)
+
+for trial in list(results):
+    print(trial)
