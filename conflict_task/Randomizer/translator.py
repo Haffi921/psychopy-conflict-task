@@ -1,7 +1,6 @@
 from numpy.random import randint
 from counterbalancer import counterbalance
 
-trials = 128
 conditions = {
     "distractor": [
         ["Left\nLeft\nLeft", "Right\nRight\nRight"],
@@ -17,18 +16,32 @@ conditions = {
     ]
 }
 
-sequence = counterbalance(trials, [2, 2], 2, True, randint(2))
+def constraint(sequence, item):
+    if len(sequence) == 1:
+        return True
+    elif len(sequence) == 2:
+        if sequence[-1][1] + item[1]:
+            return False
+        if sequence[-1][2] + item[2]:
+            return False
+    if sequence[-2][1] + sequence[-1][1] + item[1]:
+        return False
+    if sequence[-2][2] + sequence[-1][2] + item[2]:
+        return False
+    return True
+
+sequence = counterbalance(trials = 128, factor_levels = [2, 2], levels = 2, alternating = True, alternator_start = randint(2), constraint_function=constraint)
 
 def translate(trial):
-    alternating, distractor, target = trial
+    hand, distractor, target = trial
     return {
-        "congruency": 1 - int(distractor == target),
-        "distractor": conditions["distractor"][alternating][distractor],
-        "target": conditions["target"][alternating][target],
-        "correct response": conditions["correct_response"][alternating][target]
+        "congruency": int(distractor != target),
+        "distractor": conditions["distractor"][hand][distractor],
+        "target": conditions["target"][hand][target],
+        "correct response": conditions["correct_response"][hand][target]
     }
 
 results = map(translate, sequence)
 
-for trial in list(results):
-    print(trial)
+for r in results:
+    print(r)

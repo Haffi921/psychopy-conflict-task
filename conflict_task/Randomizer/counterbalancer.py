@@ -4,9 +4,10 @@ from numpy.random import choice
 from conflict_task.util import Alternator
 
 def counterbalance(
-    trials: int, condition_levels: list, levels: int = 1,
+    trials: int, factor_levels: list, levels: int = 1,
     alternating: int = False, alternator_start: int = 0,
-    Force = False, verbose = False, initial_seed = None
+    Force = False, verbose = False, initial_seed = None,
+    constraint_function = lambda sequence, item: True
     ):
 
     def create_base_matrix(trials, shape):
@@ -40,7 +41,7 @@ def counterbalance(
         return None
     
     def check_for_parameter_errors():
-        if not type(condition_levels) == list or len(condition_levels) == 0:
+        if not type(factor_levels) == list or len(factor_levels) == 0:
             raise ValueError("'condition_levels' has to be a list with a length of at least 1")
         
         if alternating < 0:
@@ -58,15 +59,15 @@ def counterbalance(
     check_for_parameter_errors()
     
     dimensions = levels + 1
-    length = np.prod(condition_levels)
+    length = np.prod(factor_levels)
     matrix_shape = [length] * dimensions
 
     if alternating:
         alternating_levels = int(alternating) + 1
-        condition_levels.insert(0, alternating_levels)
+        factor_levels.insert(0, alternating_levels)
         matrix_shape.insert(0, alternating_levels)
 
-    condition_indices = create_condition_indices(condition_levels)
+    condition_indices = create_condition_indices(factor_levels)
     base_matrix = create_base_matrix(trials, matrix_shape)
 
     if not Force:
@@ -98,7 +99,7 @@ def counterbalance(
             initial_seed = construct_initial_seed(dimensions, cb_matrix)
         
         # If seed is tried too many times, reset and get a new seed
-        if seed_tried >= cb_matrix.size:
+        if seed_tried >= cb_matrix.size * 3:
             unsuccessful_seed_list.append(initial_seed)
             initial_seed = construct_initial_seed(dimensions, cb_matrix, unsuccessful_seed_list)
             if initial_seed is None:
@@ -129,7 +130,7 @@ def counterbalance(
             
             last_index_number = check_available_conditions(cb_matrix[tuple(new_index)])
             
-            if last_index_number is not None:
+            if last_index_number is not None or constraint_function(cb_sequence, new_index):
                 new_index.append(last_index_number)
             else:
                 if verbose:
