@@ -34,7 +34,13 @@ class Experiment:
     # Time handlers
     clock = clock.Clock()
 
-    def __init__(self, name, subject_sequence, experiment_settings, subjectDlgInfo = {'participant': '', 'session': '001'}):
+    # Debug
+    debug_data = None
+
+    def __init__(self, name, subject_sequence, experiment_settings,
+        subjectDlgInfo = {'participant': '', 'session': '001'},
+        debug_data = False):
+        
         self.name = name
         self.start_participant_data(subjectDlgInfo)
 
@@ -50,6 +56,8 @@ class Experiment:
         self.subject_sequence = subject_sequence
 
         self.input_device = experiment_settings["input_device"](clock=self.trial.clock)
+
+        self.debug_data = debug_data
     
     def run(self):
         continue_experiment = True
@@ -142,12 +150,18 @@ class Trial:
                         component.start(time, thisFlipGlobal)
                 elif component.started():
                     if thisFlip >= component.stop_time - FRAMETOLERANCE:
-                        component.stop(time, thisFlipGlobal, experiment.dataHandler)
+                        if experiment.debug_data:
+                            component.stop(time, thisFlipGlobal, experiment.dataHandler)
+                        else:
+                            component.stop(time, thisFlipGlobal)
                 
                 if not component.finished():
                     running = True
             
-            self.response.check(experiment.input_device, experiment.dataHandler)
+            if experiment.debug_data:
+                self.response.check(experiment.input_device, experiment.dataHandler)
+            else:
+                self.response.check(experiment.input_device)
 
             experiment.window.flip()
         

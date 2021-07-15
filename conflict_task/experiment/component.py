@@ -39,15 +39,16 @@ class BaseComponent:
         self.time_started_refresh = flipTimeGlobal
         self.status = STARTED
     
-    def stop(self, time, flipTimeGlobal, dataHandler):
+    def stop(self, time, flipTimeGlobal, dataHandler = None):
         self.time_stopped = time
         self.time_stopped_refresh = flipTimeGlobal
         self.status = FINISHED
 
-        dataHandler.addData(self.name + ".time_started", self.time_started)
-        dataHandler.addData(self.name + ".time_started_refresh", self.time_started_refresh)
-        dataHandler.addData(self.name + ".time_stopped", self.time_stopped)
-        dataHandler.addData(self.name + ".time_stopped_refresh", self.time_stopped_refresh)
+        if dataHandler:
+            dataHandler.addData(self.name + ".time_started", self.time_started)
+            dataHandler.addData(self.name + ".time_started_refresh", self.time_started_refresh)
+            dataHandler.addData(self.name + ".time_stopped", self.time_stopped)
+            dataHandler.addData(self.name + ".time_stopped_refresh", self.time_stopped_refresh)
     
     def not_started(self):
         return self.status == NOT_STARTED
@@ -112,7 +113,7 @@ class ResponseComponent(BaseComponent):
                 logging.fatal(e)
                 core.quit()
     
-    def check(self, input_device, dataHandler):
+    def check(self, input_device, dataHandler = None):
         if self.started() and not self.made:
             keyPressed = [(key.name, key.rt) for key in input_device.getKeys(keyList=self.keys)]
             if len(keyPressed):
@@ -123,11 +124,12 @@ class ResponseComponent(BaseComponent):
                 else:
                     self.correct = False
                 
-                dataHandler.addData(self.name + ".correct_resp", self.correct_resp)
-                dataHandler.addData(self.name + ".made", self.made)
-                dataHandler.addData(self.name + ".key", self.key)
-                dataHandler.addData(self.name + ".rt", self.rt)
-                dataHandler.addData(self.name + ".correct", self.correct)
+                if dataHandler:
+                    dataHandler.addData(self.name + ".correct_resp", self.correct_resp)
+                    dataHandler.addData(self.name + ".made", self.made)
+                    dataHandler.addData(self.name + ".key", self.key)
+                    dataHandler.addData(self.name + ".rt", self.rt)
+                    dataHandler.addData(self.name + ".correct", self.correct)
 
 class VisualComponent(BaseComponent):
     visual = None
@@ -183,6 +185,6 @@ class VisualComponent(BaseComponent):
         super().start(time, flipTimeGlobal)
         self.turnAutoDrawOn()
     
-    def stop(self, time, flipTimeGlobal, dataHandler):
+    def stop(self, time, flipTimeGlobal, dataHandler = None):
         super().stop(time, flipTimeGlobal, dataHandler)
         self.turnAutoDrawOff()
