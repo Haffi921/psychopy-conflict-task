@@ -1,2 +1,2 @@
-from .util import Alternator
+from .util import Alternator, Randomizer
 from .counterbalancing import counterbalance

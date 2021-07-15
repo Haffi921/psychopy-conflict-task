@@ -44,11 +44,16 @@ class Alternator:
 
 class Randomizer:
     number = 0
-    max = 0
+    low = None
+    high = None
 
-    def __init__(self, max):
-        self.max = max
+    def __init__(self, a, b = None):
+        if b == None:
+            self.high = a + 1
+        else:
+            self.low = a
+            self.high = b + 1
     
     def new_one(self):
-        self.number = randint(self.max)
+        self.number = randint(self.low, self.high)
         return self.number
