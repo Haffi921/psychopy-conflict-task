@@ -1,12 +1,8 @@
-# import sys
-# from os.path import dirname, realpath
-
-# sys.path.append(dirname(dirname(dirname(realpath(__file__)))))
-
 from conflict_task.experiment import Experiment
-from settings.experiment_settings import *
-from settings.device_settings import *
 
-prime_probe = Experiment(experiment_settings, window_settings, input_device)
+from settings.experiment_settings import *
+from sequence_creator import subject_sequence
+
+prime_probe = Experiment("Prime-Probe", subject_sequence, experiment_settings)
 
 prime_probe.run()
