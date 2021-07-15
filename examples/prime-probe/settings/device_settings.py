@@ -5,7 +5,7 @@ from psychopy.hardware import keyboard
 # Customize input device
 #
 # ----------------------------------------------------
-input_device = keyboard.Keyboard()
+input_device = keyboard.Keyboard
 
 
 # ----------------------------------------------------
@@ -16,7 +16,7 @@ input_device = keyboard.Keyboard()
 window_settings = dict(
 
     # Size of the window in pixels (x, y)
-    size = (1680, 1050),
+    size = (1920, 1200),
 
     # Color of background as [r, g, b] list or single value. Each gun can take values between -1.0 and 1.0
     color = [-1, -1, -1],

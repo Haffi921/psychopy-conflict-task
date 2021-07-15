@@ -20,8 +20,8 @@ distractor = dict(
         color = "white",
         height = 0.05,
     ),
-    variable = list(
-        "text"
+    variable = dict(
+        text = "distractor_text"
     )
 )
 
@@ -34,8 +34,8 @@ target = dict(
         color = "white",
         height = 0.05,
     ),
-    variable = list(
-        "text"
+    variable = dict(
+        text = "target_text",
     )
 )
 
@@ -43,7 +43,7 @@ response = dict(
     start = 1.3,
     stop = 3.0,
     keys = ["a", "d", "j", "l"],
-    variable = list(
-        "correct response"
+    variable = dict(
+        correct_resp = "correct_resp",
     )
 )

@@ -6,8 +6,7 @@ from conflict_task.util import Alternator
 def counterbalance(
     trials: int, factor_levels: list, levels: int = 1,
     alternating: int = False, alternator_start: int = 0,
-    Force = False, verbose = False, initial_seed = None,
-    constraint_function = lambda sequence, item: True
+    Force = False, verbose = False, initial_seed = None
     ):
 
     def create_base_matrix(trials, shape):
@@ -130,7 +129,7 @@ def counterbalance(
             
             last_index_number = check_available_conditions(cb_matrix[tuple(new_index)])
             
-            if last_index_number is not None or constraint_function(cb_sequence, new_index):
+            if last_index_number is not None:
                 new_index.append(last_index_number)
             else:
                 if verbose:
