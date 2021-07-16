@@ -61,6 +61,7 @@ class BaseComponent:
 
 class ResponseComponent(BaseComponent):
     name = "response"
+    inputDevice = None
 
     keys: list = None
     variable_factor: dict = None
@@ -71,8 +72,10 @@ class ResponseComponent(BaseComponent):
     rt: float = None
     correct: bool = None
 
-    def __init__(self, component_settings):
+    def __init__(self, component_settings, inputDevice):
         super().__init__(component_settings)
+
+        self.inputDevice = inputDevice
         
         try:
             if "keys" in component_settings and len(component_settings["keys"]):
@@ -113,9 +116,13 @@ class ResponseComponent(BaseComponent):
                 logging.fatal(e)
                 core.quit()
     
-    def check(self, input_device, dataHandler = None):
+    def start(self, time, flipTimeGlobal):
+        super().start(time, flipTimeGlobal)
+        self.inputDevice.clock.reset()
+    
+    def check(self, dataHandler = None):
         if self.started() and not self.made:
-            keyPressed = [(key.name, key.rt) for key in input_device.getKeys(keyList=self.keys)]
+            keyPressed = [(key.name, key.rt) for key in self.input_device.getKeys(keyList=self.keys)]
             if len(keyPressed):
                 self.key, self.rt = keyPressed[-1]
                 self.made = True
