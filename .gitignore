@@ -4,3 +4,6 @@ workspace.code-workspace
 
 # Python
 **/__pycache__/*
+
+# Experiment
+**/examples/**/data
