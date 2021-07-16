@@ -34,8 +34,8 @@ rand = Randomizer(0, 1)
 subject_sequence = []
 for block in range(experiment_settings["blocks"]["number"]):
     sequence = counterbalance(
-        trials = 2, factor_levels = [2, 2], levels = 2,
-        alternating = True, alternator_start = rand.new_one(), Force=True
+        trials = 128, factor_levels = [2, 2], levels = 2,
+        alternating = True, alternator_start = rand.new_one(),
     )
 
     sequence = list(map(translate, sequence))
