@@ -171,11 +171,8 @@ class Trial:
                 if not component.finished():
                     running = True
             
-            if experiment.debug_data:
-                self.response.check(experiment.input_device, experiment.dataHandler)
-            else:
-                self.response.check(experiment.input_device)
-
+            self.response.check(experiment.input_device, experiment.dataHandler)
+            
             experiment.window.flip()
         
         experiment.dataHandler.nextEntry()
