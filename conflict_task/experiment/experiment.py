@@ -2,6 +2,7 @@ import os
 from sys import path
 
 from psychopy import core, clock, gui, data, logging
+from psychopy.hardware import keyboard
 from psychopy import __version__
 
 from conflict_task.devices import Window
@@ -97,6 +98,18 @@ class Experiment:
     def finish_participant_data(self):
         self.dataHandler.saveAsWideText(fileName=self.filename + ".csv")
         self.dataHandler.abort()
+    
+    def previewStim(window_setting, stim_settings):
+        win = Window(window_setting)
+        stim = VisualComponent(win, stim_settings)
+        inputDevice = keyboard.Keyboard()
+
+        stim.turnAutoDrawOn()
+        while True:
+            if inputDevice.getKeys(["escape"]):
+                core.quit()
+            win.flip()
+
 
 class Trial:
     # TODO: Add AudioComponents, etc.
