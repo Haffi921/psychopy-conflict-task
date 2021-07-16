@@ -5,7 +5,7 @@ experiment_settings = dict(
     blocks = dict(
         number = 2,
         trials = dict(
-            number = 2,
+            number = 128,
             visualComponents = [fixation_cross, distractor, target],
             response = response,
         )
