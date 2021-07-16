@@ -1,6 +1,15 @@
 # PsychoPy Conflict Task
 A generic Conflict Task boilerplate made in PsychoPy
 
+
+## Roadmap
+- Add AudioComponents
+- Add functionality to show non-trial screens (experiment info, etc)
+- Add additional trial functions
+    - Response feedback
+    - Component disappearance after feedback
+    - Possibly: Selective component display dependent on trial settings
+
 ## Installation
 **Prerequisite**
 1. Python version 3.6 or higher
