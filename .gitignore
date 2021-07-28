@@ -7,3 +7,6 @@ workspace.code-workspace
 
 # Experiment
 **/examples/**/data
+
+# Temporary
+**/examples
