@@ -23,7 +23,7 @@ class Experiment:
 
     # Devices
     window: Window = None
-    input_device = None
+    input_device: keyboard.Keyboard = None
 
     # Trials
     trial = None
@@ -49,7 +49,7 @@ class Experiment:
         self.nr_trials = experiment_settings["blocks"]["trials"]["number"]
 
         self.window = Window(experiment_settings["window_settings"])
-
+        
         visualComponents = experiment_settings["blocks"]["trials"]["visualComponents"]
         response = experiment_settings["blocks"]["trials"]["response"]
         
@@ -170,7 +170,7 @@ class Trial:
                 
                 if not component.finished():
                     running = True
-            
+
             self.response.check(experiment.input_device, experiment.dataHandler)
             
             experiment.window.flip()
