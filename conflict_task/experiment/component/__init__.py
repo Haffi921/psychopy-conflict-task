@@ -1,4 +1,4 @@
-from .response_component import ResponseComponent
+from .input_component import InputComponent, ResponseComponent
 from .audio_component import AudioComponent
 from .visual_component import VisualComponent
 from .wait_component import WaitComponent

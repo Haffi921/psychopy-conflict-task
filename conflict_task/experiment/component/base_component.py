@@ -4,6 +4,8 @@ from psychopy.constants import NOT_STARTED, STARTED, FINISHED
 class BaseComponent:
     name = "UNKNOWN_COMPONENT"
 
+    variable_factor: dict = None
+
     start_time = 0
     stop_time = 0
 
@@ -22,6 +24,9 @@ class BaseComponent:
             self.stop_time = component_settings["stop"]
         elif "duration" in component_settings.keys():
             self.stop_time = self.start_time + component_settings["duration"]
+        
+        if "variable" in component_settings:
+            self.variable_factor = component_settings["variable"]
 
     def refresh(self):
         self.status = NOT_STARTED
@@ -30,9 +35,20 @@ class BaseComponent:
         self.time_stopped = None
         self.time_stopped_refresh = None
     
-    def prepare(self, trial_values: dict):
-        logging.fatal("'prepare' method BaseComponent should never be invoked")
-        core.quit()
+    def prepare(self, trial_values: dict, component, component_info: str):
+        if self.__class__.__name__ == "BaseComponent":
+            logging.fatal("'prepare' method BaseComponent should never be invoked")
+            core.quit()
+        if self.variable_factor:
+            for factor_name, factor_id in self.variable_factor.items():
+                try:
+                    if factor_id in trial_values.keys():
+                        setattr(component, factor_name, trial_values[factor_id])
+                    else:
+                        raise KeyError(f"Subject trial sequence does not include key '{factor_id}' required by {component_info}")
+                except KeyError as e:
+                    logging.fatal(e)
+                    core.quit()
 
     def start(self, time, flipTimeGlobal):
         self.time_started = time
