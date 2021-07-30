@@ -8,6 +8,7 @@ from psychopy import __version__
 from conflict_task.devices import Window
 
 from .component import VisualComponent, ResponseComponent, BaseComponent
+from .sequence import Trial
 
 FRAMETOLERANCE = 0.001
 
@@ -30,7 +31,7 @@ class Experiment:
     subject_sequence = None
 
     # Output
-    dataHandler = None
+    data_handler = None
 
     # Time handlers
     clock = clock.Clock()
@@ -49,14 +50,15 @@ class Experiment:
         self.nr_trials = experiment_settings["blocks"]["trials"]["number"]
 
         self.window = Window(experiment_settings["window_settings"])
+        self.input_device = experiment_settings["input_device"](clock=self.trial.clock)
         
         visualComponents = experiment_settings["blocks"]["trials"]["visualComponents"]
         response = experiment_settings["blocks"]["trials"]["response"]
         
-        self.trial = Trial(self.window, visualComponents, response)
+        # TODO: Remove this
+        self.trial = Trial(self.window, self.input_device, self.data_handler, visualComponents, response)
         self.subject_sequence = subject_sequence
 
-        self.input_device = experiment_settings["input_device"](clock=self.trial.clock)
 
         self.debug_data = debug_data
     
@@ -93,11 +95,11 @@ class Experiment:
 
         self.filename = thisDir + os.sep + "data" + os.sep + f"{subjectDlgInfo['participant']}_{self.name}_{subjectDlgInfo['date']}"
 
-        self.dataHandler = data.ExperimentHandler(name=self.name, version=version, extraInfo=subjectDlgInfo, saveWideText=True, dataFileName=self.filename)
+        self.data_handler = data.ExperimentHandler(name=self.name, version=version, extraInfo=subjectDlgInfo, saveWideText=True, dataFileName=self.filename)
     
     def finish_participant_data(self):
-        self.dataHandler.saveAsWideText(fileName=self.filename + ".csv")
-        self.dataHandler.abort()
+        self.data_handler.saveAsWideText(fileName=self.filename + ".csv")
+        self.data_handler.abort()
     
     def previewStim(window_setting, stim_settings):
         win = Window(window_setting)
@@ -109,72 +111,3 @@ class Experiment:
             if inputDevice.getKeys(["escape"]):
                 core.quit()
             win.flip()
-
-
-class Trial:
-    # TODO: Add AudioComponents, etc.
-    visualComponents = []
-    
-    # Main conflict-task components
-    response = None
-
-    clock = clock.Clock()
-
-    def __init__(self, window, visualComponents, response):
-        for component in visualComponents:
-            visualComponent = VisualComponent(window, component)
-            
-            self.visualComponents.append(visualComponent)
-                
-        self.response = ResponseComponent(response)
-
-    def get_all_components(self) -> list[BaseComponent]:
-        return [*self.visualComponents, self.response]
-
-    def refresh(self):
-        for component in self.get_all_components():
-            component.refresh()
-    
-    def run(self, trial_values: dict, experiment: Experiment):
-        self.refresh()
-
-        for component in self.get_all_components():
-            component.prepare(trial_values)
-
-        for key, value in trial_values.items():
-            experiment.dataHandler.addData(key, r"{}".format(value))
-
-        running = True
-        self.clock.reset(-experiment.window.getFutureFlipTime(clock="now"))
-        
-        while running:
-            if experiment.input_device.getKeys(["escape"]):
-                return False
-            
-            time = self.clock.getTime()
-            thisFlip = experiment.window.getFutureFlipTime(clock=self.clock)
-            thisFlipGlobal = experiment.window.getFutureFlipTime(clock=None)
-
-            running = False
-
-            for component in self.get_all_components():
-                if component.not_started():
-                    if thisFlip >= component.start_time - FRAMETOLERANCE:
-                        component.start(time, thisFlipGlobal)
-                elif component.started():
-                    if thisFlip >= component.stop_time - FRAMETOLERANCE:
-                        if experiment.debug_data:
-                            component.stop(time, thisFlipGlobal, experiment.dataHandler)
-                        else:
-                            component.stop(time, thisFlipGlobal)
-                
-                if not component.finished():
-                    running = True
-
-            self.response.check(experiment.input_device, experiment.dataHandler)
-            
-            experiment.window.flip()
-        
-        experiment.dataHandler.nextEntry()
-        
-        return True
