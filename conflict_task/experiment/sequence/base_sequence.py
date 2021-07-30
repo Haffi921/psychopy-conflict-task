@@ -1,4 +1,4 @@
-from psychopy import clock
+from psychopy import clock, logging, core
 from psychopy.data import ExperimentHandler
 
 from conflict_task.devices import Window, InputDevice, input_device
@@ -28,9 +28,6 @@ class BaseSequence:
         self.window = window
         self.input_device = input_device
         self.data_handler = data_handler
-
-        if "response" in componentSettings:
-            self.response = ResponseComponent(componentSettings["response"])
         
         if "visual_components" in componentSettings:
             for component in componentSettings["visual_components"]:
@@ -43,8 +40,15 @@ class BaseSequence:
         if "wait_components" in componentSettings:
             for component in componentSettings["wait_components"]:
                 self.wait.append(WaitComponent(component))
+    
+    def _base_sequence_should_not_be_run(self):
+        if self.__class__.__name__ == "BaseSequence":
+            logging.fatal("BaseSequence should not be run")
+            core.quit()
 
     def _get_all_components(self) -> list[BaseComponent]:
+        self._base_sequence_should_not_be_run()
+        
         return [
             self.response,
             *self.visual,
@@ -53,10 +57,14 @@ class BaseSequence:
         ]
     
     def _refresh(self):
+        self._base_sequence_should_not_be_run()
+
         for component in self._get_all_components():
             component.refresh()
     
     def run(self, trial_values: dict, debug_data = False):
+        self._base_sequence_should_not_be_run()
+
         self._refresh()
 
         for component in self._get_all_components():
