@@ -3,8 +3,8 @@ from psychopy import visual, logging, core
 from .base_component import BaseComponent
 
 class VisualComponent(BaseComponent):
-    visual = None
     name = None
+    visual = None
 
     def __init__(self, window, component_settings: dict):
         super().__init__(component_settings)
@@ -27,6 +27,13 @@ class VisualComponent(BaseComponent):
         self.drawable = True
     
     def prepare(self, trial_values: dict):
+        """
+        Sets the key-value pairs from `trial_values` on the VisualComponent.
+
+        Args:
+            trial_values   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
+            component_info  (str): Component information string for logging and debug purposes
+        """
         super().prepare(trial_values, self.visual, f"VisualComponent '{self.name}'")
 
     def turnAutoDrawOn(self):
