@@ -3,53 +3,154 @@ from psychopy import visual, logging, core
 from .base_component import BaseComponent
 
 class VisualComponent(BaseComponent):
-    name = None
+    """
+    Component to display a visual stimulus on screen.
+
+    Basically this is a wrapper for all of PsychoPy's visual stimuli.
+    """
+
+
     visual = None
+    """Each VisualComponent is connected to a visual stimulus from PsychoPy."""
+
 
     def __init__(self, window, component_settings: dict):
+        """
+        Takes in a `component_settings` dictionary to set up component variables.
+
+        For all components, settings are as follows:
+
+            1) `start`          (float): Start time for component relative to sequence start. (Required)
+
+            2) End time, either through: (Optional)
+                a) `stop`       (float): Stop time for component relative to sequence start.
+                b) `duration`   (float): Length of time between component's start and stop.
+                Behind the scenes `stop` = `start` + `duration`.
+
+            3) `variable`        (dict): Component member variables that will be different each sequence.
+        
+        ---------------------------------------------
+
+        For a VisualComponent, settings also require:
+        
+            1) `type`        (str): Name of a PsychoPy visual stimulus type.
+
+            2) `spec`       (dict): Dictionary of arguments to use in creation of visual stimulus.
+
+                - For further information about visual stimuli and their arguments, check out
+                the [PsychoPy Website](https://www.psychopy.org/api/visual.html).
+            
+            3) `name`        (str): Because VisualComponents can be numerous, it's required to give each a name.
+        """
+
         super().__init__(component_settings)
 
-        type = component_settings["type"]
         try:
+            if "name" in component_settings:
+                self.name = self.name
+            else:
+                raise ValueError(f"Please specify a name for each VisualComponent")
+
+            if "type" in component_settings:
+                type = component_settings["type"]
+            else:
+                raise ValueError(f"VisualComponents require a type specifier. None found in {self.name}")
+            
             if hasattr(visual, type):
-                self.visual = getattr(visual, type)(window, **component_settings["spec"])
+                if "spec" in component_settings:
+                    self.visual = getattr(visual, type)(window, **component_settings["spec"])
+                else:
+                    raise ValueError(f"VisualComponents require specifications. None found in {self.name}")
             else:
                 raise ValueError(f"There's no visual component type {type}")
-            
-            if "name" in component_settings["spec"]:
-                self.name = self.visual.name
-            else:
-                raise ValueError(f"Please specify a name for every VisualComponent in 'spec'")
         except ValueError as e:
             logging.fatal(e)
             core.quit()
 
         self.drawable = True
-    
+
+
+    def refresh(self):
+        """
+        Used before each component use.
+        
+        For all components, this refreshes `status`, `time_started`, `time_started_refresh`, `time_started_global`, `time_stopped`, `time_stopped_refresh` and `time_stopped_global`.
+
+        For VisualComponent, this also turns off AutoDraw.
+        """
+
+        super().refresh()
+        self.turnAutoDrawOff()
+
+
     def prepare(self, trial_values: dict):
         """
         Sets the key-value pairs from `trial_values` on the VisualComponent.
 
         Args:
-            trial_values   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
-            component_info  (str): Component information string for logging and debug purposes
+            
+            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
         """
         super().prepare(trial_values, self.visual, f"VisualComponent '{self.name}'")
 
-    def turnAutoDrawOn(self):
-        self.visual.setAutoDraw(True)
-    
-    def turnAutoDrawOff(self):
-        self.visual.setAutoDraw(False)
-    
-    def refresh(self):
-        super().refresh()
-        self.turnAutoDrawOff()
 
-    def start(self, time, flipTimeGlobal):
-        super().start(time, flipTimeGlobal)
+    def turnAutoDrawOn(self):
+        """
+        Turns AutoDraw on for the visual stimulus connected to this component.
+
+        AutoDraw means that the component is automatically drawn before each screen flip.
+        If not turned on, visual stimulus must be explicitly drawn before each frame.
+        """
+
+        self.visual.setAutoDraw(True)
+
+
+    def turnAutoDrawOff(self):
+        """
+        Turns AutoDraw off for the visual stimulus connected to this component.
+
+        AutoDraw means that the component is automatically drawn before each screen flip.
+        If not turned on, visual stimulus must be explicitly drawn before each frame.
+        """
+
+        self.visual.setAutoDraw(False)
+
+
+    def start(self, time, flipTime, timeGlobal):
+        """
+        Starts component and records time.
+
+        Args:
+
+            `time`        (float): Time relative to sequence start.
+
+            `flipTime`    (float): Screen flip time relative to sequence start.
+
+            `timeGlobal`  (float): Time relative to experiment start.
+        
+        For a VisualComponent, this also turns on AutoDraw.
+        """
+
+        super().start(time, flipTime, timeGlobal)
         self.turnAutoDrawOn()
-    
+
+
     def stop(self, time, flipTimeGlobal, dataHandler = None):
+        """
+        Stops component and records time.
+
+        Args:
+        
+            `time`                     (float): Time relative to sequence start.
+
+            `flipTime`                 (float): Screen flip time relative to sequence start.
+
+            `timeGlobal`               (float): Time relative to experiment start.
+
+            `data_handler` (ExperimentHandler): Instance of an ExperimentHandler to record data.
+        
+        For a VisualComponent, this also turns off AutoDraw.
+        """
+
         super().stop(time, flipTimeGlobal, dataHandler)
         self.turnAutoDrawOff()

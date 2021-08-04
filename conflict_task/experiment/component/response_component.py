@@ -27,8 +27,24 @@ class ResponseComponent(BaseComponent):
 
     def __init__(self, component_settings):
         """
-        ResponseComponent's settings must include: \n
-            `keys`    (list): List of keys that users are allowed to responde with. \n
+        Takes in a `component_settings` dictionary to set up component variables.
+
+        For all components, settings are as follows:
+
+            1) `start`          (float): Start time for component relative to sequence start. (Required)
+
+            2) End time, either through: (Optional)
+                a) `stop`       (float): Stop time for component relative to sequence start.
+                b) `duration`   (float): Length of time between component's start and stop.
+                Behind the scenes `stop` = `start` + `duration`.
+
+            3) `variable`        (dict): Component member variables that will be different each sequence.
+
+        ------------------------------------------
+
+        ResponseComponent's settings must include:
+
+            `keys`    (list): List of keys that users are allowed to responde with.
         """
 
         super().__init__(component_settings)
@@ -44,7 +60,14 @@ class ResponseComponent(BaseComponent):
 
 
     def refresh(self):
-        """Refreshes variables `made`, `key` and `rt`."""
+        """
+        Used before each component use.
+        
+        For all components, this refreshes `status`, `time_started`, `time_started_refresh`,
+        `time_started_global`, `time_stopped`, `time_stopped_refresh` and `time_stopped_global`.
+
+        For a ResponseComponent, this refreshes variables `made`, `key` and `rt`.
+        """
 
         super().refresh()
 
@@ -55,11 +78,13 @@ class ResponseComponent(BaseComponent):
 
     def prepare(self, trial_values: dict, component_info: str = "InputComponent"):
         """
-        Sets the key-value pairs from `trial_values` on the ResponseComponent. \n
+        Sets the key-value pairs from `trial_values` on the ResponseComponent.
 
-        Args: \n
-            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values. \n
-            `component_info`  (str): Component information string for logging and debug purposes. \n
+        Args:
+
+            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
+
+            `component_info`  (str): Component information string for logging and debug purposes.
         """
 
         super().prepare(trial_values, self, component_info)
@@ -67,19 +92,25 @@ class ResponseComponent(BaseComponent):
 
     def check(self, input_device, data_handler = None):
         """
-        Checks for input using `input_device` and logs data using `data_handler`. \n
+        Checks for input using `input_device` and logs data using `data_handler`.
         
-        Uses `ResponseComponent.keys` list as input possiblities. If user presses any of the keys from this list: \n
-            1) `made` becomes True \n
-            2) `key` and `rt` are recorded \n
-            3) `data_handler` records `made`, `key` and `rt` \n
-        
-        Args: \n
-            `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device. \n
-            `data_handler`  (ExperimentHandler): Instance of an ExperimentHandler to record data. \n
+        Uses `ResponseComponent.keys` list as input possiblities. If user presses any of the keys from this list:
 
-        Returns: \n
-            Keypress tuple (str, float): Tuple with key and reaction time
+            1) `made` becomes True
+
+            2) `key` and `rt` are recorded
+
+            3) `data_handler` records `made`, `key` and `rt`
+        
+        Args:
+
+            `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device.
+
+            `data_handler`  (ExperimentHandler): Instance of an ExperimentHandler to record data.
+
+        Returns:
+
+            Keypress tuple (str, float): Tuple with key and reaction time.
         """
         
         if self.started() and not self.made:
@@ -116,7 +147,28 @@ class CorrectResponseComponent(ResponseComponent):
 
     def __init__(self, component_settings):
         """
-        CorrectResponseComponent's settings must have `correct_resp` (str) as a variable factor. \n
+        Takes in a `component_settings` dictionary to set up component variables.
+
+        For all components, settings are as follows:
+
+            1) `start`          (float): Start time for component relative to sequence start. (Required)
+
+            2) End time, either through: (Optional)
+                a) `stop`       (float): Stop time for component relative to sequence start.
+                b) `duration`   (float): Length of time between component's start and stop.
+                Behind the scenes `stop` = `start` + `duration`.
+
+            3) `variable`        (dict): Component member variables that will be different each sequence.
+
+        ------------------------------------------
+
+        ResponseComponent's settings must include:
+
+            `keys`    (list): List of keys that users are allowed to responde with.
+        
+        ------------------------------------------
+
+        CorrectResponseComponent's settings must have `correct_resp` (str) as a variable factor.
         """
 
         super().__init__(component_settings)
@@ -130,7 +182,16 @@ class CorrectResponseComponent(ResponseComponent):
 
 
     def refresh(self):
-        """Refreshes variables `correct_resp` and `correct`."""
+        """
+        Used before each component use.
+        
+        For all components, this refreshes `status`, `time_started`, `time_started_refresh`,
+        `time_started_global`, `time_stopped`, `time_stopped_refresh` and `time_stopped_global`.
+
+        For a ResponseComponent, this refreshes variables `made`, `key` and `rt`.
+        
+        For a CorrectResponseComponent, this refreshes variables `correct_resp` and `correct`.
+        """
 
         super().refresh()
         
@@ -145,11 +206,13 @@ class CorrectResponseComponent(ResponseComponent):
 
     def prepare(self, trial_values: dict):
         """
-        Sets the key-value pairs from `trial_values` on the ResponseComponent. \n
+        Sets the key-value pairs from `trial_values` on the ResponseComponent.
 
-        Args: \n
-            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values. \n
+        Args:
+
+            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
         """
+
         super().prepare(trial_values, self, "ResponseComponent")
     
 
@@ -157,15 +220,21 @@ class CorrectResponseComponent(ResponseComponent):
         """
         Checks for input using `input_device` and logs data using `data_handler`. \n
         
-        Uses `ResponseComponent.keys` list as input possiblities. If user presses any of the keys from this list: \n
-            1) `made` becomes True. \n
-            2) `key` and `rt` are recorded. \n
-            3) `correct` becomes True if `key` == `correct_resp`, and False if `key` != `correct_resp`. \n
-            4) `data_handler` records `made`, `key`, `rt`, `correct_resp` and `correct`. \n
+        Uses `ResponseComponent.keys` list as input possiblities. If user presses any of the keys from this list:
+
+            1) `made` becomes True.
+
+            2) `key` and `rt` are recorded.
+            
+            3) `correct` becomes True if `key` == `correct_resp`, and False if `key` != `correct_resp`.
+
+            4) `data_handler` records `made`, `key`, `rt`, `correct_resp` and `correct`.
         
-        Args: \n
-            `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device. \n
-            `data_handler`  (ExperimentHandler): Instance of an ExperimentHandler to record data. \n
+        Args:
+
+            `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device.
+
+            `data_handler`  (ExperimentHandler): Instance of an ExperimentHandler to record data.
         """
 
         super().check(input_device, data_handler)

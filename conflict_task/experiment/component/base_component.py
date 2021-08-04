@@ -44,14 +44,18 @@ class BaseComponent:
 
     def __init__(self, component_settings):
         """
-        Takes in a `component_settings` dictionary to set up component variables. \n
+        Takes in a `component_settings` dictionary to set up component variables.
 
-        For all components, settings are as follows: \n
-            1) `start`          (float): Start time for component relative to sequence start. (Required) \n
-            2) End time, either through: (Optional) \n
-                a) `stop`       (float): Stop time for component relative to sequence start. \n
-                b) `duration`   (float): Length of time between component's start and stop. Behind the scenes `stop` = `start` + `duration`. \n
-            3) `variable`        (dict): Component member variables that will be different each sequence. \n
+        For all components, settings are as follows:
+
+            1) `start`          (float): Start time for component relative to sequence start. (Required)
+
+            2) End time, either through: (Optional)
+                a) `stop`       (float): Stop time for component relative to sequence start.
+                b) `duration`   (float): Length of time between component's start and stop.
+                Behind the scenes `stop` = `start` + `duration`.
+
+            3) `variable`        (dict): Component member variables that will be different each sequence.
         """
 
         try:
@@ -84,7 +88,8 @@ class BaseComponent:
         """
         Used before each component use.
         
-        For all components, this refreshes `status`, `time_started`, `time_started_refresh`, `time_started_global`, `time_stopped`, `time_stopped_refresh` and `time_stopped_global`.
+        For all components, this refreshes `status`, `time_started`, `time_started_refresh`,
+        `time_started_global`, `time_stopped`, `time_stopped_refresh` and `time_stopped_global`.
         """
 
         self.status = NOT_STARTED
@@ -101,9 +106,12 @@ class BaseComponent:
         Sets the key-value pairs from `trial_values` on the component.
 
         Args:
-            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values. \n
-            `component`       (Any): The object on which the `trial_values` are enacted on. Most cases it will be `self`. \n
-            `component_info`  (str): Component information string for logging and debug purposes. \n
+            
+            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
+
+            `component`       (Any): The object on which the `trial_values` are enacted on. Most cases it will be `self`.
+
+            `component_info`  (str): Component information string for logging and debug purposes.
         """
 
         if self.__class__.__name__ == "BaseComponent":
@@ -123,12 +131,15 @@ class BaseComponent:
 
     def start(self, time, flipTime, timeGlobal):
         """
-        Starts component and records time. \n
+        Starts component and records time.
 
-        Args: \n
-            `time`        (float): Time relative to sequence start. \n
-            `flipTime`    (float): Screen flip time relative to sequence start. \n
-            `timeGlobal`  (float): Time relative to experiment start. \n
+        Args:
+
+            `time`        (float): Time relative to sequence start.
+
+            `flipTime`    (float): Screen flip time relative to sequence start.
+
+            `timeGlobal`  (float): Time relative to experiment start.
         """
 
         self.time_started = time
@@ -139,13 +150,17 @@ class BaseComponent:
 
     def stop(self, time, flipTime, timeGlobal, dataHandler = None):
         """
-        Stops component and records time. \n
+        Stops component and records time.
 
-        Args: \n
-            `time`                     (float): Time relative to sequence start. \n
-            `flipTime`                 (float): Screen flip time relative to sequence start. \n
-            `timeGlobal`               (float): Time relative to experiment start. \n
-            `data_handler` (ExperimentHandler): Instance of an ExperimentHandler to record data. \n
+        Args:
+        
+            `time`                     (float): Time relative to sequence start.
+
+            `flipTime`                 (float): Screen flip time relative to sequence start.
+
+            `timeGlobal`               (float): Time relative to experiment start.
+
+            `data_handler` (ExperimentHandler): Instance of an ExperimentHandler to record data.
         """
 
         self.time_stopped = time
