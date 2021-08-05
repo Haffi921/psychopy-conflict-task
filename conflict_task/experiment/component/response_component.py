@@ -1,6 +1,6 @@
 from psychopy import logging, core
 
-from .base_component import BaseComponent
+from . import BaseComponent
 
 class ResponseComponent(BaseComponent):
     """
@@ -10,19 +10,7 @@ class ResponseComponent(BaseComponent):
     """
 
 
-    name = "input"
-
-    keys: list
-    """List of keys that users are allowed to responde with."""
-
-    made: bool
-    """True if user has responded. Refreshes with `ResponseComponent.refresh()`."""
-
-    key: str
-    """The key that a user responds with. Refreshes with `ResponseComponent.refresh()`."""
-
-    rt: float
-    """The response time. Refreshes with `ResponseComponent.refresh()`."""
+    name = "response"
 
 
     def __init__(self, component_settings):
@@ -48,6 +36,26 @@ class ResponseComponent(BaseComponent):
             `keys`    (list): List of keys that users are allowed to responde with.
         """
 
+        # -----------------------------------------------
+        # Class variables
+        # -----------------------------------------------
+        self.keys: list = None
+        """List of keys that users are allowed to responde with."""
+
+        self.made: bool = False
+        """True if user has responded. Refreshes with `ResponseComponent.refresh()`."""
+
+        self.key: str = None
+        """The key that a user responds with. Refreshes with `ResponseComponent.refresh()`."""
+
+        self.rt: float = None
+        """The response time. Refreshes with `ResponseComponent.refresh()`."""
+        # -----------------------------------------------
+
+
+        # -----------------------------------------------
+        # VisualComponent Initialization
+        # -----------------------------------------------
         super().__init__(component_settings)
 
         try:
@@ -58,9 +66,10 @@ class ResponseComponent(BaseComponent):
         except ValueError as e:
             logging.fatal(e)
             core.quit()
+        # -----------------------------------------------
 
 
-    def _refresh(self):
+    def refresh(self):
         """
         Used before each component use.
         
@@ -70,14 +79,14 @@ class ResponseComponent(BaseComponent):
         For a ResponseComponent, this refreshes variables `made`, `key` and `rt`.
         """
 
-        super()._refresh()
+        super().refresh()
 
         self.made = False
         self.key = None
         self.rt = None
 
 
-    def _prepare(self, trial_values: dict, component_info: str = "InputComponent"):
+    def prepare(self, trial_values: dict):
         """
         Sets the key-value pairs from `trial_values` on the ResponseComponent.
 
@@ -88,7 +97,7 @@ class ResponseComponent(BaseComponent):
             `component_info`  (str): Component information string for logging and debug purposes.
         """
 
-        super()._prepare(trial_values, component_info = component_info)
+        super().prepare(trial_values)
 
 
     def check(self, input_device, data_handler = None):
@@ -116,6 +125,8 @@ class ResponseComponent(BaseComponent):
         
         if self.started() and not self.made:
             key_pressed = [(key.name, key.rt) for key in input_device.getKeys(keyList=self.keys)]
+            # TODO: Make the above function of InputDevice class
+
             if len(key_pressed):
                 self.key, self.rt = key_pressed[-1]
                 self.made = True
@@ -136,15 +147,6 @@ class CorrectResponseComponent(ResponseComponent):
 
     Records the key that a user responds with, the reaction time and correctness.
     """
-
-    name = "response"
-    
-    correct_resp: str
-    """String of the correct repsonse key"""
-
-    correct: bool
-    """True if response key is correct"""
-
 
     def __init__(self, component_settings):
         """
@@ -173,6 +175,12 @@ class CorrectResponseComponent(ResponseComponent):
         CorrectResponseComponent's settings must have `correct_resp` (str) as a variable factor.
         """
 
+        self.correct_resp: str = None
+        """String of the correct repsonse key"""
+
+        self.correct: bool = None
+        """True if response key is correct"""
+
         super().__init__(component_settings)
         
         try:     
@@ -183,7 +191,7 @@ class CorrectResponseComponent(ResponseComponent):
             core.quit()
 
 
-    def _refresh(self):
+    def refresh(self):
         """
         Used before each component use.
         
@@ -195,7 +203,7 @@ class CorrectResponseComponent(ResponseComponent):
         For a CorrectResponseComponent, this refreshes variables `correct_resp` and `correct`.
         """
 
-        super()._refresh()
+        super().refresh()
         
         self.correct_resp = None
         self.correct = None
@@ -206,7 +214,7 @@ class CorrectResponseComponent(ResponseComponent):
         #     setattr(self, factor_name, None)
     
 
-    def _prepare(self, trial_values: dict, component_info = "ResponseComponent"):
+    def prepare(self, trial_values: dict):
         """
         Sets the key-value pairs from `trial_values` on the ResponseComponent.
 
@@ -215,7 +223,7 @@ class CorrectResponseComponent(ResponseComponent):
             `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
         """
 
-        super()._prepare(trial_values, component_info = "ResponseComponent")
+        super().prepare(trial_values)
     
 
     def check(self, input_device, data_handler = None):
@@ -239,9 +247,9 @@ class CorrectResponseComponent(ResponseComponent):
             `data_handler`  (ExperimentHandler): Instance of an ExperimentHandler to record data.
         """
 
-        super().check(input_device, data_handler)
+        key, _ = super().check(input_device, data_handler)
 
-        if self.started() and not self.made:
+        if key is not None:
             if self.key == self.correct_resp:
                 self.correct = True
             else:

@@ -55,7 +55,7 @@ class BaseSequence:
     
     def _base_sequence_should_not_be_run(self):
         if self.__class__.__name__ == "BaseSequence":
-            logging.fatal("BaseSequence should not be run")
+            logging.fatal("An instance of BaseSequence should not be created nor run")
             core.quit()
 
     def _get_all_components(self) -> list[BaseComponent]:
@@ -72,11 +72,11 @@ class BaseSequence:
         self._base_sequence_should_not_be_run()
 
         for component in self._get_all_components():
-            component._refresh()
+            component.refresh()
     
     def _prepare_components(self, trial_values):
         for component in self._get_all_components():
-            component._prepare(trial_values)
+            component.prepare(trial_values)
 
     def _run_frame(self, debug_data = False):
         if self.input_device.getKeys(["escape"]):

@@ -1,4 +1,4 @@
-from .base_component import BaseComponent
+from . import BaseComponent
 
 class AudioComponent(BaseComponent):
     pass

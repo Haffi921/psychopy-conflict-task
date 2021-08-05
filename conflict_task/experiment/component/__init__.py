@@ -3,4 +3,4 @@ from .audio_component import AudioComponent
 from .visual_component import VisualComponent
 from .wait_component import WaitComponent
 
-from .base_component import BaseComponent
+from ._base_component import BaseComponent

@@ -1,6 +1,6 @@
 from psychopy import visual, logging, core
 
-from .base_component import BaseComponent
+from . import BaseComponent
 
 class VisualComponent(BaseComponent):
     """
@@ -8,11 +8,6 @@ class VisualComponent(BaseComponent):
 
     Basically this is a wrapper for all of PsychoPy's visual stimuli.
     """
-
-
-    visual: dict
-    """Each VisualComponent is connected to a visual stimulus from PsychoPy."""
-
 
     def __init__(self, window, component_settings: dict):
         """
@@ -44,13 +39,30 @@ class VisualComponent(BaseComponent):
             3) `name`        (str): Because VisualComponents can be numerous, it's required to give each a name.
         """
 
+
+        # -----------------------------------------------
+        # Class variables
+        # -----------------------------------------------
+        self.visual: visual.TextStim = None
+        """Each VisualComponent is connected to a visual stimulus from PsychoPy. Default: `None`"""
+
+        self.drawable = True
+        # -----------------------------------------------
+
+
+        # -----------------------------------------------
+        # VisualComponent Initialization
+        # ----------------------------------------------- 
         super().__init__(component_settings)
 
         try:
             if "name" in component_settings:
-                self.name = self.name
+                self.name = component_settings["name"]
+            elif "spec" in component_settings and "name" in component_settings["spec"]:
+                self.name = component_settings["spec"]["name"]
             else:
-                raise ValueError(f"Please specify a name for each VisualComponent")
+                raise ValueError(f"Please specify a name for each VisualComponent, \
+                    either at top level or in spec")
 
             if "type" in component_settings:
                 type = component_settings["type"]
@@ -67,11 +79,10 @@ class VisualComponent(BaseComponent):
         except ValueError as e:
             logging.fatal(e)
             core.quit()
+        # -----------------------------------------------
 
-        self.drawable = True
 
-
-    def _refresh(self):
+    def refresh(self):
         """
         Used before each component use.
         
@@ -80,11 +91,11 @@ class VisualComponent(BaseComponent):
         For VisualComponent, this also turns off AutoDraw.
         """
 
-        super()._refresh()
+        super().refresh()
         self._turnAutoDrawOff()
 
 
-    def _prepare(self, trial_values: dict, component_info = None):
+    def prepare(self, trial_values: dict):
         """
         Sets the key-value pairs from `trial_values` on the VisualComponent.
 
@@ -92,7 +103,7 @@ class VisualComponent(BaseComponent):
             
             `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
         """
-        super()._prepare(trial_values, self.visual, f"VisualComponent '{self.name}'")
+        super().prepare(trial_values, self.visual)
 
 
     def _turnAutoDrawOn(self):
