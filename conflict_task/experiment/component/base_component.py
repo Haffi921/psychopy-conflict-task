@@ -5,55 +5,56 @@ class BaseComponent:
     name = "UNKNOWN_COMPONENT"
     """Name of component for data registration."""
 
-    variable_factor: dict = None
+    variable_factor: dict
     """Dictionary of component member variables that will be different each sequence"""
 
 
-    start_time: float = 0.0
+    start_time: float
     """Start time for component relative to sequence start."""
 
-    stop_time: float = 0.0
+    stop_time: float
     """Stop time for component relative to sequence start."""
 
 
-    status = NOT_STARTED
+    status: int
     """Component status (NOT_STARTED, STARTED, FINISHED)"""
     
-    time_started: float = None
+    time_started: float
     """Time that component started, relative to sequence start."""
 
-    time_started_refresh: float = None
+    time_started_flip: float
     """Screen flip time that component started, relative to sequence start."""
 
-    time_started_global: float = None
-    """Time that component started, relative to experiment start."""
+    time_started_global_flip: float
+    """Screen flip time that component started, relative to experiment start."""
 
-    time_stopped = None
+    time_stopped: float
     """Time that component stopped, relative to sequence start."""
 
-    time_stopped_refresh = None
+    time_stopped_flip: float
     """Screen flip time that component stopped, relative to sequence start."""
 
-    time_stopped_global: float = None
-    """Time that component stopped, relative to experiment start."""
+    time_stopped_global_flip: float
+    """Screen flip time that component stopped, relative to experiment start."""
 
 
-    drawable = False
+    drawable: bool
     """True if component is a visual component, false if not."""
 
 
-    def __init__(self, component_settings):
+    def __init__(self, component_settings: dict):
         """
         Takes in a `component_settings` dictionary to set up component variables.
 
         For all components, settings are as follows:
 
-            1) `start`          (float): Start time for component relative to sequence start. (Required)
+            1) `start`          (float): Start time for component relative to sequence start. Defaults to 0.0.
 
-            2) End time, either through: (Optional)
+            2) End time, either through:
                 a) `stop`       (float): Stop time for component relative to sequence start.
                 b) `duration`   (float): Length of time between component's start and stop.
                 Behind the scenes `stop` = `start` + `duration`.
+                c) None, which means the component will be displayed indefinitely until the end of the sequence.
 
             3) `variable`        (dict): Component member variables that will be different each sequence.
         """
@@ -62,19 +63,19 @@ class BaseComponent:
             if "start" in component_settings:
                 self.start_time = component_settings["start"]
             else:
-                raise ValueError("Component must have a start time")
+                self.start_time = 0.0
             
-            if "stop" in component_settings.keys():
+            if "stop" in component_settings:
                 self.stop_time = component_settings["stop"]
                 
                 if self.stop_time < self.start_time:
                     raise ValueError("Component stop time must not be less than the start time")
 
-            elif "duration" in component_settings.keys():
+            elif "duration" in component_settings:
                 self.stop_time = self.start_time + component_settings["duration"]
 
             else:
-                raise ValueError("Component must have an end time - either 'stop' or 'duration'.")
+                self.stop_time = float("inf")
             
             if "variable" in component_settings:
                 self.variable_factor = component_settings["variable"]
@@ -82,9 +83,12 @@ class BaseComponent:
         except ValueError as e:
             logging.fatal(e)
             core.quit()
+        
+        self._refresh()
+        self.drawable = False
 
 
-    def refresh(self):
+    def _refresh(self):
         """
         Used before each component use.
         
@@ -94,14 +98,14 @@ class BaseComponent:
 
         self.status = NOT_STARTED
         self.time_started = None
-        self.time_started_refresh = None
-        self.time_started_global = None
+        self.time_started_flip = None
+        self.time_started_global_flip = None
         self.time_stopped = None
-        self.time_stopped_refresh = None
-        self.time_stopped_global = None
+        self.time_stopped_flip = None
+        self.time_stopped_global_flip = None
     
 
-    def prepare(self, trial_values: dict, component, component_info: str):
+    def _prepare(self, trial_values: dict, component = None, component_info: str = "BaseComponent"):
         """
         Sets the key-value pairs from `trial_values` on the component.
 
@@ -109,10 +113,13 @@ class BaseComponent:
             
             `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
 
-            `component`       (Any): The object on which the `trial_values` are enacted on. Most cases it will be `self`.
+            `component`       (Any): The object on which the `trial_values` are enacted on. Defaults to `self`.
 
             `component_info`  (str): Component information string for logging and debug purposes.
         """
+
+        if component is None:
+            component = self
 
         if self.__class__.__name__ == "BaseComponent":
             logging.fatal("'prepare' method BaseComponent should never be invoked")
@@ -129,7 +136,7 @@ class BaseComponent:
                     core.quit()
 
 
-    def start(self, time, flipTime, timeGlobal):
+    def start(self, time, timeFlip, globalFlip):
         """
         Starts component and records time.
 
@@ -143,12 +150,12 @@ class BaseComponent:
         """
 
         self.time_started = time
-        self.time_started_refresh = flipTime
-        self.time_started_global = timeGlobal
+        self.time_started_flip = timeFlip
+        self.time_started_global_flip = globalFlip
         self.status = STARTED
     
 
-    def stop(self, time, flipTime, timeGlobal, dataHandler = None):
+    def stop(self, time, timeFlip, globalFlip, dataHandler = None):
         """
         Stops component and records time.
 
@@ -164,17 +171,17 @@ class BaseComponent:
         """
 
         self.time_stopped = time
-        self.time_stopped_refresh = flipTime
-        self.time_stopped_global = timeGlobal
+        self.time_stopped_flip = timeFlip
+        self.time_stopped_global_flip = globalFlip
         self.status = FINISHED
 
         if dataHandler:
             dataHandler.addData(self.name + ".time_started", self.time_started)
-            dataHandler.addData(self.name + ".time_started_refresh", self.time_started_refresh)
-            dataHandler.addData(self.name + ".time_started_global", self.time_started_global)
+            dataHandler.addData(self.name + ".time_started_flip", self.time_started_flip)
+            dataHandler.addData(self.name + ".time_started_global_flip", self.time_started_global_flip)
             dataHandler.addData(self.name + ".time_stopped", self.time_stopped)
-            dataHandler.addData(self.name + ".time_stopped_refresh", self.time_stopped_refresh)
-            dataHandler.addData(self.name + ".time_stopped_global", self.time_stopped_global)
+            dataHandler.addData(self.name + ".time_stopped_flip", self.time_stopped_flip)
+            dataHandler.addData(self.name + ".time_stopped_global_flip", self.time_stopped_global_flip)
     
 
     def not_started(self):

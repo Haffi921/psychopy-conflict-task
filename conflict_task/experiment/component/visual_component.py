@@ -10,7 +10,7 @@ class VisualComponent(BaseComponent):
     """
 
 
-    visual = None
+    visual: dict
     """Each VisualComponent is connected to a visual stimulus from PsychoPy."""
 
 
@@ -20,12 +20,13 @@ class VisualComponent(BaseComponent):
 
         For all components, settings are as follows:
 
-            1) `start`          (float): Start time for component relative to sequence start. (Required)
+            1) `start`          (float): Start time for component relative to sequence start. Defaults to 0.0.
 
-            2) End time, either through: (Optional)
+            2) End time, either through:
                 a) `stop`       (float): Stop time for component relative to sequence start.
                 b) `duration`   (float): Length of time between component's start and stop.
                 Behind the scenes `stop` = `start` + `duration`.
+                c) None, which means the component will be displayed indefinitely until the end of the sequence.
 
             3) `variable`        (dict): Component member variables that will be different each sequence.
         
@@ -70,7 +71,7 @@ class VisualComponent(BaseComponent):
         self.drawable = True
 
 
-    def refresh(self):
+    def _refresh(self):
         """
         Used before each component use.
         
@@ -79,11 +80,11 @@ class VisualComponent(BaseComponent):
         For VisualComponent, this also turns off AutoDraw.
         """
 
-        super().refresh()
-        self.turnAutoDrawOff()
+        super()._refresh()
+        self._turnAutoDrawOff()
 
 
-    def prepare(self, trial_values: dict):
+    def _prepare(self, trial_values: dict, component_info = None):
         """
         Sets the key-value pairs from `trial_values` on the VisualComponent.
 
@@ -91,10 +92,10 @@ class VisualComponent(BaseComponent):
             
             `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
         """
-        super().prepare(trial_values, self.visual, f"VisualComponent '{self.name}'")
+        super()._prepare(trial_values, self.visual, f"VisualComponent '{self.name}'")
 
 
-    def turnAutoDrawOn(self):
+    def _turnAutoDrawOn(self):
         """
         Turns AutoDraw on for the visual stimulus connected to this component.
 
@@ -105,7 +106,7 @@ class VisualComponent(BaseComponent):
         self.visual.setAutoDraw(True)
 
 
-    def turnAutoDrawOff(self):
+    def _turnAutoDrawOff(self):
         """
         Turns AutoDraw off for the visual stimulus connected to this component.
 
@@ -132,7 +133,7 @@ class VisualComponent(BaseComponent):
         """
 
         super().start(time, flipTime, timeGlobal)
-        self.turnAutoDrawOn()
+        self._turnAutoDrawOn()
 
 
     def stop(self, time, flipTimeGlobal, dataHandler = None):
@@ -153,4 +154,4 @@ class VisualComponent(BaseComponent):
         """
 
         super().stop(time, flipTimeGlobal, dataHandler)
-        self.turnAutoDrawOff()
+        self._turnAutoDrawOff()

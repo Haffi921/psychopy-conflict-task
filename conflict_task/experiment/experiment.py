@@ -106,7 +106,7 @@ class Experiment:
         stim = VisualComponent(win, stim_settings)
         inputDevice = keyboard.Keyboard()
 
-        stim.turnAutoDrawOn()
+        stim._turnAutoDrawOn()
         while True:
             if inputDevice.getKeys(["escape"]):
                 core.quit()

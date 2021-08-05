@@ -12,16 +12,16 @@ class ResponseComponent(BaseComponent):
 
     name = "input"
 
-    keys: list = None
+    keys: list
     """List of keys that users are allowed to responde with."""
 
-    made: bool = False
+    made: bool
     """True if user has responded. Refreshes with `ResponseComponent.refresh()`."""
 
-    key: str = None
+    key: str
     """The key that a user responds with. Refreshes with `ResponseComponent.refresh()`."""
 
-    rt: float = None
+    rt: float
     """The response time. Refreshes with `ResponseComponent.refresh()`."""
 
 
@@ -31,12 +31,13 @@ class ResponseComponent(BaseComponent):
 
         For all components, settings are as follows:
 
-            1) `start`          (float): Start time for component relative to sequence start. (Required)
+            1) `start`          (float): Start time for component relative to sequence start. Defaults to 0.0.
 
-            2) End time, either through: (Optional)
+            2) End time, either through:
                 a) `stop`       (float): Stop time for component relative to sequence start.
                 b) `duration`   (float): Length of time between component's start and stop.
                 Behind the scenes `stop` = `start` + `duration`.
+                c) None, which means the component will be displayed indefinitely until the end of the sequence.
 
             3) `variable`        (dict): Component member variables that will be different each sequence.
 
@@ -59,7 +60,7 @@ class ResponseComponent(BaseComponent):
             core.quit()
 
 
-    def refresh(self):
+    def _refresh(self):
         """
         Used before each component use.
         
@@ -69,14 +70,14 @@ class ResponseComponent(BaseComponent):
         For a ResponseComponent, this refreshes variables `made`, `key` and `rt`.
         """
 
-        super().refresh()
+        super()._refresh()
 
         self.made = False
         self.key = None
         self.rt = None
 
 
-    def prepare(self, trial_values: dict, component_info: str = "InputComponent"):
+    def _prepare(self, trial_values: dict, component_info: str = "InputComponent"):
         """
         Sets the key-value pairs from `trial_values` on the ResponseComponent.
 
@@ -87,7 +88,7 @@ class ResponseComponent(BaseComponent):
             `component_info`  (str): Component information string for logging and debug purposes.
         """
 
-        super().prepare(trial_values, self, component_info)
+        super()._prepare(trial_values, component_info = component_info)
 
 
     def check(self, input_device, data_handler = None):
@@ -138,10 +139,10 @@ class CorrectResponseComponent(ResponseComponent):
 
     name = "response"
     
-    correct_resp = None
+    correct_resp: str
     """String of the correct repsonse key"""
 
-    correct: bool = None
+    correct: bool
     """True if response key is correct"""
 
 
@@ -151,12 +152,13 @@ class CorrectResponseComponent(ResponseComponent):
 
         For all components, settings are as follows:
 
-            1) `start`          (float): Start time for component relative to sequence start. (Required)
+            1) `start`          (float): Start time for component relative to sequence start. Defaults to 0.0.
 
-            2) End time, either through: (Optional)
+            2) End time, either through:
                 a) `stop`       (float): Stop time for component relative to sequence start.
                 b) `duration`   (float): Length of time between component's start and stop.
                 Behind the scenes `stop` = `start` + `duration`.
+                c) None, which means the component will be displayed indefinitely until the end of the sequence.
 
             3) `variable`        (dict): Component member variables that will be different each sequence.
 
@@ -181,7 +183,7 @@ class CorrectResponseComponent(ResponseComponent):
             core.quit()
 
 
-    def refresh(self):
+    def _refresh(self):
         """
         Used before each component use.
         
@@ -193,7 +195,7 @@ class CorrectResponseComponent(ResponseComponent):
         For a CorrectResponseComponent, this refreshes variables `correct_resp` and `correct`.
         """
 
-        super().refresh()
+        super()._refresh()
         
         self.correct_resp = None
         self.correct = None
@@ -204,7 +206,7 @@ class CorrectResponseComponent(ResponseComponent):
         #     setattr(self, factor_name, None)
     
 
-    def prepare(self, trial_values: dict):
+    def _prepare(self, trial_values: dict, component_info = "ResponseComponent"):
         """
         Sets the key-value pairs from `trial_values` on the ResponseComponent.
 
@@ -213,7 +215,7 @@ class CorrectResponseComponent(ResponseComponent):
             `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
         """
 
-        super().prepare(trial_values, self, "ResponseComponent")
+        super()._prepare(trial_values, component_info = "ResponseComponent")
     
 
     def check(self, input_device, data_handler = None):
