@@ -1,5 +1,7 @@
 from psychopy import logging, core
 
+from conflict_task.devices import InputDevice, DataHandler
+
 from . import BaseComponent
 
 class ResponseComponent(BaseComponent):
@@ -100,7 +102,7 @@ class ResponseComponent(BaseComponent):
         super().prepare(trial_values)
 
 
-    def check(self, input_device, data_handler = None):
+    def check(self, input_device: InputDevice, data_handler: DataHandler = None):
         """
         Checks for input using `input_device` and logs data using `data_handler`.
         
@@ -124,20 +126,21 @@ class ResponseComponent(BaseComponent):
         """
         
         if self.started() and not self.made:
-            key_pressed = [(key.name, key.rt) for key in input_device.getKeys(keyList=self.keys)]
+            key_pressed = input_device.get_last_key(self.keys)
             # TODO: Make the above function of InputDevice class
 
-            if len(key_pressed):
-                self.key, self.rt = key_pressed[-1]
+            if key_pressed is not None:
+                self.key, self.rt = key_pressed
                 self.made = True
 
                 if data_handler:
-                    data_handler.addData(self.name + ".made", self.made)
-                    data_handler.addData(self.name + ".key", self.key)
-                    data_handler.addData(self.name + ".rt", self.rt)
+                    data_handler.add_data(self.name + ".made", self.made)
+                    data_handler.add_data(self.name + ".key", self.key)
+                    data_handler.add_data(self.name + ".rt", self.rt)
                 
                 return (self.key, self.rt)
-        return (None, None)
+            else:
+                return (None, None)
 
 
 
@@ -226,7 +229,7 @@ class CorrectResponseComponent(ResponseComponent):
         super().prepare(trial_values)
     
 
-    def check(self, input_device, data_handler = None):
+    def check(self, input_device, data_handler: DataHandler = None):
         """
         Checks for input using `input_device` and logs data using `data_handler`. \n
         
@@ -256,5 +259,5 @@ class CorrectResponseComponent(ResponseComponent):
                 self.correct = False
             
             if data_handler:
-                data_handler.addData(self.name + ".correct_resp", self.correct_resp)
-                data_handler.addData(self.name + ".correct", self.correct)
+                data_handler.add_data(self.name + ".correct_resp", self.correct_resp)
+                data_handler.add_data(self.name + ".correct", self.correct)

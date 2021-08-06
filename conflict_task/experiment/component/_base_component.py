@@ -1,7 +1,7 @@
 from psychopy import core, logging
-from psychopy.constants import NOT_STARTED, STARTED, FINISHED
 
-INFINITY = float("inf")
+from conflict_task.devices import DataHandler
+from conflict_task.constants import *
 
 class BaseComponent:
     """
@@ -168,7 +168,7 @@ class BaseComponent:
         self.status = STARTED
     
 
-    def stop(self, time, time_flip, global_flip, data_handler = None):
+    def stop(self, time, time_flip, global_flip, data_handler: DataHandler = None):
         """
         Stops component and records time.
 
@@ -194,14 +194,14 @@ class BaseComponent:
         # This causes all data entries related to this component to be grouped together in the ".csv"
         if data_handler:
             # Started
-            data_handler.addData(self.name + ".time_started", self.time_started)
-            data_handler.addData(self.name + ".time_started_flip", self.time_started_flip)
-            data_handler.addData(self.name + ".time_started_global_flip", self.time_started_global_flip)
+            data_handler.add_data(self.name + ".time_started", self.time_started)
+            data_handler.add_data(self.name + ".time_started_flip", self.time_started_flip)
+            data_handler.add_data(self.name + ".time_started_global_flip", self.time_started_global_flip)
 
             # Stopped
-            data_handler.addData(self.name + ".time_stopped", self.time_stopped)
-            data_handler.addData(self.name + ".time_stopped_flip", self.time_stopped_flip)
-            data_handler.addData(self.name + ".time_stopped_global_flip", self.time_stopped_global_flip)
+            data_handler.add_data(self.name + ".time_stopped", self.time_stopped)
+            data_handler.add_data(self.name + ".time_stopped_flip", self.time_stopped_flip)
+            data_handler.add_data(self.name + ".time_stopped_global_flip", self.time_stopped_global_flip)
     
 
     def not_started(self):

@@ -1,5 +1,7 @@
 from psychopy import visual, logging, core
 
+from conflict_task.devices import DataHandler
+
 from . import BaseComponent
 
 class VisualComponent(BaseComponent):
@@ -147,7 +149,7 @@ class VisualComponent(BaseComponent):
         self._turnAutoDrawOn()
 
 
-    def stop(self, time, flipTimeGlobal, dataHandler = None):
+    def stop(self, time, flipTimeGlobal, data_handler: DataHandler = None):
         """
         Stops component and records time.
 
@@ -164,5 +166,5 @@ class VisualComponent(BaseComponent):
         For a VisualComponent, this also turns off AutoDraw.
         """
 
-        super().stop(time, flipTimeGlobal, dataHandler)
+        super().stop(time, flipTimeGlobal, data_handler)
         self._turnAutoDrawOff()
