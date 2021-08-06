@@ -2,7 +2,7 @@ from psychopy import logging, core
 
 from conflict_task.devices import InputDevice, DataHandler
 
-from . import BaseComponent
+from ._base_component import BaseComponent
 
 class ResponseComponent(BaseComponent):
     """

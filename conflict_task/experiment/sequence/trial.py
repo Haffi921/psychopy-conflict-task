@@ -1,6 +1,7 @@
 from conflict_task.constants import *
 
-from . import BaseSequence, Feedback
+from ._base_sequence import BaseSequence
+from .feedback import Feedback
 
 class Trial(BaseSequence):
     feedback: Feedback = None

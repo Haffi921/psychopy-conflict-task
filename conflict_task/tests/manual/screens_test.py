@@ -1,21 +1,8 @@
 import os
 from sys import path
-from psychopy.data import ExperimentHandler
 
-thisDir = os.path.abspath(path[0])
-
-data_handler = ExperimentHandler(dataFileName="test")
-
-# def add(key, value):
-#     data_handler.addData(key, str(value).encode("unicode_escape").decode())
-# add("Hello", "World\nWorld\nWorld")
-# data_handler.nextEntry()
-# add("Hello", 3)
-
-# data_handler.nextEntry()
-
-from conflict_task.devices import Window, Keyboard
-from conflict_task.experiment.screen.information_screen import InformationScreen
+from conflict_task.devices import Window, Keyboard, DataHandler
+from conflict_task.experiment.sequence import Screen
 
 window_settings = dict(
 
@@ -48,26 +35,42 @@ window_settings = dict(
     units = 'height'
 )
 
+text = """
+Welcome to this test experiment. Right now you are looking at a Static Information Screen. \
+This is to provide you with some information about this experiment and what you should know before starting.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam venenatis accumsan eros a vehicula. Quisque mollis \
+ante ac leo tempus egestas ut vitae lectus. Suspendisse maximus venenatis tortor, in imperdiet ipsum rutrum quis. \
+Nulla quis est in mauris feugiat cursus feugiat nec tellus. Quisque a purus iaculis, commodo nibh id, pharetra odio. \
+Sed sit amet ligula a diam placerat imperdiet. Fusce in quam vehicula odio pharetra maximus. Aliquam eget nunc sollicitudin, \
+fermentum ipsum bibendum, convallis nisl. In nec eros turpis. Donec et ultricies quam. Etiam ipsum erat, consequat et \
+bibendum id, eleifend sit amet est. Curabitur sit amet tincidunt ante, at congue orci.
+
+Press [space] to continue.
+"""
+
 componentSettings = dict(
     visual_components = dict(
         text = dict(
             name = "text",
             type = "TextStim",
             spec = dict(
-                name = "target",
+                name = "text",
                 color = "white",
-                height = 0.02,
-                text = "Hello!"
+                height = 0.03,
+                text = text
             )
         )
+    ),
+    response = dict(
+        keys = ["space"]
     )
 )
 
+data_handler = DataHandler("ScreenTest")
+input_device = Keyboard()
 window = Window(window_settings)
-input_device = Keyboard().device
-screen = InformationScreen(window, input_device, data_handler, componentSettings)
+
+screen = Screen(window, input_device, data_handler, componentSettings)
 
 screen.run()
-
-data_handler.saveAsWideText(thisDir + os.sep + "test.csv")
-data_handler.abort()

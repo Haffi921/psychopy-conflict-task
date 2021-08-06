@@ -2,7 +2,7 @@ from psychopy import visual, logging, core
 
 from conflict_task.devices import DataHandler
 
-from . import BaseComponent
+from ._base_component import BaseComponent
 
 class VisualComponent(BaseComponent):
     """
@@ -81,6 +81,7 @@ class VisualComponent(BaseComponent):
         except ValueError as e:
             logging.fatal(e)
             core.quit()
+        
         # -----------------------------------------------
 
 

@@ -1,4 +1,4 @@
-from . import BaseComponent
+from ._base_component import BaseComponent
 
 class WaitComponent(BaseComponent):
     def __init__(self, component_settings):

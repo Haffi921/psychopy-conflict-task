@@ -1,7 +1,6 @@
-from . import BaseSequence
+from ._base_sequence import BaseSequence
 
 class Screen(BaseSequence):
-    
     wait_for_response = True
     cut_on_response = True
 

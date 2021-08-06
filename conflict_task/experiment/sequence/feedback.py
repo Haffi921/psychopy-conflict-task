@@ -1,4 +1,4 @@
-from . import BaseSequence
+from ._base_sequence import BaseSequence
 
 class Feedback(BaseSequence):
 

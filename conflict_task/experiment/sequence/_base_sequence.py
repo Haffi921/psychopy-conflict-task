@@ -6,6 +6,8 @@ from conflict_task.devices import Window, InputDevice, DataHandler
 from ..component import *
 
 class BaseSequence:
+    wait_for_response: bool = False
+    cut_on_response: bool = False
 
     def __init__(self, window, input_device, data_handler, componentSettings):
         self.window: Window = window
@@ -19,25 +21,23 @@ class BaseSequence:
 
         self.clock: clock.Clock = clock.Clock()
 
-        self.wait_for_response: bool = False
-        self.cut_on_response: bool = False
         self.timed: bool = False
         
         if "visual_components" in componentSettings:
-            for component in componentSettings["visual_components"]:
+            for component in componentSettings["visual_components"].values():
                 self.visual.append(VisualComponent(window, component))
         
         if "audio_components" in componentSettings:
-            for component in componentSettings["audio_components"]:
+            for component in componentSettings["audio_components"].values():
                 self.audio.append(AudioComponent(window, component))
         
         if "wait_components" in componentSettings:
-            for component in componentSettings["wait_components"]:
+            for component in componentSettings["wait_components"].values():
                 self.wait.append(WaitComponent(component))
         
         if "response" in componentSettings:
             if "variable" in componentSettings["response"] and "correct_resp" in componentSettings["response"]["variable"]:
-                self.response = CorrectResponseComponent(componentSettings)
+                self.response = CorrectResponseComponent(componentSettings["response"])
             else:
                 self.response = ResponseComponent(componentSettings["response"])
 
@@ -86,7 +86,7 @@ class BaseSequence:
         if self.timed:
             return self.timer
         
-        return max([component.stop_time for component in self._get_all_components()])
+        return max([component.stop_time for component in self._get_all_components() if component is not None])
 
 
     def refresh(self):
@@ -123,14 +123,14 @@ class BaseSequence:
             # Either start them...
             if component.not_started():
                 if thisFlip >= component.start_time - FRAMETOLERANCE:
-                    component.start(time, thisFlipGlobal)
+                    component.start(time, thisFlip, thisFlipGlobal)
             # ...or stop them
             elif component.started():
                 if thisFlip >= component.stop_time - FRAMETOLERANCE:
                     if debug_data:
-                        component.stop(time, thisFlipGlobal, self.data_handler)
+                        component.stop(time, thisFlip, thisFlipGlobal, self.data_handler)
                     else:
-                        component.stop(time, thisFlipGlobal)
+                        component.stop(time, thisFlip, thisFlipGlobal)
             
             # If not all components have finished, continue the sequence
             if not component.finished():
@@ -166,7 +166,7 @@ class BaseSequence:
         return keep_running
 
 
-    def run(self, trial_values: dict, debug_data = False):
+    def run(self, trial_values: dict = {}, debug_data = False):
         self._base_sequence_should_not_be_run()
 
         self.refresh()
