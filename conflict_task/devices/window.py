@@ -1,6 +1,6 @@
 from psychopy import visual
 
-default_window_settings = dict(
+DEFAULT_WINDOW_SETTINGS = dict(
 
     # Size of the window in pixels (x, y)
     size = (1920, 1080),
@@ -35,7 +35,7 @@ class Window(visual.Window):
 
     def __init__(self, window_settings = {}):
 
-        self.window_settings = default_window_settings | window_settings
+        self.window_settings = DEFAULT_WINDOW_SETTINGS | window_settings
 
         super().__init__(**self.window_settings)
 
