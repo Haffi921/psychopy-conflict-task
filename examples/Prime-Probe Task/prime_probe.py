@@ -1,8 +1,9 @@
-from conflict_task.experiment import Experiment
+from conflict_task.experiment import Experiment, preview_component
 
-from settings.experiment_settings import *
-from sequence_creator import subject_sequence
+from settings.experiment_settings import experiment_settings
+from trial_values import trial_values
 
-prime_probe = Experiment("Prime-Probe", subject_sequence, experiment_settings)
+
+prime_probe = Experiment("Prime-Probe", trial_values, experiment_settings)
 
 prime_probe.run()

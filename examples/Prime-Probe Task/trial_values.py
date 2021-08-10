@@ -2,9 +2,6 @@ from conflict_task.util import counterbalance, Randomizer
 
 from settings.experiment_settings import *
 
-nr_blocks = experiment_settings["blocks"]["number"]
-nr_trials = experiment_settings["blocks"]["trials"]["number"]
-
 conditions = {
     "distractor": [
         ["Left\nLeft\nLeft", "Right\nRight\nRight"],
@@ -31,12 +28,12 @@ def translate(trial):
     }
 
 rand = Randomizer(0, 1)
-subject_sequence = []
-for block in range(experiment_settings["blocks"]["number"]):
+trial_values = []
+for block in range(8):
     sequence = counterbalance(
         trials = 128, factor_levels = [2, 2], levels = 2,
         alternating = True, alternator_start = rand.new_one(),
     )
 
     sequence = list(map(translate, sequence))
-    subject_sequence.append(sequence)
+    trial_values.append(sequence)

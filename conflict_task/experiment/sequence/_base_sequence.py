@@ -4,12 +4,15 @@ from conflict_task.constants import *
 from conflict_task.devices import Window, InputDevice, DataHandler
 
 from ..component import *
+from conflict_task.experiment import component
 
 class BaseSequence:
-    wait_for_response: bool = False
-    cut_on_response: bool = False
 
-    def __init__(self, window, input_device, data_handler, componentSettings):
+    def __init__(self, window, input_device, data_handler, sequence_settings):
+        self._base_sequence_should_not_be_run()
+
+        self.name: str = "Unnamed Sequence"
+        
         self.window: Window = window
         self.input_device: InputDevice = input_device
         self.data_handler: DataHandler = data_handler
@@ -22,54 +25,72 @@ class BaseSequence:
         self.clock: clock.Clock = clock.Clock()
 
         self.timed: bool = False
+        self.wait_for_response: bool = False
+        self.cut_on_response: bool = False
+        self.takes_trial_values: bool = False
+        self.feedback: bool = False
         
-        if "visual_components" in componentSettings:
-            for component in componentSettings["visual_components"].values():
-                self.visual.append(VisualComponent(window, component))
-        
-        if "audio_components" in componentSettings:
-            for component in componentSettings["audio_components"].values():
-                self.audio.append(AudioComponent(window, component))
-        
-        if "wait_components" in componentSettings:
-            for component in componentSettings["wait_components"].values():
-                self.wait.append(WaitComponent(component))
-        
-        if "response" in componentSettings:
-            if "variable" in componentSettings["response"] and "correct_resp" in componentSettings["response"]["variable"]:
-                self.response = CorrectResponseComponent(componentSettings["response"])
+        if "name" in sequence_settings:
+            if isinstance(sequence_settings["name"], str):
+                self.name = sequence_settings["name"]
             else:
-                self.response = ResponseComponent(componentSettings["response"])
+                logging.fatal("Sequence name is not a string")
 
-        if "wait_for_response" in componentSettings:
-            self.wait_for_response = bool(componentSettings["wait_for_response"])
-
-        if "cut_on_response" in componentSettings:
-            self.cut_on_response = bool(componentSettings["cut_on_response"])
-        
-        if "timed" in componentSettings:
-            self.timed = True
-
-        if self.timed:
-            try:
-                if "timer" in componentSettings:
-                    self.timer = float(componentSettings["timer"])
-                else:
-                    raise ValueError("If sequence is timed, please provide a timer")
-            except ValueError as e:
-                logging.fatal(e)
-                core.quit()
-        
-        if (not self.response or not self.cut_on_response) and self.get_duration() == INFINITY:
-            logging.fatal("Sequence has no way to finish.")
-            core.quit()
+        self._parse_component_settings(sequence_settings)
     
 
     def _base_sequence_should_not_be_run(self):
         if self.__class__.__name__ == "BaseSequence":
             logging.fatal("An instance of BaseSequence should not be created nor run")
             core.quit()
+    
 
+    def _create_components(self, component_settings, component_class: BaseComponent, *args, **kwargs):
+        settings: list = None
+        components: list = []
+
+        if isinstance(component_settings, list):
+            settings = component_settings    
+        elif isinstance(component_settings, dict):
+            settings = list(component_settings.values())
+        else:
+            logging.fatal(f"Sequence components must listed either in a dictionary or as a list")
+            core.quit()
+        
+        for component in settings:
+            components.append(component_class(component, *args, **kwargs))
+
+        return components
+    
+
+    def _parse_component_settings(self, sequence_settings):
+        if "visual_components" in sequence_settings:
+            self.visual = self._create_components(
+                sequence_settings["visual_components"], VisualComponent, self.window
+            )
+        
+        if "audio_components" in sequence_settings:
+            self.audio = self._create_components(
+                sequence_settings["audio_components"], AudioComponent, self.window
+            )
+        
+        if "wait_components" in sequence_settings:
+            self.wait = self._create_components(
+                sequence_settings["wait_components"], WaitComponent
+            )
+        
+        # Two different ways to create CorrectResponseComponent
+        if "response" in sequence_settings:
+            # By setting a 'correct' key in settings to True
+            if "correct" in sequence_settings["response"] and sequence_settings["response"]["correct"]:
+                self.response = CorrectResponseComponent(sequence_settings["response"])
+            else:
+                self.response = ResponseComponent(sequence_settings["response"])
+
+            # Or by naming the response settings 'correct_response'
+        elif "correct_response" in sequence_settings:
+            self.response = CorrectResponseComponent(sequence_settings["correct_response"])
+    
 
     def _get_all_components(self) -> list[BaseComponent]:
         self._base_sequence_should_not_be_run()
@@ -170,9 +191,11 @@ class BaseSequence:
         self._base_sequence_should_not_be_run()
 
         self.refresh()
-        self.prepare_components(trial_values)
+        if self.takes_trial_values:
+            self.prepare_components(trial_values)
 
-        self.data_handler.add_data_dict(trial_values)
+        if self.data_handler:
+            self.data_handler.add_data_dict(trial_values)
         self.clock.reset(-self.window.getFutureFlipTime(clock="now"))
 
         running = KEEP_RUNNING
@@ -183,6 +206,7 @@ class BaseSequence:
             if running == QUIT_EXPERIMENT:
                 return False
         
-        self.data_handler.next_entry()
+        if self.data_handler:
+            self.data_handler.next_entry()
         
         return True

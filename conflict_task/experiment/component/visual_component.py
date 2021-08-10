@@ -11,7 +11,7 @@ class VisualComponent(BaseComponent):
     Basically this is a wrapper for all of PsychoPy's visual stimuli.
     """
 
-    def __init__(self, window, component_settings: dict):
+    def __init__(self, component_settings: dict,  window):
         """
         Takes in a `component_settings` dictionary to set up component variables.
 

@@ -1,8 +1,14 @@
-from ._base_sequence import BaseSequence
+from .sequence import DEFAULT_SEQUENCE_SETTINGS, Sequence
 
-class Screen(BaseSequence):
-    wait_for_response = True
-    cut_on_response = True
+SCREEN_SETTINGS = DEFAULT_SEQUENCE_SETTINGS | {
+    "wait_for_response": True,
+    "cut_on_response": True,
+    "takes_trial_values": False
+}
 
-    def __init__(self, window, input_device, data_handler, componentSettings):
-        super().__init__(window, input_device, data_handler, componentSettings)
+class Screen(Sequence):
+    def __init__(self, window, input_device, data_handler, sequence_settings):
+        super().__init__(window, input_device, data_handler, sequence_settings)
+    
+    def _parse_sequence_settings(self, sequence_settings, default_settings = SCREEN_SETTINGS):
+        return super()._parse_sequence_settings(sequence_settings, default_settings)

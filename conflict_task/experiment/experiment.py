@@ -1,94 +1,99 @@
-import os
-from sys import path
-
-from psychopy import core, clock, gui, data, logging
-from psychopy.hardware import keyboard
-from psychopy import __version__
+from psychopy import core, clock, logging
 
 from conflict_task.devices import input_device
-from conflict_task.devices import Window, InputDevice, DataHandler
+from conflict_task.devices import Window, DataHandler
 
-from .component import VisualComponent, ResponseComponent, BaseComponent
-from .sequence import Trial
-
-FRAMETOLERANCE = 0.001
+from . import sequence
 
 class Experiment:
-    # Experiment/Subject info
-    name = None
-    filename = None
-    #subjectDlgInfo = None
 
-    # Number of blocks and trials
-    nr_blocks = 0
-    nr_trials = 0
-
-    # Devices
-    window: Window = None
-    input_device: InputDevice = None
-    data_handler: DataHandler = None
-
-    # Trials
-    trial = None
-    subject_sequence = None
-
-    # Time handlers
-    clock = clock.Clock()
-
-    # Debug
-    debug_data = None
-
-    def __init__(self, name, subject_sequence, experiment_settings,
-        subjectDlgInfo = {'participant': '', 'session': '001'},
-        debug_data = False):
+    def __init__(self, name, trial_values, experiment_settings):
         
         self.name = name
-        self.start_participant_data(subjectDlgInfo)
+        self.trial_values = trial_values
+        self.clock = clock.Clock()
 
-        self.nr_blocks = experiment_settings["blocks"]["number"]
-        self.nr_trials = experiment_settings["blocks"]["trials"]["number"]
-
-        self.window = Window(experiment_settings["window_settings"])
-        if hasattr(input_device, experiment_settings["input_device"]):
-            self.input_device = getattr(input_device, experiment_settings["input_device"])
+        if "subjectInfo" in experiment_settings:
+            self.data_handler = DataHandler(self.name, experiment_settings["subjectInfo"])
         else:
-            logging.fatal(f"No input device named {experiment_settings['input_device']}")
-            core.quit()
+            self.data_handler = DataHandler(self.name)
         
-        visualComponents = experiment_settings["blocks"]["trials"]["visualComponents"]
-        response = experiment_settings["blocks"]["trials"]["response"]
+        if "input_device" in experiment_settings:
+            if hasattr(input_device, experiment_settings["input_device"]):
+                self.input_device = getattr(input_device, experiment_settings["input_device"])
+            else:
+                logging.fatal(f"No input device named {experiment_settings['input_device']}")
+                core.quit()
+        else:
+            self.input_device = input_device.Keyboard()
         
-        # TODO: Remove this
-        self.trial = Trial(self.window, self.input_device, self.data_handler, visualComponents, response)
-        self.subject_sequence = subject_sequence
+        if "debug_data" in experiment_settings:
+            self.debug_data = bool(experiment_settings["debug_data"])
+            
+        if "window_settings" in experiment_settings:
+            self.window = Window(experiment_settings["window_settings"])
+        else:
+            self.window = Window()
+        
+        if "experiment_sequence" in experiment_settings:
+            if "pre" in experiment_settings["experiment_sequence"]:
+                self.pre: list[sequence.Sequence] = []
+                for seq in experiment_settings["experiment_sequence"]["pre"]:
+                    self.pre.append(self.create_sequence(seq))
+            
+            if "post" in experiment_settings["experiment_sequence"]:
+                self.post: list[sequence.Sequence] = []
+                for seq in experiment_settings["experiment_sequence"]["post"]:
+                    self.post.append(self.create_sequence(seq))
+            
+            if "block" in experiment_settings["experiment_sequence"]:
+                self.nr_blocks = experiment_settings["experiment_sequence"]["nr_blocks"]
+                self.nr_trials = experiment_settings["experiment_sequence"]["nr_trials"]
+                self.block_trial: sequence.Sequence = self.create_sequence(experiment_settings["experiment_sequence"]["trial"])
+                self.between_block: sequence.Sequence = self.create_sequence(experiment_settings["experiment_sequence"]["between_blocks_screen"])
 
 
-        self.debug_data = debug_data
+    def create_sequence(self, sequence_settings: dict) -> sequence.Sequence:
+        if "type" in sequence_settings:
+            return getattr(sequence, sequence_settings["type"])(
+                self.window, self.input_device, self.data_handler, sequence_settings
+                )
+        else:
+            return sequence.Sequence(self.window, self.input_device, self.data_handler, sequence_settings)
     
-    def run(self):
-        continue_experiment = True
 
-        for block in range(self.nr_blocks):
-            for trial in range(self.nr_trials):
-                continue_experiment = self.trial.run(self.subject_sequence[block][trial], self)
-
-                if not continue_experiment:
-                    break
-            if not continue_experiment:
-                break
-        
-        self.finish_participant_data()
+    def close(self):
+        self.data_handler.finish_participant_data()
         self.window.flip()
         self.window.close()
         core.quit()
-    
-    def previewStim(window_setting, stim_settings):
-        win = Window(window_setting)
-        stim = VisualComponent(win, stim_settings)
-        inputDevice = keyboard.Keyboard()
 
-        stim._turnAutoDrawOn()
-        while True:
-            if inputDevice.getKeys(["escape"]):
-                core.quit()
-            win.flip()
+
+    def run(self, debug_data = False):
+        continue_experiment = True
+
+        for pre in self.pre:
+            continue_experiment = pre.run(debug_data=debug_data)
+
+            if not continue_experiment:
+                self.close()
+
+
+        for block in range(self.nr_blocks):
+            for trial in range(self.nr_trials):
+                trial_values = {}
+                if self.block_trial.takes_trial_values:
+                    trial_values = trial_values | self.trial_values[block][trial]
+                continue_experiment = self.block_trial.run(trial_values=trial_values, debug_data=debug_data)
+
+                if not continue_experiment:
+                    self.close()
+
+            if not block + 1 <= self.nr_blocks:            
+                for post in self.post:
+                    continue_experiment = post.run(debug_data=debug_data)
+
+            if not continue_experiment:
+                self.close()
+        
+        self.close()

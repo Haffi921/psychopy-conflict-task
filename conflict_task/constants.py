@@ -3,7 +3,13 @@ from psychopy.constants import NOT_STARTED, STARTED, FINISHED
 # Window constants
 FRAMETOLERANCE = 0.001
 
-# Trial signals
+# Component indicators
+VISUAL = 0
+AUDIO = 1
+RESPONSE = 2
+WAIT = 3
+
+# Sequence signals
 QUIT_EXPERIMENT = -1
 STOP_RUNNING = 0
 KEEP_RUNNING = 1

@@ -1,6 +1,6 @@
-from ._base_sequence import BaseSequence
+from .sequence import Sequence
 
-class Feedback(BaseSequence):
+class Feedback(Sequence):
 
-    def __init__(self, window, input_device, data_handler, componentSettings):
-        super().__init__(window, input_device, data_handler, componentSettings)
+    def __init__(self, window, input_device, data_handler, sequence_settings):
+        super().__init__(window, input_device, data_handler, sequence_settings)

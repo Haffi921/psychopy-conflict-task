@@ -10,7 +10,7 @@ class DataHandler:
     filename: str
     _data_handler: data.ExperimentHandler
 
-    def __init__(self, experiment_name, subjectDlgInfo  = {"participant": ""}):
+    def __init__(self, experiment_name, subjectDlgInfo  = {'participant': '', 'session': '001'}):
         self.start_participant_data(experiment_name, subjectDlgInfo)
 
     def start_participant_data(self, experiment_name, subjectDlgInfo):

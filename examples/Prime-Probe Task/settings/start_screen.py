@@ -1,10 +1,4 @@
-import os
-from sys import path
-
-from conflict_task.devices import Window, Keyboard, DataHandler
-from conflict_task.experiment.sequence import Screen
-
-text = """
+start_screen_text = """
 Welcome to this test experiment. Right now you are looking at a Static Information Screen. \
 This is to provide you with some information about this experiment and what you should know before starting.
 
@@ -18,28 +12,30 @@ bibendum id, eleifend sit amet est. Curabitur sit amet tincidunt ante, at congue
 Press [space] to continue.
 """
 
-componentSettings = dict(
+text_component = dict(
+    name = "text",
+    type = "TextStim",
+    spec = dict(
+        name = "text",
+        color = "white",
+        height = 0.03,
+        text = start_screen_text
+    )
+)
+
+start_screen = dict(
+    type = "Screen",
+
     visual_components = dict(
-        text = dict(
-            name = "text",
-            type = "TextStim",
-            spec = dict(
-                name = "text",
-                color = "white",
-                height = 0.03,
-                text = text
-            )
-        )
+        text = text_component
     ),
+    
     response = dict(
         keys = ["space"]
     )
 )
 
-data_handler = DataHandler("ScreenTest")
-input_device = Keyboard()
-window = Window()
+if __name__ == "__main__":
+    from conflict_task.experiment import preview_sequence
 
-screen = Screen(window, input_device, data_handler, componentSettings)
-
-screen.run()
+    preview_sequence(start_screen, window_settings={"color": [-1, -1, -1]})

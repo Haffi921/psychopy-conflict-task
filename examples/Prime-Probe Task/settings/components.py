@@ -39,11 +39,34 @@ target = dict(
     )
 )
 
-response = dict(
-    start = 1.3,
-    stop = 3.0,
-    keys = ["a", "d", "j", "l"],
-    variable = dict(
-        correct_resp = "correct_resp",
-    )
+trial = dict(
+    type = "Trial",
+    
+    visual_components = dict(
+        fixation_cross = fixation_cross,
+        distractor = distractor,
+        target = target
+    ),
+
+    response = dict(
+        start = 1.3,
+        stop = 3.0,
+        keys = ["a", "d", "j", "l"],
+        variable = dict(
+            correct_resp = "correct_resp",
+        )
+    ),
+
+    takes_trial_values = True
 )
+
+if __name__ == "__main__":
+    from conflict_task.experiment import preview_sequence
+
+    preview_sequence(trial,
+        sequence_values={
+            "distractor_text": "Left\nLeft\nLeft",
+            "target_text": "Right",
+            "correct_resp": "a"
+        },
+        window_settings={"color": [-1, -1, -1]})
