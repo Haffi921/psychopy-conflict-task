@@ -122,7 +122,7 @@ class BaseSequence:
             component.prepare(trial_values)
 
 
-    def run_frame(self, debug_data = False, allow_escape = True):
+    def run_frame(self, debug_data = False, allow_escape = False):
         # Check if user wants to quit experiment
         if allow_escape and self.input_device.was_key_pressed("escape"):
             return QUIT_EXPERIMENT
@@ -187,7 +187,7 @@ class BaseSequence:
         return keep_running
 
 
-    def run(self, trial_values: dict = {}, debug_data = False):
+    def run(self, trial_values: dict = {}, debug_data = False, allow_escape = False):
         self._base_sequence_should_not_be_run()
 
         self.refresh()
@@ -201,7 +201,7 @@ class BaseSequence:
         running = KEEP_RUNNING
         
         while running == KEEP_RUNNING:
-            running = self.run_frame(debug_data)
+            running = self.run_frame(debug_data, allow_escape)
 
             if running == QUIT_EXPERIMENT:
                 return False
