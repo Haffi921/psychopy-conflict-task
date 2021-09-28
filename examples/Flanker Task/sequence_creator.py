@@ -8,7 +8,7 @@ nr_trials = experiment_settings["blocks"]["trials"]["number"]
 conditions = {
     "distractor_text": ["<< <<", ">> >>"],
     "target_text": ["<", ">"],
-    "correct_resp": ["left", "right"]
+    "correct_key": ["left", "right"]
 }
 
 def translate(trial):
@@ -16,13 +16,13 @@ def translate(trial):
     
     distractor_text = conditions["distractor_text"][distractor]
     target_text = conditions["target_text"][target]
-    correct_resp = conditions["correct_resp"][target]
+    correct_key = conditions["correct_key"][target]
 
     return {
         "congruency": int(distractor != target),
         "distractor_text": distractor_text,
         "target_text": target_text,
-        "correct_resp": correct_resp
+        "correct_key": correct_key
     }
 
 subject_sequence = []

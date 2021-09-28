@@ -36,6 +36,11 @@ class Trial(Sequence):
         #     self.feedback_variables = trial_settings["feedback"]["variable"]
         
     
+    def run(self, trial_values: dict = {}, allow_escape = False):
+        super().run(trial_values=trial_values, allow_escape=allow_escape)
+
+        self.feedback_sequence.run()
+
     # def run(self, trial_values: dict, debug_data = False):
     #     self.refresh()
     #     self.prepare_components(trial_values)

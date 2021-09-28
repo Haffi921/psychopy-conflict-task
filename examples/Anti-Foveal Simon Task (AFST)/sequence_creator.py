@@ -8,7 +8,7 @@ nr_trials = experiment_settings["blocks"]["trials"]["number"]
 conditions = {
     "target_text": ["Up", "Down"],
     "target_pos": [(0, 0.05), (0, -0.05), (-0.05, 0), (0.05, 0)],
-    "correct_resp": ["up", "down"]
+    "correct_key": ["up", "down"]
 }
 
 def translate(trial):
@@ -23,7 +23,7 @@ def translate(trial):
         "congruency": congruency,
         "target_text": conditions["target_text"][target_text],
         "target_pos": conditions["target_pos"][target_pos],
-        "correct_resp": conditions["correct_resp"][target_text]
+        "correct_key": conditions["correct_key"][target_text]
     }
 
 subject_sequence = []

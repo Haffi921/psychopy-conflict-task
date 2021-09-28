@@ -1,6 +1,6 @@
 from psychopy import core, clock, logging
 
-from conflict_task.devices import input_device
+from conflict_task.devices import data_handler, input_device
 from conflict_task.devices import Window, DataHandler
 
 from . import sequence
@@ -98,14 +98,19 @@ class Experiment:
                 trial_values = {}
                 if self.block_trial.takes_trial_values:
                     trial_values = trial_values | self.trial_values[block][trial]
-                continue_experiment = self.block_trial.run(trial_values=trial_values, debug_data=debug_data, allow_escape=self.allow_escape)
+
+                self.data_handler.add_data_dict(trial_values)
+
+                continue_experiment = self.block_trial.run(trial_values=trial_values, allow_escape=self.allow_escape)
+
+                self.data_handler.next_entry()
 
                 if not continue_experiment:
                     self.close()
 
             # BETWEEN BLOCK
             if block < self.nr_blocks - 1:            
-                continue_experiment = self.between_block.run(debug_data=debug_data, allow_escape=self.allow_escape)
+                continue_experiment = self.between_block.run(allow_escape=self.allow_escape)
 
                 if not continue_experiment:
                     self.close()

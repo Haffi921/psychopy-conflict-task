@@ -20,6 +20,7 @@ class Sequence(BaseSequence):
         for key, value in settings.items():
             setattr(self, key, value)
 
+        # Why is this not in BaseSequence?
         if self.timed:
             try:
                 if "timer" in sequence_settings:
@@ -34,7 +35,7 @@ class Sequence(BaseSequence):
             logging.fatal("Sequence has no way to finish.")
             core.quit()
 
-    def _parse_sequence_settings(self, sequence_settings, default_settings = DEFAULT_SEQUENCE_SETTINGS):
+    def _parse_sequence_settings(self, sequence_settings: dict, default_settings: dict = DEFAULT_SEQUENCE_SETTINGS):
         settings = {}
 
         for key in default_settings.keys():

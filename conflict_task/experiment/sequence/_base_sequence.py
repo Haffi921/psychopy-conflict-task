@@ -1,21 +1,21 @@
 from psychopy import clock, logging, core
 
 from conflict_task.constants import *
-from conflict_task.devices import Window, InputDevice, DataHandler
+from conflict_task.devices import Window, Keyboard
 
 from ..component import *
 from conflict_task.experiment import component
 
 class BaseSequence:
 
-    def __init__(self, window, input_device, data_handler, sequence_settings):
+    def __init__(self, window, input_device, sequence_settings):
         self._base_sequence_should_not_be_run()
 
         self.name: str = "Unnamed Sequence"
         
         self.window: Window = window
-        self.input_device: InputDevice = input_device
-        self.data_handler: DataHandler = data_handler
+        self.input_device: Keyboard = input_device
+#        self.data_handler: DataHandler = data_handler
 
         self.response: ResponseComponent = None
         self.visual: list[VisualComponent] = []
@@ -63,7 +63,7 @@ class BaseSequence:
         return components
     
 
-    def _parse_component_settings(self, sequence_settings):
+    def _parse_component_settings(self, sequence_settings: dict):
         if "visual_components" in sequence_settings:
             self.visual = self._create_components(
                 sequence_settings["visual_components"], VisualComponent, self.window
@@ -79,17 +79,15 @@ class BaseSequence:
                 sequence_settings["wait_components"], WaitComponent
             )
         
-        # Two different ways to create CorrectResponseComponent
-        if "response" in sequence_settings:
-            # By setting a 'correct' key in settings to True
-            if "correct" in sequence_settings["response"] and sequence_settings["response"]["correct"]:
-                self.response = CorrectResponseComponent(sequence_settings["response"])
-            else:
-                self.response = ResponseComponent(sequence_settings["response"])
 
-            # Or by naming the response settings 'correct_response'
-        elif "correct_response" in sequence_settings:
-            self.response = CorrectResponseComponent(sequence_settings["correct_response"])
+        if response := sequence_settings.get("response"):
+            if "correct_key" in response.get("variable", {}):
+                self.response = CorrectResponseComponent(response)
+            else:
+                self.response = ResponseComponent(response)
+
+        elif response := sequence_settings.get("correct_response"):
+            self.response = CorrectResponseComponent(response)
     
 
     def _get_all_components(self) -> list[BaseComponent]:
@@ -121,8 +119,17 @@ class BaseSequence:
         for component in self._get_all_components():
             component.prepare(trial_values)
 
+    
+    def get_data(self):
+        data = {}
 
-    def run_frame(self, debug_data = False, allow_escape = False):
+        for component in self._get_all_components():
+            data = data | component.get_data()
+        
+        return data
+
+
+    def run_frame(self, allow_escape = False):
         # Check if user wants to quit experiment
         if allow_escape and self.input_device.was_key_pressed("escape"):
             return QUIT_EXPERIMENT
@@ -148,10 +155,7 @@ class BaseSequence:
             # ...or stop them
             elif component.started():
                 if thisFlip >= component.stop_time - FRAMETOLERANCE:
-                    if debug_data:
-                        component.stop(time, thisFlip, thisFlipGlobal, self.data_handler)
-                    else:
-                        component.stop(time, thisFlip, thisFlipGlobal)
+                    component.stop(time, thisFlip, thisFlipGlobal)
             
             # If not all components have finished, continue the sequence
             if not component.finished():
@@ -160,7 +164,7 @@ class BaseSequence:
 
         # If sequence has a response component check for it 
         if self.response:
-            self.response.check(self.input_device, self.data_handler)
+            self.response.check(self.input_device)
             
             # Two possibilities based on the response settings
             if self.response.made:
@@ -187,26 +191,22 @@ class BaseSequence:
         return keep_running
 
 
-    def run(self, trial_values: dict = {}, debug_data = False, allow_escape = False):
+    def run(self, trial_values: dict = {}, allow_escape = False):
         self._base_sequence_should_not_be_run()
 
         self.refresh()
         if self.takes_trial_values:
             self.prepare_components(trial_values)
 
-        if self.data_handler:
-            self.data_handler.add_data_dict(trial_values)
         self.clock.reset(-self.window.getFutureFlipTime(clock="now"))
+        self.input_device.reset_clock()
 
         running = KEEP_RUNNING
         
         while running == KEEP_RUNNING:
-            running = self.run_frame(debug_data, allow_escape)
+            running = self.run_frame(allow_escape = allow_escape)
 
             if running == QUIT_EXPERIMENT:
                 return False
-        
-        if self.data_handler:
-            self.data_handler.next_entry()
         
         return True

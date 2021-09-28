@@ -102,7 +102,7 @@ class ResponseComponent(BaseComponent):
         super().prepare(trial_values)
 
 
-    def check(self, input_device: InputDevice, data_handler: DataHandler = None):
+    def check(self, input_device: InputDevice):
         """
         Checks for input using `input_device` and logs data using `data_handler`.
         
@@ -118,8 +118,6 @@ class ResponseComponent(BaseComponent):
 
             `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device.
 
-            `data_handler`  (ExperimentHandler): Instance of an ExperimentHandler to record data.
-
         Returns:
 
             Keypress tuple (str, float): Tuple with key and reaction time.
@@ -132,15 +130,20 @@ class ResponseComponent(BaseComponent):
             if key_pressed is not None:
                 self.key, self.rt = key_pressed
                 self.made = True
-
-                if data_handler:
-                    data_handler.add_data(self.name + ".made", self.made)
-                    data_handler.add_data(self.name + ".key", self.key)
-                    data_handler.add_data(self.name + ".rt", self.rt)
                 
                 return (self.key, self.rt)
             else:
                 return (None, None)
+    
+    
+    def get_data(self) -> dict:
+        data = super().get_data()
+
+        return data | {
+            self.name + ".made": self.made,
+            self.name + ".key": self.key,
+            self.name + ".rt": self.rt,
+        }
 
 
 
@@ -175,10 +178,10 @@ class CorrectResponseComponent(ResponseComponent):
         
         ------------------------------------------
 
-        CorrectResponseComponent's settings must have `correct_resp` (str) as a variable factor.
+        CorrectResponseComponent's settings must have `correct_key` (str) as a variable factor.
         """
 
-        self.correct_resp: str = None
+        self.correct_key: str = None
         """String of the correct repsonse key"""
 
         self.correct: bool = None
@@ -187,8 +190,8 @@ class CorrectResponseComponent(ResponseComponent):
         super().__init__(component_settings)
         
         try:     
-            if "correct_resp" not in self.variable_factor:
-                raise ValueError("'correct_resp' must be a key in variable factors of ResponseComponent")
+            if "correct_key" not in self.variable_factor:
+                raise ValueError("'correct_key' must be a key in variable factors of ResponseComponent")
         except ValueError as e:
             logging.fatal(e)
             core.quit()
@@ -203,18 +206,13 @@ class CorrectResponseComponent(ResponseComponent):
 
         For a ResponseComponent, this refreshes variables `made`, `key` and `rt`.
         
-        For a CorrectResponseComponent, this refreshes variables `correct_resp` and `correct`.
+        For a CorrectResponseComponent, this refreshes variables `correct_key` and `correct`.
         """
 
         super().refresh()
         
-        self.correct_resp = None
+        self.correct_key = None
         self.correct = None
-
-        # for factor_name, _ in self.variable_factor.items():
-        #     if factor_name == "correct_resp":
-        #         continue
-        #     setattr(self, factor_name, None)
     
 
     def prepare(self, trial_values: dict):
@@ -229,7 +227,7 @@ class CorrectResponseComponent(ResponseComponent):
         super().prepare(trial_values)
     
 
-    def check(self, input_device, data_handler: DataHandler = None):
+    def check(self, input_device):
         """
         Checks for input using `input_device` and logs data using `data_handler`. \n
         
@@ -239,25 +237,27 @@ class CorrectResponseComponent(ResponseComponent):
 
             2) `key` and `rt` are recorded.
             
-            3) `correct` becomes True if `key` == `correct_resp`, and False if `key` != `correct_resp`.
+            3) `correct` becomes True if `key` == `correct_key`, and False if `key` != `correct_key`.
 
-            4) `data_handler` records `made`, `key`, `rt`, `correct_resp` and `correct`.
+            4) `data_handler` records `made`, `key`, `rt`, `correct_key` and `correct`.
         
         Args:
 
             `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device.
-
-            `data_handler`  (ExperimentHandler): Instance of an ExperimentHandler to record data.
         """
 
-        key, _ = super().check(input_device, data_handler)
+        key, _ = super().check(input_device)
 
         if key is not None:
-            if self.key == self.correct_resp:
+            if self.key == self.correct_key:
                 self.correct = True
             else:
                 self.correct = False
-            
-            if data_handler:
-                data_handler.add_data(self.name + ".correct_resp", self.correct_resp)
-                data_handler.add_data(self.name + ".correct", self.correct)
+
+    def get_data(self) -> dict:
+        data = super().get_data()
+
+        return data | {
+            self.name + ".correct_key": self.correct_key,
+            self.name + ".correct": self.correct,
+        }

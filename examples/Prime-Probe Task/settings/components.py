@@ -53,7 +53,7 @@ trial = dict(
         stop = 3.0,
         keys = ["a", "d", "j", "l"],
         variable = dict(
-            correct_resp = "correct_resp",
+            correct_key = "correct_key",
         )
     ),
 
@@ -67,6 +67,6 @@ if __name__ == "__main__":
         sequence_values={
             "distractor_text": "Left\nLeft\nLeft",
             "target_text": "Right",
-            "correct_resp": "a"
+            "correct_key": "a"
         },
         window_settings={"color": [-1, -1, -1]})

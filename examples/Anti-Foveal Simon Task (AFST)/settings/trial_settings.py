@@ -44,6 +44,6 @@ response = dict(
     stop = 3.5,
     keys = ["left", "right", "up", "down"],
     variable = dict(
-        correct_resp = "correct_resp",
+        correct_key = "correct_key",
     )
 )
