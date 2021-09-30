@@ -9,7 +9,7 @@ experiment_settings = dict(
             nr_blocks = 8,
             nr_trials = 128,
             trial = trial,
-            between_blocks_screen = between_blocks
+            between_blocks = between_blocks
         ),
         post = [start_screen]
     ),

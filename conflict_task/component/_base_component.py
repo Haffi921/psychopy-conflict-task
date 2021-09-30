@@ -1,17 +1,18 @@
-from psychopy import core, logging
-
-from conflict_task.devices import DataHandler
 from conflict_task.constants import *
+from conflict_task.util import *
+
+BASECOMPONENT_DATA_EXCLUSION = [
+    "name",
+    "component",
+    "variable_factor"
+]
 
 class BaseComponent:
-    """
-    TODO: Finish this documentation.
-    """
-
     name = "UNKNOWN_COMPONENT"
     """Name of component for data registration."""
 
-    def __init__(self, component_settings: dict):
+
+    def __init__(self, component_settings: dict, window = None) -> None:
         """
         Takes in a `component_settings` dictionary to set up component variables.
 
@@ -31,6 +32,9 @@ class BaseComponent:
         # -----------------------------------------------
         # Class variables
         # -----------------------------------------------
+
+        self.component = self
+        """Reference to an object that trial values modify. Default: `self`"""
 
         self.variable_factor: dict = None
         """Dictionary of component member variables that will be different each sequence. Default: `None`."""
@@ -61,44 +65,33 @@ class BaseComponent:
 
         self.time_stopped_global_flip: float = None
         """Screen flip time that component stopped, relative to experiment start.Default: `None`."""
-
-        self.drawable: bool = False
-        """True if component is a visual component, false if not. Default: `False`."""
         # -----------------------------------------------
 
         
         # -----------------------------------------------
         # BaseComponent Initialization
         # -----------------------------------------------
-        if "start" in component_settings:
-            self.start_time = component_settings["start"]
+        if start := component_settings.get("start"):
+            self.start_time = start
                     
-        if "stop" in component_settings:
-            self.stop_time = component_settings["stop"]
-        elif "duration" in component_settings:
-            self.stop_time = self.start_time + component_settings["duration"]
+        if stop := component_settings.get("stop"):
+            self.stop_time = stop
+        elif duration := component_settings.get("duration"):
+            self.stop_time = self.start_time + duration
 
-        if "variable" in component_settings:
-            self.variable_factor = component_settings["variable"]
+        if variable_factor := component_settings.get("variable"):
+            self.variable_factor = variable_factor
         
-        try:
-            if self.start_time < 0.0:
-                raise ValueError("Component start time can not be less than 0.0")
-            if self.stop_time < self.start_time:
-                raise ValueError("Component stop time must not be less than the start time")
-        except ValueError as e:
-            logging.fatal(e)
-            core.quit()        
+        test_or_fatal_exit(self.start_time >= 0.0, f"{self.name} - Component start time can not be less than 0.0")
+        test_or_fatal_exit(self.stop_time >= self.start_time, f"{self.name} - Component stop time must not be less than the start time")      
         # -----------------------------------------------
     
 
-    def _base_component_should_not_be_run(self):
-        if self.__class__.__name__ == "BaseComponent":
-            logging.fatal("An instance of BaseComponent should not be created nor run")
-            core.quit()
+    def _base_component_should_not_be_run(self) -> None:
+        test_or_fatal_exit(self.__class__.__name__ != "BaseComponent", "An instance of BaseComponent should not be created nor run")
 
 
-    def refresh(self):
+    def refresh(self) -> None:
         """
         Refreshes component variables. Perform before each component use.
         
@@ -117,7 +110,7 @@ class BaseComponent:
         self.time_stopped_global_flip = None
     
 
-    def prepare(self, trial_values: dict, component = None):
+    def prepare(self, trial_values: dict) -> None:
         """
         Sets the key-value pairs from `trial_values` on the component.
 
@@ -126,28 +119,18 @@ class BaseComponent:
             `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
 
             `component`       (Any): The object on which the `trial_values` are enacted on. Defaults to `self`.
-
-            `component_info`  (str): Component information string for logging and debug purposes.
         """
 
         self._base_component_should_not_be_run()
         
-        if component is None:
-            component = self
 
         if self.variable_factor:
             for factor_name, factor_id in self.variable_factor.items():
-                try:
-                    if factor_id in trial_values.keys():
-                        setattr(component, factor_name, trial_values[factor_id])
-                    else:
-                        raise KeyError(f"Subject trial sequence does not include key '{factor_id}' required by {self.name}")
-                except KeyError as e:
-                    logging.fatal(e)
-                    core.quit()
+                test_or_fatal_exit(factor_id in trial_values.keys(), f"Subject trial sequence does not include key '{factor_id}' required by {self.name}")
+                setattr(self.component, factor_name, trial_values[factor_id])
 
 
-    def start(self, time, time_flip, global_flip):
+    def start(self, time, time_flip, global_flip) -> None:
         """
         Starts component and records time.
 
@@ -168,7 +151,7 @@ class BaseComponent:
         self.status = STARTED
     
 
-    def stop(self, time, time_flip, global_flip):
+    def stop(self, time, time_flip, global_flip) -> None:
         """
         Stops component and records time.
 
@@ -188,7 +171,8 @@ class BaseComponent:
         self.time_stopped_global_flip = global_flip
         self.status = FINISHED
 
-    def not_started(self):
+
+    def not_started(self) -> bool:
         """
         Returns True if component has not been started, false if not.
         """
@@ -197,7 +181,8 @@ class BaseComponent:
 
         return self.status == NOT_STARTED
     
-    def started(self):
+    
+    def started(self) -> bool:
         """
         Returns True if component has been started, false if not.
         """
@@ -206,7 +191,8 @@ class BaseComponent:
 
         return self.status == STARTED
     
-    def finished(self):
+
+    def finished(self) -> bool:
         """
         Returns True if component has finished, false if not.
         """
@@ -215,17 +201,13 @@ class BaseComponent:
 
         return self.status == FINISHED
     
-    def get_data(self) -> dict:
+
+    def get_data(self, data_exclusion: list = []) -> dict:
         """
         Returns a dictionary of the component's data
         """
         self._base_component_should_not_be_run()
 
-        return {
-            self.name + ".time_started": self.time_started,
-            self.name + ".time_started_flip": self.time_started_flip,
-            self.name + ".time_started_global_flip": self.time_started_global_flip,
-            self.name + ".time_stopped": self.time_stopped,
-            self.name + ".time_stopped_flip": self.time_stopped_flip,
-            self.name + ".time_stopped_global_flip": self.time_stopped_global_flip,
-        }
+        _data_exclusion = [*BASECOMPONENT_DATA_EXCLUSION, *data_exclusion]
+
+        return {f"{self.name}.{i}": vars(self)[i] for i in vars(self) if i not in _data_exclusion}

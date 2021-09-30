@@ -1,6 +1,6 @@
-from psychopy import visual, logging, core
+from psychopy import visual
 
-from conflict_task.devices import DataHandler
+from conflict_task.util import *
 
 from ._base_component import BaseComponent
 
@@ -11,7 +11,7 @@ class VisualComponent(BaseComponent):
     Basically this is a wrapper for all of PsychoPy's visual stimuli.
     """
 
-    def __init__(self, component_settings: dict,  window):
+    def __init__(self, component_settings: dict,  window) -> None:
         """
         Takes in a `component_settings` dictionary to set up component variables.
 
@@ -43,49 +43,27 @@ class VisualComponent(BaseComponent):
 
 
         # -----------------------------------------------
-        # Class variables
-        # -----------------------------------------------
-        self.visual: visual.TextStim = None
-        """Each VisualComponent is connected to a visual stimulus from PsychoPy. Default: `None`"""
-
-        self.drawable = True
-        # -----------------------------------------------
-
-
-        # -----------------------------------------------
         # VisualComponent Initialization
         # ----------------------------------------------- 
         super().__init__(component_settings)
 
-        try:
-            if "name" in component_settings:
-                self.name = component_settings["name"]
-            elif "spec" in component_settings and "name" in component_settings["spec"]:
-                self.name = component_settings["spec"]["name"]
-            else:
-                raise ValueError(f"Please specify a name for each VisualComponent, \
-                    either at top level or in spec")
+        if name := get_type(component_settings, "name", str):
+            self.name = name
+        elif spec_name := get_type(component_settings, "spec", dict, {}).get("name"):
+            self.name = spec_name
+        else:
+            fatal_exit("Please specify a name for each VisualComponent, either at top level or in spec")
 
-            if "type" in component_settings:
-                type = component_settings["type"]
-            else:
-                raise ValueError(f"VisualComponents require a type specifier. None found in {self.name}")
-            
-            if hasattr(visual, type):
-                if "spec" in component_settings:
-                    self.visual = getattr(visual, type)(window, **component_settings["spec"])
-                else:
-                    raise ValueError(f"VisualComponents require specifications. None found in {self.name}")
-            else:
-                raise ValueError(f"There's no visual component type {type}")
-        except ValueError as e:
-            logging.fatal(e)
-            core.quit()
+        visual_type = get_type_or_fatal_exit(component_settings, "type", str, f"{self.name}: VisualComponents must specify a 'type'")
+        test_or_fatal_exit(hasattr(visual, visual_type), f"{self.name}: There's no visual component type {visual_type}")
+
+        visual_spec: dict = get_type_or_fatal_exit(component_settings, "spec", dict, f"{self.name}: VisualComponents require specifications - use 'spec' field")
         
+        self.component: visual.TextStim = getattr(visual, visual_type)(window, **visual_spec)
         # -----------------------------------------------
 
 
-    def refresh(self):
+    def refresh(self) -> None:
         """
         Used before each component use.
         
@@ -98,18 +76,7 @@ class VisualComponent(BaseComponent):
         self._turnAutoDrawOff()
 
 
-    def prepare(self, trial_values: dict):
-        """
-        Sets the key-value pairs from `trial_values` on the VisualComponent.
-
-        Args:
-            
-            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
-        """
-        super().prepare(trial_values, self.visual)
-
-
-    def _turnAutoDrawOn(self):
+    def _turnAutoDrawOn(self) -> None:
         """
         Turns AutoDraw on for the visual stimulus connected to this component.
 
@@ -117,10 +84,10 @@ class VisualComponent(BaseComponent):
         If not turned on, visual stimulus must be explicitly drawn before each frame.
         """
 
-        self.visual.setAutoDraw(True)
+        self.component.setAutoDraw(True)
 
 
-    def _turnAutoDrawOff(self):
+    def _turnAutoDrawOff(self) -> None:
         """
         Turns AutoDraw off for the visual stimulus connected to this component.
 
@@ -128,10 +95,10 @@ class VisualComponent(BaseComponent):
         If not turned on, visual stimulus must be explicitly drawn before each frame.
         """
 
-        self.visual.setAutoDraw(False)
+        self.component.setAutoDraw(False)
 
 
-    def start(self, time, flipTime, timeGlobal):
+    def start(self, time, flipTime, timeGlobal) -> None:
         """
         Starts component and records time.
 
@@ -150,7 +117,7 @@ class VisualComponent(BaseComponent):
         self._turnAutoDrawOn()
 
 
-    def stop(self, time, flipTimeGlobal):
+    def stop(self, time, flipTimeGlobal) -> None:
         """
         Stops component and records time.
 

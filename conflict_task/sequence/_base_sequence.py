@@ -1,51 +1,101 @@
 from psychopy import clock, logging, core
 
 from conflict_task.constants import *
-from conflict_task.devices import Window, Keyboard
-
-from ..component import *
-from conflict_task.experiment import component
+from conflict_task.component import *
+from conflict_task.devices import Window, InputDevice, Keyboard
+from conflict_task.util import *
 
 class BaseSequence:
 
-    def __init__(self, window, input_device, sequence_settings):
+    def __init__(self, window: Window, input_device: InputDevice, sequence_settings: dict) -> None:
         self._base_sequence_should_not_be_run()
 
-        self.name: str = "Unnamed Sequence"
+        self.name: str = "unnamed_sequence"
         
+        # Devices
         self.window: Window = window
         self.input_device: Keyboard = input_device
-#        self.data_handler: DataHandler = data_handler
 
+        # Components
         self.response: ResponseComponent = None
         self.visual: list[VisualComponent] = []
         self.audio: list[AudioComponent] = []
         self.wait: list[WaitComponent] = []
 
+        # Clock
         self.clock: clock.Clock = clock.Clock()
 
+        # Sequence settings
         self.timed: bool = False
+        self.timer: float = 0.0
         self.wait_for_response: bool = False
         self.cut_on_response: bool = False
         self.takes_trial_values: bool = False
         self.feedback: bool = False
         
-        if "name" in sequence_settings:
-            if isinstance(sequence_settings["name"], str):
-                self.name = sequence_settings["name"]
-            else:
-                logging.fatal("Sequence name is not a string")
-
         self._parse_component_settings(sequence_settings)
+        self._parse_sequence_settings(sequence_settings)
+        
+        if (not self.response or not self.cut_on_response) and self._get_duration() == INFINITY:
+            fatal_exit("Sequence has no way to finish.")
     
 
-    def _base_sequence_should_not_be_run(self):
+    def _base_sequence_should_not_be_run(self) -> None:
         if self.__class__.__name__ == "BaseSequence":
-            logging.fatal("An instance of BaseSequence should not be created nor run")
-            core.quit()
+            fatal_exit("An instance of BaseSequence should not be created nor run")
     
 
-    def _create_components(self, component_settings, component_class: BaseComponent, *args, **kwargs):
+    def _parse_sequence_settings(self, sequence_settings: dict, default_settings: dict) -> None:
+        self._base_sequence_should_not_be_run()
+
+        settings = {}
+
+        for key in default_settings.keys():
+            if key in sequence_settings:
+                settings[key] = sequence_settings[key]
+        
+        settings = default_settings | settings
+
+        for key, value in settings.items():
+            setattr(self, key, value)
+        
+        if name := get_type(sequence_settings, "name", str):
+            self.name = name
+        
+        if self.timed:
+            self.timer = get_type_or_fatal_exit(
+                sequence_settings, "timer", float,
+                "If sequence is timed, please provide a timer"
+            )
+
+    def _parse_component_settings(self, sequence_settings: dict) -> None:
+        self._base_sequence_should_not_be_run()
+
+        if visual_components := sequence_settings.get("visual_components"):
+            self.visual = self._create_components(
+                visual_components, VisualComponent, self.window
+            )
+        
+        if audio_components := sequence_settings.get("audio_components"):
+            self.audio = self._create_components(
+                audio_components, AudioComponent, self.window
+            )
+        
+        if wait_components := sequence_settings.get("wait_components"):
+            self.wait = self._create_components(
+                wait_components, WaitComponent
+            )
+        
+        if response := get_type(sequence_settings, "response", dict):
+            if "correct_key" in get_type(response, "variable", dict, {}):
+                self.response = CorrectResponseComponent(response)
+            else:
+                self.response = ResponseComponent(response)
+    
+
+    def _create_components(self, component_settings: dict, component_class: BaseComponent, *args, **kwargs) -> BaseComponent:
+        self._base_sequence_should_not_be_run()
+
         settings: list = None
         components: list = []
 
@@ -54,41 +104,13 @@ class BaseSequence:
         elif isinstance(component_settings, dict):
             settings = list(component_settings.values())
         else:
-            logging.fatal(f"Sequence components must listed either in a dictionary or as a list")
-            core.quit()
+            fatal_exit(f"Sequence components must listed either in a dictionary or as a list")
         
         for component in settings:
             components.append(component_class(component, *args, **kwargs))
 
         return components
-    
 
-    def _parse_component_settings(self, sequence_settings: dict):
-        if "visual_components" in sequence_settings:
-            self.visual = self._create_components(
-                sequence_settings["visual_components"], VisualComponent, self.window
-            )
-        
-        if "audio_components" in sequence_settings:
-            self.audio = self._create_components(
-                sequence_settings["audio_components"], AudioComponent, self.window
-            )
-        
-        if "wait_components" in sequence_settings:
-            self.wait = self._create_components(
-                sequence_settings["wait_components"], WaitComponent
-            )
-        
-
-        if response := sequence_settings.get("response"):
-            if "correct_key" in response.get("variable", {}):
-                self.response = CorrectResponseComponent(response)
-            else:
-                self.response = ResponseComponent(response)
-
-        elif response := sequence_settings.get("correct_response"):
-            self.response = CorrectResponseComponent(response)
-    
 
     def _get_all_components(self) -> list[BaseComponent]:
         self._base_sequence_should_not_be_run()
@@ -101,35 +123,32 @@ class BaseSequence:
         ]
 
     
-    def get_duration(self):
+    def _get_duration(self) -> float:
+        self._base_sequence_should_not_be_run()
+
         if self.timed:
             return self.timer
         
         return max([component.stop_time for component in self._get_all_components() if component is not None])
 
 
-    def refresh(self):
+    def _refresh(self) -> None:
         self._base_sequence_should_not_be_run()
 
         for component in self._get_all_components():
             component.refresh()
 
 
-    def prepare_components(self, trial_values):
+    def _prepare_components(self, trial_values) -> None:
+        self._base_sequence_should_not_be_run()
+
         for component in self._get_all_components():
             component.prepare(trial_values)
 
-    
-    def get_data(self):
-        data = {}
 
-        for component in self._get_all_components():
-            data = data | component.get_data()
-        
-        return data
+    def _run_frame(self, allow_escape = False) -> None:
+        self._base_sequence_should_not_be_run()
 
-
-    def run_frame(self, allow_escape = False):
         # Check if user wants to quit experiment
         if allow_escape and self.input_device.was_key_pressed("escape"):
             return QUIT_EXPERIMENT
@@ -191,12 +210,12 @@ class BaseSequence:
         return keep_running
 
 
-    def run(self, trial_values: dict = {}, allow_escape = False):
+    def run(self, trial_values: dict = {}, allow_escape = False) -> None:
         self._base_sequence_should_not_be_run()
 
-        self.refresh()
+        self._refresh()
         if self.takes_trial_values:
-            self.prepare_components(trial_values)
+            self._prepare_components(trial_values)
 
         self.clock.reset(-self.window.getFutureFlipTime(clock="now"))
         self.input_device.reset_clock()
@@ -204,9 +223,22 @@ class BaseSequence:
         running = KEEP_RUNNING
         
         while running == KEEP_RUNNING:
-            running = self.run_frame(allow_escape = allow_escape)
+            running = self._run_frame(allow_escape = allow_escape)
 
             if running == QUIT_EXPERIMENT:
                 return False
         
         return True
+    
+
+    def get_data(self) -> dict:
+        self._base_sequence_should_not_be_run()
+
+        data = {}
+
+        for component in self._get_all_components():
+            data = data | component.get_data()
+
+        data = {f"{self.name}.{key}": value for key, value in data.items()}
+        
+        return data

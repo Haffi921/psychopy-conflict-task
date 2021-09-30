@@ -1,8 +1,11 @@
-from psychopy import logging, core
-
-from conflict_task.devices import InputDevice, DataHandler
+from conflict_task.devices import InputDevice
+from conflict_task.util import *
 
 from ._base_component import BaseComponent
+
+RESPONSECOMPONENT_DATA_EXCLUSION = [
+    "keys"
+]
 
 class ResponseComponent(BaseComponent):
     """
@@ -15,7 +18,7 @@ class ResponseComponent(BaseComponent):
     name = "response"
 
 
-    def __init__(self, component_settings):
+    def __init__(self, component_settings, window = None) -> None:
         """
         Takes in a `component_settings` dictionary to set up component variables.
 
@@ -56,22 +59,17 @@ class ResponseComponent(BaseComponent):
 
 
         # -----------------------------------------------
-        # VisualComponent Initialization
+        # ResponseComponent Initialization
         # -----------------------------------------------
         super().__init__(component_settings)
 
-        try:
-            if "keys" in component_settings and len(component_settings["keys"]):
-                self.keys = component_settings["keys"]
-            else:
-                raise ValueError("Valid input keys are not specified")
-        except ValueError as e:
-            logging.fatal(e)
-            core.quit()
+        self.keys = get_type_or_fatal_exit(component_settings, "keys", list, "Response component - Must have a 'keys' setting")
+        test_or_fatal_exit(len(self.keys), "Response component - Setting 'keys' must include some keys")
+        test_or_fatal_exit(all(isinstance(key, str) for key in self.keys), "Response component - Keys specified in 'keys' must be strings")
         # -----------------------------------------------
 
 
-    def refresh(self):
+    def refresh(self) -> None:
         """
         Used before each component use.
         
@@ -88,21 +86,7 @@ class ResponseComponent(BaseComponent):
         self.rt = None
 
 
-    def prepare(self, trial_values: dict):
-        """
-        Sets the key-value pairs from `trial_values` on the ResponseComponent.
-
-        Args:
-
-            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
-
-            `component_info`  (str): Component information string for logging and debug purposes.
-        """
-
-        super().prepare(trial_values)
-
-
-    def check(self, input_device: InputDevice):
+    def check(self, input_device: InputDevice) -> tuple[str, float]:
         """
         Checks for input using `input_device` and logs data using `data_handler`.
         
@@ -125,25 +109,18 @@ class ResponseComponent(BaseComponent):
         
         if self.started() and not self.made:
             key_pressed = input_device.get_last_key(self.keys)
-            # TODO: Make the above function of InputDevice class
 
             if key_pressed is not None:
                 self.key, self.rt = key_pressed
                 self.made = True
                 
-                return (self.key, self.rt)
+                return key_pressed
             else:
                 return (None, None)
     
     
-    def get_data(self) -> dict:
-        data = super().get_data()
-
-        return data | {
-            self.name + ".made": self.made,
-            self.name + ".key": self.key,
-            self.name + ".rt": self.rt,
-        }
+    def get_data(self, data_exclusion: list = []) -> dict:
+        return super().get_data(RESPONSECOMPONENT_DATA_EXCLUSION)
 
 
 
@@ -188,16 +165,11 @@ class CorrectResponseComponent(ResponseComponent):
         """True if response key is correct"""
 
         super().__init__(component_settings)
-        
-        try:     
-            if "correct_key" not in self.variable_factor:
-                raise ValueError("'correct_key' must be a key in variable factors of ResponseComponent")
-        except ValueError as e:
-            logging.fatal(e)
-            core.quit()
+
+        test_or_fatal_exit(get_type(self.variable_factor, "correct_key", str), "CorrectResponse component - 'correct_key' must be a key in variable factors")
 
 
-    def refresh(self):
+    def refresh(self) -> None:
         """
         Used before each component use.
         
@@ -215,19 +187,7 @@ class CorrectResponseComponent(ResponseComponent):
         self.correct = None
     
 
-    def prepare(self, trial_values: dict):
-        """
-        Sets the key-value pairs from `trial_values` on the ResponseComponent.
-
-        Args:
-
-            `trial_values`   (dict): Dictionary of key-value pairs that link up component member variables (keys) with their respective values.
-        """
-
-        super().prepare(trial_values)
-    
-
-    def check(self, input_device):
+    def check(self, input_device: InputDevice) -> tuple[str, float]:
         """
         Checks for input using `input_device` and logs data using `data_handler`. \n
         
@@ -246,18 +206,9 @@ class CorrectResponseComponent(ResponseComponent):
             `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device.
         """
 
-        key, _ = super().check(input_device)
+        key_pressed = super().check(input_device)
 
-        if key is not None:
-            if self.key == self.correct_key:
-                self.correct = True
-            else:
-                self.correct = False
-
-    def get_data(self) -> dict:
-        data = super().get_data()
-
-        return data | {
-            self.name + ".correct_key": self.correct_key,
-            self.name + ".correct": self.correct,
-        }
+        if self.key is not None:
+            self.correct = self.key == self.correct_key
+        
+        return key_pressed
