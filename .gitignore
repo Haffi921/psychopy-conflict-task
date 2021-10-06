@@ -4,6 +4,7 @@
 
 # Python
 **/__pycache__/*
+.python-version
 
 # Experiment
 **/data

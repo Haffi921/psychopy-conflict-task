@@ -13,26 +13,15 @@ Press [space] to continue.
 """
 
 text_component = dict(
-    name = "text",
-    type = "TextStim",
-    spec = dict(
-        name = "text",
-        color = "white",
-        height = 0.03,
-        text = start_screen_text
-    )
+    name="text",
+    type="TextStim",
+    spec=dict(name="text", color="white", height=0.03, text=start_screen_text),
 )
 
 start_screen = dict(
-    type = "Screen",
-
-    visual_components = dict(
-        text = text_component
-    ),
-    
-    response = dict(
-        keys = ["space"]
-    )
+    type="Screen",
+    visual_components=dict(text=text_component),
+    response=dict(keys=["space"]),
 )
 
 if __name__ == "__main__":
