@@ -32,5 +32,5 @@ class Window(visual.Window):
     def __init__(self, window_settings={}):
 
         self.window_settings = DEFAULT_WINDOW_SETTINGS | window_settings
-
+        
         super().__init__(**self.window_settings)
