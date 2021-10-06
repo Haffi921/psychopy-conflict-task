@@ -1,20 +1,17 @@
-from .start_screen import *
-from .components import *
 from .between_blocks import *
+from .components import *
+from .start_screen import *
 
 experiment_settings = dict(
-    experiment_sequence = dict(
-        pre = [start_screen],
-        block = dict(
-            nr_blocks = 8,
-            nr_trials = 128,
-            trial = trial,
-            between_blocks_screen = between_blocks
+    experiment_sequence=dict(
+        pre=[start_screen],
+        block=dict(
+            nr_blocks=8, nr_trials=128, trial=trial, between_blocks=between_blocks
         ),
-        post = [start_screen]
+        post=[start_screen],
     ),
-    window_settings = dict(
-        color = [-1, -1, -1],
+    window_settings=dict(
+        color=[-1, -1, -1],
     ),
-    input_device = "Keyboard",
+    # input_device = "Keyboard",
 )
