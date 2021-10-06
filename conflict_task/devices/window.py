@@ -18,7 +18,10 @@ DEFAULT_WINDOW_SETTINGS = dict(
     screen = 0,
 
     #---- Rest are less useful settings to tinker with, so it's not recommended ----#
-    monitor='BasicMonitor',
+    monitor = 'BasicMonitor',
+
+    # If False, window will have no mouse, toolbar, etc.
+    allowGUI = False,
 
     # Set the window type or back-end to use
     winType = 'pyglet',
@@ -38,5 +41,3 @@ class Window(visual.Window):
         self.window_settings = DEFAULT_WINDOW_SETTINGS | window_settings
 
         super().__init__(**self.window_settings)
-
-        self.mouseVisible = False
