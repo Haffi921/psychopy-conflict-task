@@ -2,7 +2,7 @@ from .error import fatal_exit
 
 
 def get_or_fatal_exit(dictionary: dict, key: str, msg: str):
-    if value := dictionary.get(key):
+    if (value := dictionary.get(key)) is not None:
         return value
     else:
         fatal_exit(msg)

@@ -35,11 +35,11 @@ class Experiment:
         # -----------------------------------------------
         # Sanity check
         # -----------------------------------------------
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             isinstance(trial_values, list),
             "Trial values must be a list of dictionaries",
         )
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             isinstance(experiment_settings, dict),
             "Experiment settings must be a dictionary",
         )
@@ -70,7 +70,7 @@ class Experiment:
         input_device_class = get_type(
             experiment_settings, "input_device", str, "Keyboard"
         )
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             hasattr(input_device, input_device_class),
             f"Input device specified in 'input_device' does not exist. No input device named {input_device_class}",
         )
@@ -136,11 +136,11 @@ class Experiment:
             self.between_blocks = self._create_sequence(between_blocks_settings)
 
         if self.block_trial.takes_trial_values:
-            test_or_fatal_exit(
+            true_or_fatal_exit(
                 len(self.trial_values) == self.nr_blocks,
                 f"Number of blocks in trial values not corresponding to 'nr_blocks' - {len(self.trial_values)} != {self.nr_blocks}",
             )
-            test_or_fatal_exit(
+            true_or_fatal_exit(
                 all(len(trials) == self.nr_trials for trials in self.trial_values),
                 f"Number of trial values in all blocks must correspond to 'nr_trials' = {self.nr_trials}",
             )
@@ -152,7 +152,7 @@ class Experiment:
 
     def _create_sequence(self, sequence_settings: dict) -> sequence.Sequence:
         sequence_type = get_type(sequence_settings, "type", str, "Sequence")
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             isinstance(sequence, sequence_type),
             f"Sequence type specified in 'type' does not exist. No sequence named {sequence_type}",
         )

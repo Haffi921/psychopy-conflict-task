@@ -74,29 +74,26 @@ class BaseComponent:
         # -----------------------------------------------
         # BaseComponent Initialization
         # -----------------------------------------------
-        if start := component_settings.get("start"):
-            self.start_time = start
+        self.start_time = get_type(component_settings, "start", float, 0.0)
+        if "stop" in component_settings:
+            self.stop_time = get_type(component_settings, "stop", float)
+        elif "duration" in component_settings:
+            self.stop_time = self.start_time + get_type(component_settings, "duration", float)
 
-        if stop := component_settings.get("stop"):
-            self.stop_time = stop
-        elif duration := component_settings.get("duration"):
-            self.stop_time = self.start_time + duration
+        self.variable_factor = get_type(component_settings, "variable", dict)
 
-        if variable_factor := component_settings.get("variable"):
-            self.variable_factor = variable_factor
-
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             self.start_time >= 0.0,
             f"{self.name} - Component start time can not be less than 0.0",
         )
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             self.stop_time >= self.start_time,
             f"{self.name} - Component stop time must not be less than the start time",
         )
         # -----------------------------------------------
 
     def _base_component_should_not_be_run(self) -> None:
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             self.__class__.__name__ != "BaseComponent",
             "An instance of BaseComponent should not be created nor run",
         )
@@ -134,7 +131,7 @@ class BaseComponent:
 
         if self.variable_factor:
             for factor_name, factor_id in self.variable_factor.items():
-                test_or_fatal_exit(
+                true_or_fatal_exit(
                     factor_id in trial_values.keys(),
                     f"Subject trial sequence does not include key '{factor_id}' required by {self.name}",
                 )

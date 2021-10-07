@@ -67,10 +67,10 @@ class ResponseComponent(BaseComponent):
             list,
             "Response component - Must have a 'keys' setting",
         )
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             len(self.keys), "Response component - Setting 'keys' must include some keys"
         )
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             all(isinstance(key, str) for key in self.keys),
             "Response component - Keys specified in 'keys' must be strings",
         )
@@ -179,7 +179,7 @@ class CorrectResponseComponent(ResponseComponent):
 
         super().__init__(component_settings)
 
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             get_type(self.variable_factor, "correct_key", str),
             "CorrectResponse component - 'correct_key' must be a key in variable factors",
         )

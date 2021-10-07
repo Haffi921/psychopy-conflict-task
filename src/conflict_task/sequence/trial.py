@@ -40,7 +40,7 @@ class Trial(Sequence):
         elif self.feedback:
             fatal_exit(f"No settings found for feedback in trial: {self.name}")
 
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             self.name != self.feedback_sequence.name,
             f"{self.name} - Trial and its feedback cannot have the same name",
         )
@@ -49,7 +49,7 @@ class Trial(Sequence):
         super().run(trial_values=trial_values, allow_escape=allow_escape)
 
         if self.feedback:
-            test_or_fatal_exit(
+            true_or_fatal_exit(
                 self.feedback_sequence is None,
                 f"No settings found for feedback in trial: {self.name}",
             )

@@ -62,7 +62,7 @@ class VisualComponent(BaseComponent):
             str,
             f"{self.name}: VisualComponents must specify a 'type'",
         )
-        test_or_fatal_exit(
+        true_or_fatal_exit(
             hasattr(visual, visual_type),
             f"{self.name}: There's no visual component type {visual_type}",
         )

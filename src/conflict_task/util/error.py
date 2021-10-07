@@ -6,6 +6,6 @@ def fatal_exit(msg: str):
     core.quit()
 
 
-def test_or_fatal_exit(test: bool, msg: str):
+def true_or_fatal_exit(test: bool, msg: str):
     if not test:
         fatal_exit(msg)

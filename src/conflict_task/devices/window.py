@@ -10,14 +10,11 @@ DEFAULT_WINDOW_SETTINGS = dict(
     # If not fullscreen, then position of the top-left corner of the window on the screen (x, y)
     pos=(0, 0),
     # Which monitor? 0 is primary monitor, 1 is secondary, etc.
-    screen = 0,
-
-    #---- Rest are less useful settings to tinker with, so it's not recommended ----#
-    monitor = 'BasicMonitor',
-
+    screen=0,
+    # ---- Rest are less useful settings to tinker with, so it's not recommended ----#
+    monitor="BasicMonitor",
     # If False, window will have no mouse, toolbar, etc.
-    allowGUI = False,
-
+    allowGUI=False,
     # Set the window type or back-end to use
     winType="pyglet",
     # Use framebuffer object
@@ -31,6 +28,6 @@ DEFAULT_WINDOW_SETTINGS = dict(
 class Window(visual.Window):
     def __init__(self, window_settings={}):
 
-        self.window_settings = DEFAULT_WINDOW_SETTINGS | window_settings
-        
+        self.window_settings = {**DEFAULT_WINDOW_SETTINGS, **window_settings}
+
         super().__init__(**self.window_settings)

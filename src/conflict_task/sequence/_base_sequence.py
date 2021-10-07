@@ -63,7 +63,7 @@ class BaseSequence:
 
         def retrieve_valid_settings(settings, nextKey) -> dict:
             if nextKey in sequence_settings:
-                test_or_fatal_exit(
+                true_or_fatal_exit(
                     type(default_settings[nextKey]) == type(sequence_settings[nextKey]),
                     f"{self.name} - '{nextKey}' setting must be of type {default_settings[nextKey]}",
                 )
