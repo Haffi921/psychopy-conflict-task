@@ -8,24 +8,25 @@ class DataHandler:
     def __init__(
         self,
         experiment_name: str,
-        subject_info: dict = {"participant": "", "session": "001"},
+        subject_info: dict = {},
     ):
         self.filename: str = None
         self.experiment_name: str = experiment_name
-        self.subject_info: dict = subject_info
+        self.subject_info: dict = {"participant": "", "session": "001", **subject_info}
         self._data_handler: data.ExperimentHandler = None
 
-    def start_participant_data(self):
+    def start_participant_data(self, _save=True, _dlg=True):
         thisDir = os.path.abspath(path[0])
         version = __version__
         date = data.getDateStr()
 
-        dlg = gui.DlgFromDict(
-            self.subject_info, sortKeys=False, title=self.experiment_name
-        )
+        if _dlg:
+            dlg = gui.DlgFromDict(
+                self.subject_info, sortKeys=False, title=self.experiment_name
+            )
 
-        if not dlg.OK:
-            core.quit()
+            if not dlg.OK:
+                core.quit()
 
         self.subject_info["date"] = date
         self.subject_info["psychopyVersion"] = version
@@ -36,19 +37,26 @@ class DataHandler:
             + os.sep
             + "data"
             + os.sep
-            + f"{self.subject_info['participant']}_{self.experiment_name}_{self.subject_info['date']}"
+            + f"{self.subject_info['participant']}_{self.subject_info['session']}_{self.experiment_name}_{self.subject_info['date']}"
         )
 
         self._data_handler = data.ExperimentHandler(
             name=self.experiment_name,
             version=version,
             extraInfo=self.subject_info,
-            saveWideText=True,
+            saveWideText=_save,
+            savePickle=_save,
             dataFileName=self.filename,
         )
 
-    def finish_participant_data(self):
+    def save_as_csv(self):
         self._data_handler.saveAsWideText(fileName=self.filename + ".csv")
+
+    def save_as_psydat(self):
+        self._data_handler.saveAsPickle(fileName=self.filename)
+
+    def finish_participant_data(self):
+        self.save_as_csv()
         self._data_handler.abort()
 
     def abort(self):

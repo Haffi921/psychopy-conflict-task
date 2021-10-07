@@ -28,6 +28,7 @@ filterwarnings = [
 profile = "black"
 
 [tool.poe.tasks]
+clean = { shell = "rm -rf ./data" }
 test = "pytest ."
 retest = "pytest . --lf"
 isort = "isort ."

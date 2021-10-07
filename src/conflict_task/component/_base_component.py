@@ -78,7 +78,9 @@ class BaseComponent:
         if "stop" in component_settings:
             self.stop_time = get_type(component_settings, "stop", float)
         elif "duration" in component_settings:
-            self.stop_time = self.start_time + get_type(component_settings, "duration", float)
+            self.stop_time = self.start_time + get_type(
+                component_settings, "duration", float
+            )
 
         self.variable_factor = get_type(component_settings, "variable", dict)
 
