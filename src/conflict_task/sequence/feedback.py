@@ -38,4 +38,6 @@ class Feedback(Sequence):
 
     def _prepare_components(self, trial_values: dict) -> None:
 
-        super()._prepare_components(trial_values)
+        feedback_values = self.feedback_function(trial_values)
+
+        super()._prepare_components(feedback_values)

@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from functools import reduce
 
 from psychopy import clock
 
+from conflict_task import component
 from conflict_task.component import *
 from conflict_task.constants import *
 from conflict_task.devices import InputDevice, Keyboard, Window
@@ -9,12 +12,12 @@ from conflict_task.util import *
 
 
 class BaseSequence:
+    name: str = "UNKNOWN_SEQUENCE"
+
     def __init__(
         self, window: Window, input_device: InputDevice, sequence_settings: dict
     ) -> None:
         self._base_sequence_should_not_be_run()
-
-        self.name: str = "unnamed_sequence"
 
         # Devices
         self.window: Window = window
@@ -41,10 +44,15 @@ class BaseSequence:
         self._parse_component_settings(sequence_settings)
         self._parse_sequence_settings(sequence_settings)
 
-        if (
-            not self.response or not self.cut_on_response
-        ) and self._get_duration() == INFINITY:
-            fatal_exit("Sequence has no way to finish.")
+        true_or_fatal_exit(
+            (self.response and self.cut_on_response)
+            or self._get_duration() != INFINITY,
+            f"{self.name}: Sequence has no way to finish.",
+        )
+
+        true_or_fatal_exit(
+            self._get_all_components() != [], f"{self.name}: Sequence has no components"
+        )
 
     def _base_sequence_should_not_be_run(self) -> None:
         if self.__class__.__name__ == "BaseSequence":
@@ -69,9 +77,10 @@ class BaseSequence:
                 )
                 settings[nextKey] = sequence_settings[nextKey]
 
-        settings: dict = default_settings | reduce(
-            retrieve_valid_settings, default_settings.keys(), {}
-        )
+        settings: dict = {
+            **default_settings,
+            **reduce(retrieve_valid_settings, default_settings.keys(), {}),
+        }
 
         for key, value in settings.items():
             setattr(self, key, value)
@@ -84,29 +93,23 @@ class BaseSequence:
                 "If sequence is timed, please provide a timer",
             )
 
-        """for key in default_settings.keys():
-            if key in sequence_settings:
-                settings[key] = sequence_settings[key]"""
-
-        # settings = default_settings | settings
-
     def _parse_component_settings(self, sequence_settings: dict) -> None:
         self._base_sequence_should_not_be_run()
 
-        if visual_components := sequence_settings.get("visual_components"):
+        if visual_components := get_type(sequence_settings, "visual_components", list):
             self.visual = self._create_components(
                 visual_components, VisualComponent, self.window
             )
 
-        if audio_components := sequence_settings.get("audio_components"):
+        if audio_components := get_type(sequence_settings, "audio_components", list):
             self.audio = self._create_components(
                 audio_components, AudioComponent, self.window
             )
 
-        if wait_components := sequence_settings.get("wait_components"):
+        if wait_components := get_type(sequence_settings, "wait_components", list):
             self.wait = self._create_components(wait_components, WaitComponent)
 
-        if response := get_type(sequence_settings, "response", dict):
+        if (response := get_type(sequence_settings, "response", dict)) is not None:
             if "correct_key" in get_type(response, "variable", dict, {}):
                 self.response = CorrectResponseComponent(response)
             else:
@@ -116,23 +119,18 @@ class BaseSequence:
     # Helper functions
     # ===============================================
     def _create_components(
-        self, component_settings: dict, component_class: BaseComponent, *args, **kwargs
+        self, component_settings: list, component_class: BaseComponent, *args, **kwargs
     ) -> BaseComponent:
         self._base_sequence_should_not_be_run()
 
-        settings: list = None
         components: list = []
 
-        if isinstance(component_settings, list):
-            settings = component_settings
-        elif isinstance(component_settings, dict):
-            settings = list(component_settings.values())
-        else:
-            fatal_exit(
-                f"Sequence components must listed either in a dictionary or as a list"
-            )
+        true_or_fatal_exit(
+            all(isinstance(component, dict) for component in component_settings),
+            f"{self.name}: Components settings need to be a dictionary - Error in {component_settings.__class__.__name__}",
+        )
 
-        for component in settings:
+        for component in component_settings:
             components.append(component_class(component, *args, **kwargs))
 
         return components
@@ -141,25 +139,27 @@ class BaseSequence:
         self._base_sequence_should_not_be_run()
 
         return [
-            self.response,
-            *self.visual,
-            *self.audio,
-            *self.wait,
+            component
+            for component in [
+                self.response,
+                *self.visual,
+                *self.audio,
+                *self.wait,
+            ]
+            if component is not None
         ]
 
     def _get_duration(self) -> float:
         self._base_sequence_should_not_be_run()
 
-        if self.timed:
-            return self.timer
-
-        return max(
-            [
-                component.stop_time
-                for component in self._get_all_components()
-                if component is not None
-            ]
+        duration = max(
+            [component.stop_time for component in self._get_all_components()]
         )
+
+        if self.timed and self.timed < duration:
+            return self.timer
+        else:
+            return duration
 
     def _get_all_components_variable_factors(self) -> dict:
         self._base_sequence_should_not_be_run()
@@ -167,7 +167,7 @@ class BaseSequence:
         def merge_variable_factors(
             variable_factors: dict, nextComponent: BaseComponent
         ):
-            return variable_factors | nextComponent.variable_factor
+            return {**variable_factors, **nextComponent.variable_factor}
 
         return reduce(merge_variable_factors, self._get_all_components(), {})
 
@@ -269,7 +269,7 @@ class BaseSequence:
         self._base_sequence_should_not_be_run()
 
         def merge_data(data: dict, nextComponent: BaseComponent):
-            return data | nextComponent.get_data(prepend_key=prepend_key)
+            return {**data, **nextComponent.get_data(prepend_key=prepend_key)}
 
         data = reduce(merge_data, self._get_all_components(), {})
 

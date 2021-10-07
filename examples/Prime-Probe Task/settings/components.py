@@ -60,9 +60,7 @@ feedback = dict(
 
 trial = dict(
     type="Trial",
-    visual_components=dict(
-        fixation_cross=fixation_cross, distractor=distractor, target=target
-    ),
+    visual_components=list(fixation_cross, distractor, target),
     response=response,
     takes_trial_values=True,
     feedback=True,
@@ -76,7 +74,7 @@ trial = dict(
 )
 
 if __name__ == "__main__":
-    from conflict_task.experiment import preview_sequence
+    from conflict_task.preview import preview_sequence
 
     preview_sequence(
         trial,

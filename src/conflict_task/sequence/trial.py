@@ -54,15 +54,16 @@ class Trial(Sequence):
                 f"No settings found for feedback in trial: {self.name}",
             )
 
-            trial_values = trial_values | self.response.get_response_data()
+            trial_values = {**trial_values, **self.response.get_response_data()}
 
-            feedback_values = self.feedback_sequence.feedback_function(trial_values)
+            # feedback_values = self.feedback_sequence.feedback_function(trial_values)
 
             self.feedback_sequence.run(
-                trial_values=feedback_values, allow_escape=allow_escape
+                trial_values=trial_values, allow_escape=allow_escape
             )
 
     def get_data(self, prepend_key: bool = True, data_exclusion: list = []) -> dict:
-        return super().get_data(
-            prepend_key=prepend_key
-        ) | self.feedback_sequence.get_data(prepend_key=prepend_key)
+        return {
+            **super().get_data(prepend_key=prepend_key),
+            **self.feedback_sequence.get_data(prepend_key=prepend_key),
+        }

@@ -18,7 +18,7 @@ def get_type_or_fatal_exit(dictionary: dict, key: str, type_name: object, msg: s
 
 
 def get_type(dictionary: dict, key: str, type_name: object, *args, **kwargs):
-    if value := dictionary.get(key, *args, **kwargs):
+    if (value := dictionary.get(key, *args, **kwargs)) is not None:
         if not isinstance(value, type_name):
             fatal_exit(f"'{key}' must be of type '{type_name}'")
 
