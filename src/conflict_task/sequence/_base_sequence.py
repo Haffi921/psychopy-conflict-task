@@ -35,23 +35,23 @@ class BaseSequence:
         # Sequence settings
         self.variable_factor: dict = None
         self.timed: bool = False
-        self.timer: float = 0.0
+        self.timer: float = None
         self.wait_for_response: bool = False
         self.cut_on_response: bool = False
         self.takes_trial_values: bool = False
         self.feedback: bool = False
 
-        self._parse_component_settings(sequence_settings)
         self._parse_sequence_settings(sequence_settings)
+        self._parse_component_settings(sequence_settings)
+
+        true_or_fatal_exit(
+            self._get_all_components() != [], f"{self.name}: Sequence has no components"
+        )
 
         true_or_fatal_exit(
             (self.response and self.cut_on_response)
             or self._get_duration() != INFINITY,
-            f"{self.name}: Sequence has no way to finish.",
-        )
-
-        true_or_fatal_exit(
-            self._get_all_components() != [], f"{self.name}: Sequence has no components"
+            f"{self.name}: Sequence has no way to finish",
         )
 
     def _base_sequence_should_not_be_run(self) -> None:
@@ -73,9 +73,10 @@ class BaseSequence:
             if nextKey in sequence_settings:
                 true_or_fatal_exit(
                     type(default_settings[nextKey]) == type(sequence_settings[nextKey]),
-                    f"{self.name} - '{nextKey}' setting must be of type {default_settings[nextKey]}",
+                    f"{self.name}: '{nextKey}' setting must be of type {default_settings[nextKey]}",
                 )
                 settings[nextKey] = sequence_settings[nextKey]
+            return settings
 
         settings: dict = {
             **default_settings,
@@ -90,7 +91,10 @@ class BaseSequence:
                 sequence_settings,
                 "timer",
                 float,
-                "If sequence is timed, please provide a timer",
+                f"{self.name}: If sequence is timed, please provide a timer",
+            )
+            true_or_fatal_exit(
+                self.timer > 0.0, f"{self.name}: Timer has to be greater than 0.0"
             )
 
     def _parse_component_settings(self, sequence_settings: dict) -> None:
@@ -127,7 +131,7 @@ class BaseSequence:
 
         true_or_fatal_exit(
             all(isinstance(component, dict) for component in component_settings),
-            f"{self.name}: Components settings need to be a dictionary - Error in {component_settings.__class__.__name__}",
+            f"{self.name}: Components settings need to be a dictionary",
         )
 
         for component in component_settings:
@@ -160,16 +164,6 @@ class BaseSequence:
             return self.timer
         else:
             return duration
-
-    def _get_all_components_variable_factors(self) -> dict:
-        self._base_sequence_should_not_be_run()
-
-        def merge_variable_factors(
-            variable_factors: dict, nextComponent: BaseComponent
-        ):
-            return {**variable_factors, **nextComponent.variable_factor}
-
-        return reduce(merge_variable_factors, self._get_all_components(), {})
 
     # ===============================================
     # Sequence execution functions

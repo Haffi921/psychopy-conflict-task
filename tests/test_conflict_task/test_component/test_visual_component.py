@@ -5,10 +5,8 @@ from conflict_task.component.visual_component import VisualComponent
 from conflict_task.constants import *
 from conflict_task.devices.window import Window
 
-win = Window({"fullscr": False, "size": (1, 1)})
 
-
-def test_no_name(capsys: pytest.CaptureFixture):
+def test_no_name(win: Window, capsys: pytest.CaptureFixture):
     with pytest.raises(SystemExit):
         VisualComponent({"type": "TextStim", "spec": {}}, win)
 
@@ -18,24 +16,24 @@ def test_no_name(capsys: pytest.CaptureFixture):
     )
 
 
-def test_name_specified_top_level():
+def test_name_specified_top_level(win: Window):
     component = VisualComponent({"name": "Text", "type": "TextStim", "spec": {}}, win)
     assert component.name == "Text"
 
 
-def test_name_specified_in_spec():
+def test_name_specified_in_spec(win: Window):
     component = VisualComponent({"type": "TextStim", "spec": {"name": "Text"}}, win)
     assert component.name == "Text"
 
 
-def test_no_type(capsys: pytest.CaptureFixture):
+def test_no_type(win: Window, capsys: pytest.CaptureFixture):
     with pytest.raises(SystemExit):
         VisualComponent({"name": "Text", "spec": {}}, win)
 
     assert "Text: VisualComponents must specify a 'type'" in capsys.readouterr().out
 
 
-def test_unknown_type(capsys: pytest.CaptureFixture):
+def test_unknown_type(win: Window, capsys: pytest.CaptureFixture):
     with pytest.raises(SystemExit):
         VisualComponent({"name": "Text", "type": "SillyDucks", "spec": {}}, win)
 
@@ -44,7 +42,7 @@ def test_unknown_type(capsys: pytest.CaptureFixture):
     )
 
 
-def test_no_spec(capsys: pytest.CaptureFixture):
+def test_no_spec(win: Window, capsys: pytest.CaptureFixture):
     with pytest.raises(SystemExit):
         VisualComponent({"name": "Text", "type": "TextStim"}, win)
 
@@ -54,14 +52,14 @@ def test_no_spec(capsys: pytest.CaptureFixture):
     )
 
 
-def test_spec_not_dictionary(capsys: pytest.CaptureFixture):
+def test_spec_not_dictionary(win: Window, capsys: pytest.CaptureFixture):
     with pytest.raises(SystemExit):
         VisualComponent({"name": "Text", "type": "TextStim", "spec": 23}, win)
 
     assert f"'spec' must be of type '{dict}'" in capsys.readouterr().out
 
 
-def test_all_settings_are_set():
+def test_all_settings_are_set(win: Window):
     component = VisualComponent(
         {
             "type": "TextStim",
