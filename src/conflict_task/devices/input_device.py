@@ -9,8 +9,11 @@ class InputDevice:
     def __init__(self):
         self.device = None
 
-    def _use_derived_classes():
-        fatal_exit("InputDevice: Use derived classes")
+    def _use_derived_classes(self):
+        true_or_fatal_exit(
+            self.__class__.__name__ != "InputDevice",
+            "InputDevice: Use derived classes",
+        )
 
     def get_keys(self, keys: list[str]) -> list[tuple[str, float]]:
         """
@@ -25,7 +28,7 @@ class InputDevice:
     def was_key_pressed(self, keys) -> bool:
         self._use_derived_classes()
 
-    def reset_clock(self, newT=0.0):
+    def reset_clock(self, new_t=0.0):
         self._use_derived_classes()
 
 
@@ -44,16 +47,12 @@ class Keyboard(InputDevice):
 
         if len(keys_pressed):
             return keys_pressed[-1]
-        else:
-            return None
+        return None
 
     def was_key_pressed(self, keys) -> bool:
         key_pressed = self.get_keys(keys)
 
-        if len(key_pressed):
-            return True
-        else:
-            return False
+        return bool(len(key_pressed))
 
-    def reset_clock(self, newT=0.0):
-        self.device.clock.reset(newT)
+    def reset_clock(self, new_t=0.0):
+        self.device.clock.reset(new_t)

@@ -89,9 +89,9 @@ class VisualComponent(BaseComponent):
         """
 
         super().refresh()
-        self._turnAutoDrawOff()
+        self._turn_auto_draw_off()
 
-    def _turnAutoDrawOn(self) -> None:
+    def _turn_auto_draw_on(self) -> None:
         """
         Turns AutoDraw on for the visual stimulus connected to this component.
 
@@ -101,7 +101,7 @@ class VisualComponent(BaseComponent):
 
         self.component.setAutoDraw(True)
 
-    def _turnAutoDrawOff(self) -> None:
+    def _turn_auto_draw_off(self) -> None:
         """
         Turns AutoDraw off for the visual stimulus connected to this component.
 
@@ -111,7 +111,7 @@ class VisualComponent(BaseComponent):
 
         self.component.setAutoDraw(False)
 
-    def start(self, time, flipTime, timeGlobal) -> None:
+    def start(self, time, time_flip, global_flip) -> None:
         """
         Starts component and records time.
 
@@ -119,17 +119,17 @@ class VisualComponent(BaseComponent):
 
             `time`        (float): Time relative to sequence start.
 
-            `flipTime`    (float): Screen flip time relative to sequence start.
+            `time_flip`    (float): Screen flip time relative to sequence start.
 
-            `timeGlobal`  (float): Time relative to experiment start.
+            `global_flip`  (float): Time relative to experiment start.
 
         For a VisualComponent, this also turns on AutoDraw.
         """
 
-        super().start(time, flipTime, timeGlobal)
-        self._turnAutoDrawOn()
+        super().start(time, time_flip, global_flip)
+        self._turn_auto_draw_on()
 
-    def stop(self, time, flipTimeGlobal) -> None:
+    def stop(self, time, time_flip, global_flip) -> None:
         """
         Stops component and records time.
 
@@ -137,14 +137,12 @@ class VisualComponent(BaseComponent):
 
             `time`                     (float): Time relative to sequence start.
 
-            `flipTime`                 (float): Screen flip time relative to sequence start.
+            `time_flip`                 (float): Screen flip time relative to sequence start.
 
-            `timeGlobal`               (float): Time relative to experiment start.
-
-            `data_handler` (ExperimentHandler): Instance of an ExperimentHandler to record data.
+            `global_flip`               (float): Time relative to experiment start.
 
         For a VisualComponent, this also turns off AutoDraw.
         """
 
-        super().stop(time, flipTimeGlobal)
-        self._turnAutoDrawOff()
+        super().stop(time, time_flip, global_flip)
+        self._turn_auto_draw_off()

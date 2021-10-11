@@ -121,8 +121,7 @@ class ResponseComponent(BaseComponent):
                 self.made = True
 
                 return key_pressed
-            else:
-                return (None, None)
+        return (None, None)
 
     def get_data(self, prepend_key: bool = True, data_exclusion: list = []) -> dict:
         return super().get_data(

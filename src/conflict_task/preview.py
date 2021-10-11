@@ -5,19 +5,19 @@ from conflict_task.devices import Keyboard, Window
 
 
 def preview_component(
-    component_settings, type=VISUAL, component_values={}, window_settings={}
+    component_settings, component_type=VISUAL, component_values={}, window_settings={}
 ):
     window = Window(window_settings)
     keyboard = Keyboard()
     component: BaseComponent = None
 
-    if type == VISUAL:
+    if component_type == VISUAL:
         component = VisualComponent(component_settings, window)
-    elif type == AUDIO:
+    elif component_type == AUDIO:
         component = AudioComponent(component_settings)
-    elif type == RESPONSE:
+    elif component_type == RESPONSE:
         component = ResponseComponent(component_settings)
-    elif type == WAIT:
+    elif component_type == WAIT:
         component = WaitComponent(component_settings)
 
     if component.variable_factor:
@@ -32,7 +32,7 @@ def preview_component(
             running = QUIT_EXPERIMENT
             continue
 
-        if type == RESPONSE:
+        if component_type == RESPONSE:
             component.check(keyboard)
 
             if component.made:

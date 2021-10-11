@@ -2,10 +2,9 @@ from .error import fatal_exit
 
 
 def get_or_fatal_exit(dictionary: dict, key: str, msg: str):
-    if (value := dictionary.get(key)) is not None:
-        return value
-    else:
+    if (value := dictionary.get(key)) is None:
         fatal_exit(msg)
+    return value
 
 
 def get_type_or_fatal_exit(dictionary: dict, key: str, type_name: object, msg: str):

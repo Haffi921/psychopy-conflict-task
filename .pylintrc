@@ -1,0 +1,22 @@
+[MASTER]
+
+ignore=preview.py,
+       tests
+
+[MESSAGE CONTROL]
+
+disable=missing-module-docstring,
+        missing-class-docstring,
+        missing-function-docstring,
+        unused-argument,
+        super-init-not-called,
+        too-many-instance-attributes,
+        dangerous-default-value,
+        line-too-long,
+        wildcard-import,
+        unused-wildcard-import,
+        undefined-variable,
+        unidiomatic-typecheck
+
+[FORMAT]
+good-names=rt

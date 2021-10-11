@@ -4,11 +4,11 @@ from functools import reduce
 
 from psychopy import clock
 
-from conflict_task import component
 from conflict_task.component import *
-from conflict_task.constants import *
+from conflict_task.constants import FRAMETOLERANCE, QUIT_EXPERIMENT, STOP_RUNNING, KEEP_RUNNING, INFINITY
+
 from conflict_task.devices import InputDevice, Keyboard, Window
-from conflict_task.util import *
+from conflict_task.util import fatal_exit, true_or_fatal_exit, get_type, get_type_or_fatal_exit
 
 
 class BaseSequence:
@@ -62,20 +62,20 @@ class BaseSequence:
     # Dictionary parsing
     # ===============================================
     def _parse_sequence_settings(
-        self, sequence_settings: dict, default_settings: dict
+        self, sequence_settings: dict, default_settings: dict = {}
     ) -> None:
         self._base_sequence_should_not_be_run()
 
         if name := get_type(sequence_settings, "name", str):
             self.name = name
 
-        def retrieve_valid_settings(settings, nextKey) -> dict:
-            if nextKey in sequence_settings:
+        def retrieve_valid_settings(settings, next_key) -> dict:
+            if next_key in sequence_settings:
                 true_or_fatal_exit(
-                    type(default_settings[nextKey]) == type(sequence_settings[nextKey]),
-                    f"{self.name}: '{nextKey}' setting must be of type {default_settings[nextKey]}",
+                    type(default_settings[next_key]) == type(sequence_settings[next_key]),
+                    f"{self.name}: '{next_key}' setting must be of type {default_settings[next_key]}",
                 )
-                settings[nextKey] = sequence_settings[nextKey]
+                settings[next_key] = sequence_settings[next_key]
             return settings
 
         settings: dict = {
@@ -162,13 +162,12 @@ class BaseSequence:
 
         if self.timed and self.timed < duration:
             return self.timer
-        else:
-            return duration
+        return duration
 
     # ===============================================
     # Sequence execution functions
     # ===============================================
-    def _refresh(self) -> None:
+    def _refresh_components(self) -> None:
         self._base_sequence_should_not_be_run()
 
         for component in self._get_all_components():
@@ -177,8 +176,15 @@ class BaseSequence:
     def _prepare_components(self, trial_values: dict) -> None:
         self._base_sequence_should_not_be_run()
 
-        for component in self._get_all_components():
-            component.prepare(trial_values)
+        if self.takes_trial_values:
+            for component in self._get_all_components():
+                component.prepare(trial_values)
+
+    def refresh(self, new_t: float = 0.0) -> None:
+        self._base_sequence_should_not_be_run()
+
+        self.clock.reset(newT=new_t)
+        self.input_device.reset_clock(new_t=new_t)
 
     def _run_frame(self, allow_escape=False) -> None:
         self._base_sequence_should_not_be_run()
@@ -189,8 +195,8 @@ class BaseSequence:
 
         # Get current timers
         time = self.clock.getTime()
-        thisFlip = self.window.getFutureFlipTime(clock=self.clock)
-        thisFlipGlobal = self.window.getFutureFlipTime(clock=None)
+        time_flip = self.window.getFutureFlipTime(clock=self.clock)
+        time_global_flip = self.window.getFutureFlipTime(clock=None)
 
         # Return variable is whether or not to continue the sequence
         keep_running = STOP_RUNNING
@@ -199,13 +205,11 @@ class BaseSequence:
         for component in self._get_all_components():
 
             # Either start them...
-            if component.not_started():
-                if thisFlip >= component.start_time - FRAMETOLERANCE:
-                    component.start(time, thisFlip, thisFlipGlobal)
+            if component.not_started() and time_flip >= component.start_time - FRAMETOLERANCE:
+                component.start(time, time_flip, time_global_flip)
             # ...or stop them
-            elif component.started():
-                if thisFlip >= component.stop_time - FRAMETOLERANCE:
-                    component.stop(time, thisFlip, thisFlipGlobal)
+            elif component.started() and time_flip >= component.stop_time - FRAMETOLERANCE:
+                component.stop(time, time_flip, time_global_flip)
 
             # If not all components have finished, continue the sequence
             if not component.finished():
@@ -216,19 +220,16 @@ class BaseSequence:
             self.response.check(self.input_device)
 
             # Two possibilities based on the response settings
-            if self.response.made:
-                if self.cut_on_response:
-                    # Cutting sequence short after a response has been made
-                    keep_running = STOP_RUNNING
-            else:
-                if self.wait_for_response:
-                    # Wait for response even though all components have finished
-                    keep_running = KEEP_RUNNING
+            if self.response.made and self.cut_on_response:
+                # Cutting sequence short after a response has been made
+                keep_running = STOP_RUNNING
+            elif self.wait_for_response:
+                # Wait for response even though all components have finished
+                keep_running = KEEP_RUNNING
 
         # Finally, if timed check if sequence has finished it's timer
-        if self.timed:
-            if thisFlip >= self.timer:
-                keep_running = STOP_RUNNING
+        if self.timed and time_flip >= self.timer:
+            keep_running = STOP_RUNNING
 
         # Flip window
         self.window.flip()
@@ -242,12 +243,9 @@ class BaseSequence:
     def run(self, trial_values: dict = {}, allow_escape=False) -> None:
         self._base_sequence_should_not_be_run()
 
-        self._refresh()
-        if self.takes_trial_values:
-            self._prepare_components(trial_values)
-
-        self.clock.reset(-self.window.getFutureFlipTime(clock="now"))
-        self.input_device.reset_clock()
+        self._refresh_components()
+        self._prepare_components(trial_values)
+        self.refresh(new_t=-self.window.getFutureFlipTime(clock="now"))
 
         running = KEEP_RUNNING
 
@@ -262,8 +260,8 @@ class BaseSequence:
     def get_data(self, prepend_key=True) -> dict:
         self._base_sequence_should_not_be_run()
 
-        def merge_data(data: dict, nextComponent: BaseComponent):
-            return {**data, **nextComponent.get_data(prepend_key=prepend_key)}
+        def merge_data(data: dict, next_component: BaseComponent):
+            return {**data, **next_component.get_data(prepend_key=prepend_key)}
 
         data = reduce(merge_data, self._get_all_components(), {})
 

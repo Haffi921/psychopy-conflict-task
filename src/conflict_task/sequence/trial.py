@@ -62,7 +62,7 @@ class Trial(Sequence):
                 trial_values=trial_values, allow_escape=allow_escape
             )
 
-    def get_data(self, prepend_key: bool = True, data_exclusion: list = []) -> dict:
+    def get_data(self, prepend_key: bool = True) -> dict:
         return {
             **super().get_data(prepend_key=prepend_key),
             **self.feedback_sequence.get_data(prepend_key=prepend_key),

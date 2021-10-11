@@ -6,6 +6,7 @@ from conflict_task.component.response_component import (
 )
 from conflict_task.component.visual_component import VisualComponent
 from conflict_task.constants import INFINITY
+from conflict_task.devices import input_device
 from conflict_task.sequence._base_sequence import BaseSequence
 from conflict_task.sequence.sequence import Sequence
 
@@ -343,5 +344,7 @@ def test_finite_duration_with_timer(win, input):
     assert sequence2._get_duration() == 5.0
 
 
-def test_run():
-    pass
+def test_refresh(sequence: Sequence):
+    print(sequence.clock.getTime())
+    assert (sequence.clock.getTime() - sequence.input_device.device.clock.getTime()) == pytest.approx(0.0)
+    assert 0

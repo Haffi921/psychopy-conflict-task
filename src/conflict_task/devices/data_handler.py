@@ -16,7 +16,7 @@ class DataHandler:
         self._data_handler: data.ExperimentHandler = None
 
     def start_participant_data(self, _save=True, _dlg=True):
-        thisDir = os.path.abspath(path[0])
+        this_dir = os.path.abspath(path[0])
         version = __version__
         date = data.getDateStr()
 
@@ -33,7 +33,7 @@ class DataHandler:
         self.subject_info["expName"] = self.experiment_name
 
         self.filename = (
-            thisDir
+            this_dir
             + os.sep
             + "data"
             + os.sep
@@ -68,10 +68,10 @@ class DataHandler:
     def add_data(self, key, value):
         self._data_handler.addData(key, value)
 
-    def add_data_dict(self, dict: dict):
-        for key, value in dict.items():
+    def add_data_dict(self, data_dict: dict):
+        for key, value in data_dict.items():
             self.add_data(str(key), str(value).encode("unicode_escape").decode())
 
-    def add_data_dict_and_next_entry(self, dict: dict):
-        self.add_data_dict(dict)
+    def add_data_dict_and_next_entry(self, data_dict: dict):
+        self.add_data_dict(data_dict)
         self.next_entry()
