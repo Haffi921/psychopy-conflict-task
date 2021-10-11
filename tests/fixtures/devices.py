@@ -13,4 +13,5 @@ def win() -> Window:
 
 @pytest.fixture(scope="session")
 def input() -> Keyboard:
-    return Keyboard()
+    input = Keyboard()
+    return input

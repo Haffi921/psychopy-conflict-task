@@ -5,10 +5,20 @@ from functools import reduce
 from psychopy import clock
 
 from conflict_task.component import *
-from conflict_task.constants import FRAMETOLERANCE, QUIT_EXPERIMENT, STOP_RUNNING, KEEP_RUNNING, INFINITY
-
+from conflict_task.constants import (
+    FRAMETOLERANCE,
+    INFINITY,
+    KEEP_RUNNING,
+    QUIT_EXPERIMENT,
+    STOP_RUNNING,
+)
 from conflict_task.devices import InputDevice, Keyboard, Window
-from conflict_task.util import fatal_exit, true_or_fatal_exit, get_type, get_type_or_fatal_exit
+from conflict_task.util import (
+    fatal_exit,
+    get_type,
+    get_type_or_fatal_exit,
+    true_or_fatal_exit,
+)
 
 
 class BaseSequence:
@@ -72,7 +82,8 @@ class BaseSequence:
         def retrieve_valid_settings(settings, next_key) -> dict:
             if next_key in sequence_settings:
                 true_or_fatal_exit(
-                    type(default_settings[next_key]) == type(sequence_settings[next_key]),
+                    type(default_settings[next_key])
+                    == type(sequence_settings[next_key]),
                     f"{self.name}: '{next_key}' setting must be of type {default_settings[next_key]}",
                 )
                 settings[next_key] = sequence_settings[next_key]
@@ -164,6 +175,9 @@ class BaseSequence:
             return self.timer
         return duration
 
+    def reset_clock(self, new_t):
+        self.clock.reset(newT=new_t)
+
     # ===============================================
     # Sequence execution functions
     # ===============================================
@@ -183,7 +197,7 @@ class BaseSequence:
     def refresh(self, new_t: float = 0.0) -> None:
         self._base_sequence_should_not_be_run()
 
-        self.clock.reset(newT=new_t)
+        self.reset_clock(new_t=new_t)
         self.input_device.reset_clock(new_t=new_t)
 
     def _run_frame(self, allow_escape=False) -> None:
@@ -205,10 +219,16 @@ class BaseSequence:
         for component in self._get_all_components():
 
             # Either start them...
-            if component.not_started() and time_flip >= component.start_time - FRAMETOLERANCE:
+            if (
+                component.not_started()
+                and time_flip >= component.start_time - FRAMETOLERANCE
+            ):
                 component.start(time, time_flip, time_global_flip)
             # ...or stop them
-            elif component.started() and time_flip >= component.stop_time - FRAMETOLERANCE:
+            elif (
+                component.started()
+                and time_flip >= component.stop_time - FRAMETOLERANCE
+            ):
                 component.stop(time, time_flip, time_global_flip)
 
             # If not all components have finished, continue the sequence

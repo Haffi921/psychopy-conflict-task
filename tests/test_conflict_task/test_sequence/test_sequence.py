@@ -345,6 +345,51 @@ def test_finite_duration_with_timer(win, input):
 
 
 def test_refresh(sequence: Sequence):
-    print(sequence.clock.getTime())
-    assert (sequence.clock.getTime() - sequence.input_device.device.clock.getTime()) == pytest.approx(0.0)
-    assert 0
+    def get_diff() -> float:
+        return sequence.clock.getTime() - sequence.input_device.device.clock.getTime()
+
+    before_refresh = get_diff()
+    sequence.refresh()
+    after_refresh = get_diff()
+
+    assert not before_refresh == pytest.approx(0.0, abs=0.0001)
+    assert after_refresh == pytest.approx(0.0, abs=0.0001)
+
+
+def test_run_frame(sequence: Sequence):
+    sequence.refresh()
+
+    text = sequence.visual[0]
+    assert text.not_started()
+    assert text.time_started == None
+    assert text.time_started_flip == None
+    assert text.time_started_global_flip == None
+
+    seq_time = sequence.clock.getTime()
+    seq_flip = sequence.window.getFutureFlipTime(clock=sequence.clock)
+    win_flip = sequence.window.getFutureFlipTime()
+
+    status = sequence._run_frame()
+
+    assert status == 1
+    assert text.started()
+    assert text.time_started == pytest.approx(seq_time, abs=0.0001)
+    assert text.time_started_flip == pytest.approx(seq_flip, abs=0.0001)
+    assert text.time_started_global_flip == pytest.approx(win_flip, abs=0.0001)
+
+
+def test_run(sequence: Sequence):
+    text = sequence.visual[0]
+    win_refresh = 1.0 / sequence.window._monitorFrameRate
+
+    text_stop_time = text.stop_time
+    win_stop_time = sequence.window.getFutureFlipTime() + text_stop_time
+
+    sequence.run()
+
+    assert text.finished()
+    assert text.time_stopped == pytest.approx(text_stop_time, abs=win_refresh)
+    assert text.time_stopped_flip == pytest.approx(text_stop_time, abs=win_refresh)
+    assert text.time_stopped_global_flip == pytest.approx(
+        win_stop_time, abs=win_refresh * 2
+    )

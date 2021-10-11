@@ -3,7 +3,7 @@ from __future__ import annotations
 from psychopy import clock, core
 
 from conflict_task.devices import DataHandler, Window, input_device
-from conflict_task.util import true_or_fatal_exit, get_type, get_type_or_fatal_exit
+from conflict_task.util import get_type, get_type_or_fatal_exit, true_or_fatal_exit
 
 from . import sequence
 
@@ -74,8 +74,10 @@ class Experiment:
         )
         true_or_fatal_exit(
             hasattr(input_device, input_device_class),
-            ("Input device specified in 'input_device' does not exist. "
-            f"No input device named {input_device_class}"),
+            (
+                "Input device specified in 'input_device' does not exist. "
+                f"No input device named {input_device_class}"
+            ),
         )
         self.input_device = getattr(input_device, input_device_class)
         # -----------------------------------------------
@@ -84,7 +86,9 @@ class Experiment:
         # Data handler
         # -----------------------------------------------
         if subject_info := experiment_settings.get("subject_info"):
-            self.data_handler = DataHandler(experiment_name=self.name, subject_info=subject_info)
+            self.data_handler = DataHandler(
+                experiment_name=self.name, subject_info=subject_info
+            )
         else:
             self.data_handler = DataHandler(experiment_name=self.name)
         # -----------------------------------------------
@@ -141,13 +145,17 @@ class Experiment:
         if self.block_trial.takes_trial_values:
             true_or_fatal_exit(
                 len(self.trial_values) == self.nr_blocks,
-                ("Number of blocks in trial values not corresponding to 'nr_blocks': "
-                f"{len(self.trial_values)} != {self.nr_blocks}")
+                (
+                    "Number of blocks in trial values not corresponding to 'nr_blocks': "
+                    f"{len(self.trial_values)} != {self.nr_blocks}"
+                ),
             )
             true_or_fatal_exit(
                 all(len(trials) == self.nr_trials for trials in self.trial_values),
-                ("Number of trial values in all blocks must correspond to 'nr_trials': "
-                f"{self.nr_trials}")
+                (
+                    "Number of trial values in all blocks must correspond to 'nr_trials': "
+                    f"{self.nr_trials}"
+                ),
             )
         # -----------------------------------------------
 
