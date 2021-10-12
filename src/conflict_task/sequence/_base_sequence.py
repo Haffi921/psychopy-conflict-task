@@ -60,7 +60,11 @@ class BaseSequence:
 
         true_or_fatal_exit(
             (self.response and self.cut_on_response)
-            or self._get_duration() != INFINITY,
+            or (
+                self._get_duration() != INFINITY
+                and not (self.wait_for_response and not self.response)
+            )
+            or (self.timed and self.timer != INFINITY),
             f"{self.name}: Sequence has no way to finish",
         )
 

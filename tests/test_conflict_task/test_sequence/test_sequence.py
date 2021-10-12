@@ -41,6 +41,7 @@ def test_all_sequence_settings_are_set(win, input):
             "visual_components": [
                 {"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}
             ],
+            "response": {"keys": ["space"]}
         },
     )
 
@@ -298,6 +299,68 @@ def test_cut_on_response_infinity_duration(win, input):
     assert sequence._get_duration() == INFINITY
 
 
+def test_wait_on_response_infinity_duration(win, input):
+    sequence = Sequence(
+        win,
+        input,
+        {
+            "name": "TestSequence",
+            "cut_on_response": True,
+            "wait_for_response": True,
+            "visual_components": [{"name": "Text", "type": "TextStim", "spec": {}}],
+            "response": {"keys": ["space"]},
+        },
+    )
+
+    assert sequence._get_duration() == INFINITY
+
+def test_finite_duration_wait_on_nonexisting_response(win, input, capsys: pytest.CaptureFixture):
+    with pytest.raises(SystemExit):
+        Sequence(
+            win,
+            input,
+            {
+                "name": "TestSequence",
+                "cut_on_response": True,
+                "wait_for_response": True,
+                "visual_components": [{"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}],
+            },
+        )
+
+    assert "TestSequence: Sequence has no way to finish" in capsys.readouterr().out
+
+
+def test_finite_duration_wait_on_nonexisting_response_but_infinity_timed(win, input, capsys: pytest.CaptureFixture):
+    with pytest.raises(SystemExit):
+        Sequence(
+            win,
+            input,
+            {
+                "name": "TestSequence",
+                "cut_on_response": True,
+                "wait_for_response": True,
+                "timed": True,
+                "timer": INFINITY,
+                "visual_components": [{"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}],
+            },
+        )
+
+    assert "TestSequence: Sequence has no way to finish" in capsys.readouterr().out
+
+def test_finite_duration_wait_on_nonexisting_response_but_timed(win, input):
+    Sequence(
+        win,
+        input,
+        {
+            "name": "TestSequence",
+            "cut_on_response": True,
+            "wait_for_response": True,
+            "timed": True,
+            "timer": 30.0,
+            "visual_components": [{"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}],
+        },
+    )
+
 def test_finite_duration(win, input):
     sequence = Sequence(
         win,
@@ -344,6 +407,22 @@ def test_finite_duration_with_timer(win, input):
     assert sequence2._get_duration() == 5.0
 
 
+def test_ininity_timer_changes_duration(win, input):
+    sequence = Sequence(
+        win,
+        input,
+        {
+            "name": "TestSequence",
+            "cut_on_response": True,
+            "timed": True,
+            "timer": INFINITY,
+            "visual_components": [{"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}],
+            "response": {"keys": ["space"]},
+        },
+    )
+
+    assert sequence._get_duration() == INFINITY
+
 def test_refresh(sequence: Sequence):
     def get_diff() -> float:
         return sequence.clock.getTime() - sequence.input_device.device.clock.getTime()
@@ -378,9 +457,9 @@ def test_run_frame(sequence: Sequence):
     assert text.time_started_global_flip == pytest.approx(win_flip, abs=0.0001)
 
 
-def test_run(sequence: Sequence):
+def test_sequence_run(sequence: Sequence):
     text = sequence.visual[0]
-    win_refresh = 1.0 / sequence.window._monitorFrameRate
+    win_refresh = 1.2 / sequence.window.getActualFrameRate()
 
     text_stop_time = text.stop_time
     win_stop_time = sequence.window.getFutureFlipTime() + text_stop_time
