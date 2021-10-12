@@ -1,5 +1,6 @@
 import pytest
 
+from conflict_task.devices.window import Window
 from conflict_task.sequence import Screen
 from conflict_task.sequence.sequence import Sequence
 
@@ -21,16 +22,27 @@ def sequence(win, input, settings=None) -> Sequence:
     return sequence
 
 
-@pytest.fixture(scope="session")
-def screen(win, input, settings=None) -> Screen:
+@pytest.fixture(
+    scope="session",
+    params=[
+        {
+            "settings": None,
+            "win_setting": None,
+        },
+    ],
+)
+def screen(win, input, request) -> Screen:
+    settings = request.param.get("settings")
     if settings is None:
         settings = {
             "name": "TestScreen",
             "visual_components": [
-                {"name": "Text", "type": "TextStim", "spec": {}, "stop": 0.0}
+                {"name": "Text", "type": "TextStim", "spec": {"text": "Hello"}, "stop": 0.0}
             ],
-            "response": {"keys": ["space"]}
+            "response": {"keys": ["space"]},
         }
+    if (win_setting := request.param.get("win_setting")) is not None:
+        win = Window(win_setting)
     screen = Screen(
         win,
         input,

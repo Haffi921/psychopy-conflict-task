@@ -41,7 +41,7 @@ def test_all_sequence_settings_are_set(win, input):
             "visual_components": [
                 {"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}
             ],
-            "response": {"keys": ["space"]}
+            "response": {"keys": ["space"]},
         },
     )
 
@@ -314,7 +314,10 @@ def test_wait_on_response_infinity_duration(win, input):
 
     assert sequence._get_duration() == INFINITY
 
-def test_finite_duration_wait_on_nonexisting_response(win, input, capsys: pytest.CaptureFixture):
+
+def test_finite_duration_wait_on_nonexisting_response(
+    win, input, capsys: pytest.CaptureFixture
+):
     with pytest.raises(SystemExit):
         Sequence(
             win,
@@ -323,14 +326,18 @@ def test_finite_duration_wait_on_nonexisting_response(win, input, capsys: pytest
                 "name": "TestSequence",
                 "cut_on_response": True,
                 "wait_for_response": True,
-                "visual_components": [{"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}],
+                "visual_components": [
+                    {"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}
+                ],
             },
         )
 
     assert "TestSequence: Sequence has no way to finish" in capsys.readouterr().out
 
 
-def test_finite_duration_wait_on_nonexisting_response_but_infinity_timed(win, input, capsys: pytest.CaptureFixture):
+def test_finite_duration_wait_on_nonexisting_response_but_infinity_timed(
+    win, input, capsys: pytest.CaptureFixture
+):
     with pytest.raises(SystemExit):
         Sequence(
             win,
@@ -341,11 +348,14 @@ def test_finite_duration_wait_on_nonexisting_response_but_infinity_timed(win, in
                 "wait_for_response": True,
                 "timed": True,
                 "timer": INFINITY,
-                "visual_components": [{"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}],
+                "visual_components": [
+                    {"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}
+                ],
             },
         )
 
     assert "TestSequence: Sequence has no way to finish" in capsys.readouterr().out
+
 
 def test_finite_duration_wait_on_nonexisting_response_but_timed(win, input):
     Sequence(
@@ -357,9 +367,12 @@ def test_finite_duration_wait_on_nonexisting_response_but_timed(win, input):
             "wait_for_response": True,
             "timed": True,
             "timer": 30.0,
-            "visual_components": [{"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}],
+            "visual_components": [
+                {"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}
+            ],
         },
     )
+
 
 def test_finite_duration(win, input):
     sequence = Sequence(
@@ -416,12 +429,15 @@ def test_ininity_timer_changes_duration(win, input):
             "cut_on_response": True,
             "timed": True,
             "timer": INFINITY,
-            "visual_components": [{"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}],
+            "visual_components": [
+                {"name": "Text", "type": "TextStim", "spec": {}, "stop": 5.0}
+            ],
             "response": {"keys": ["space"]},
         },
     )
 
     assert sequence._get_duration() == INFINITY
+
 
 def test_refresh(sequence: Sequence):
     def get_diff() -> float:
