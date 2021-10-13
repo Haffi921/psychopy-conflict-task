@@ -52,9 +52,7 @@ class Trial(Sequence):
         super().run(trial_values=trial_values, allow_escape=allow_escape)
 
         if self.feedback:
-            trial_values = {**trial_values, **self.response.get_response_data()}
-
-            # feedback_values = self.feedback_sequence.feedback_function(trial_values)
+            trial_values.update(self.response.get_response_data())
 
             self.feedback_sequence.run(
                 trial_values=trial_values, allow_escape=allow_escape

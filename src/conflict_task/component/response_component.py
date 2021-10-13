@@ -5,8 +5,6 @@ from conflict_task.util import *
 
 from ._base_component import BaseComponent
 
-RESPONSECOMPONENT_DATA_EXCLUSION = ["keys"]
-
 
 class ResponseComponent(BaseComponent):
     """
@@ -122,11 +120,6 @@ class ResponseComponent(BaseComponent):
 
                 return key_pressed
         return (None, None)
-
-    def get_data(self, prepend_key: bool = True, data_exclusion: list = []) -> dict:
-        return super().get_data(
-            prepend_key=prepend_key, data_exclusion=RESPONSECOMPONENT_DATA_EXCLUSION
-        )
 
     def get_response_data(self):
         return {

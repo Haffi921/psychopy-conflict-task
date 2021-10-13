@@ -2,11 +2,8 @@ from conflict_task.constants import *
 from conflict_task.util import *
 
 BASECOMPONENT_DATA_EXCLUSION = [
-    "name",
     "component",
     "variable_factor",
-    "start_time",
-    "stop_time",
 ]
 
 
@@ -206,16 +203,18 @@ class BaseComponent:
 
         return self.status == FINISHED
 
-    def get_data(self, prepend_key: bool = True, data_exclusion: list = []) -> dict:
+    def get_data(self, prepend_key: bool = True) -> dict:
         """
         Returns a dictionary of the component's data
         """
         self._base_component_should_not_be_run()
 
-        _data_exclusion = [*BASECOMPONENT_DATA_EXCLUSION, *data_exclusion]
+        variables = vars(self)
 
         data = {
-            item: vars(self)[item] for item in vars(self) if item not in _data_exclusion
+            item: variables[item]
+            for item in variables
+            if item not in BASECOMPONENT_DATA_EXCLUSION
         }
 
         if prepend_key:

@@ -1,4 +1,5 @@
 import pytest
+from numpy.core.fromnumeric import mean
 
 from conflict_task.devices import Keyboard, Window
 from conflict_task.sequence import Screen, Sequence, Trial, screen
@@ -149,6 +150,7 @@ def test_trial_with_run():
         {
             "type": "Trial",
             "takes_trial_values": True,
+            "cut_on_response": True,
             "feedback": True,
             "visual_components": [
                 {
@@ -179,4 +181,19 @@ def test_trial_with_run():
             },
         },
     )
-    trial.run()
+
+    lag = []
+    for _ in range(10):
+        trial.run()
+
+        data = trial.get_data()
+        """for k, v in data.items():
+            print(f"{k}: {v}")"""
+        text_start = data["trial.response.time_started_global_flip"]
+        response_time = data["trial.response.rt"] or data["trial.response.time_stopped"]
+        feedback_start = data["feedback.Feedback.time_started_global_flip"]
+        lag.append(feedback_start - text_start - response_time)
+
+    print(lag)
+    print(mean(lag))
+    assert 0

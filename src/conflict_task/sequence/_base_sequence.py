@@ -212,6 +212,7 @@ class BaseSequence:
 
         self.reset_clock(new_t=new_t)
         self.input_device.reset_clock(new_t=new_t)
+        self.input_device.reset_events()
 
     def _run_frame(self, allow_escape=False) -> None:
         self._base_sequence_should_not_be_run()

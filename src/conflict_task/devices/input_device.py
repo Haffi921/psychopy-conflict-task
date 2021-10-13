@@ -56,3 +56,6 @@ class Keyboard(InputDevice):
 
     def reset_clock(self, new_t=0.0):
         self.device.clock.reset(new_t)
+
+    def reset_events(self):
+        self.device.clearEvents()
