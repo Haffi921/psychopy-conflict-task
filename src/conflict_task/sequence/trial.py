@@ -25,11 +25,14 @@ class Trial(Sequence):
 
         super().__init__(window, input_device, sequence_settings)
 
+        self._parse_feedback_settings(sequence_settings)
+
     def _parse_sequence_settings(
         self, sequence_settings, default_settings=DEFAULT_TRIAL_SETTINGS
     ):
         super()._parse_sequence_settings(sequence_settings, default_settings)
 
+    def _parse_feedback_settings(self, sequence_settings: dict):
         feedback_settings = get_type(sequence_settings, "feedback_sequence", dict)
 
         if feedback_settings:
@@ -49,11 +52,6 @@ class Trial(Sequence):
         super().run(trial_values=trial_values, allow_escape=allow_escape)
 
         if self.feedback:
-            true_or_fatal_exit(
-                self.feedback_sequence is None,
-                f"No settings found for feedback in trial: {self.name}",
-            )
-
             trial_values = {**trial_values, **self.response.get_response_data()}
 
             # feedback_values = self.feedback_sequence.feedback_function(trial_values)

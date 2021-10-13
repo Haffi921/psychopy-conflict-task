@@ -18,8 +18,8 @@ class Feedback(Sequence):
     def __init__(
         self, window: Window, input_device: InputDevice, sequence_settings: dict
     ) -> None:
-        super().__init__(window, input_device, sequence_settings)
         self.feedback_function: function = None
+        super().__init__(window, input_device, sequence_settings)
 
     def _parse_sequence_settings(
         self,
@@ -36,11 +36,10 @@ class Feedback(Sequence):
         )
         true_or_fatal_exit(
             callable(self.feedback_function),
-            "Feedback 'trial_values' setting must be a function"
+            "Feedback 'trial_values' setting must be a function",
         )
 
     def _prepare_components(self, trial_values: dict) -> None:
-
         feedback_values = self.feedback_function(trial_values)
 
         super()._prepare_components(feedback_values)

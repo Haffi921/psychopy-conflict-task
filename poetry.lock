@@ -783,6 +783,25 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "pygments"
+version = "2.10.0"
+description = "Pygments is a syntax highlighting package written in Python."
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
+name = "pygount"
+version = "1.2.4"
+description = "count source lines of code (SLOC) using pygments"
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+pygments = ">=2.0"
+
+[[package]]
 name = "pylint"
 version = "2.11.1"
 description = "python code static checker"
@@ -3089,7 +3108,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.8.10"
-content-hash = "d210d4fc11fa996565259ada4713aa6895a466c5cbbffa698d068707cea54c59"
+content-hash = "937ae693914c7cc46d360310581587fdd39a6666fc0bdd1e4702466461f2adfe"
 
 [metadata.files]
 appdirs = [
@@ -3856,6 +3875,13 @@ pyglet = [
     {file = "pyglet-1.4.11.zip", hash = "sha256:e4cc8dc2f09d8487f7b3e2d93bd1961528afe989d058177b26a46d3508fd2c33"},
     {file = "pyglet-1.5.21-py3-none-any.whl", hash = "sha256:11f11ddda4ee456284f2ddd1fe5c62fe29ba8c42074d3d9ae52d094abc2e1b7c"},
     {file = "pyglet-1.5.21.zip", hash = "sha256:5aaaddb06dc4b6f9ba08254d8d806a2bd2406925a9caf3a51fdffbd5d09728e2"},
+]
+pygments = [
+    {file = "Pygments-2.10.0-py3-none-any.whl", hash = "sha256:b8e67fe6af78f492b3c4b3e2970c0624cbf08beb1e493b2c99b9fa1b67a20380"},
+    {file = "Pygments-2.10.0.tar.gz", hash = "sha256:f398865f7eb6874156579fdf36bc840a03cab64d1cde9e93d68f46a425ec52c6"},
+]
+pygount = [
+    {file = "pygount-1.2.4-py3-none-any.whl", hash = "sha256:8ec56e58cfcb2be8bb54f32f02e7130d33302e2543c8a37b441e606ea3b8a2c5"},
 ]
 pylint = [
     {file = "pylint-2.11.1-py3-none-any.whl", hash = "sha256:0f358e221c45cbd4dad2a1e4b883e75d28acdcccd29d40c76eb72b307269b126"},

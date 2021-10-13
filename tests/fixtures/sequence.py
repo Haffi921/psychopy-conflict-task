@@ -21,6 +21,7 @@ def sequence(win, input) -> Sequence:
     return sequence
 
 
+@pytest.fixture(scope="session")
 def screen(win, input) -> Screen:
     settings = {
         "name": "TestScreen",
