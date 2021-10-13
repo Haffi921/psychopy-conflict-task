@@ -1,5 +1,5 @@
 from conflict_task.devices import InputDevice, Window
-from conflict_task.util import get_type_or_fatal_exit
+from conflict_task.util import get_or_fatal_exit, true_or_fatal_exit
 
 from .sequence import Sequence
 
@@ -29,11 +29,14 @@ class Feedback(Sequence):
         super()._parse_sequence_settings(
             sequence_settings, default_settings=default_settings
         )
-        self.feedback_function = get_type_or_fatal_exit(
+        self.feedback_function = get_or_fatal_exit(
             sequence_settings,
             "trial_values",
-            function,
             "Feedback must have 'trial_values' setting",
+        )
+        true_or_fatal_exit(
+            callable(self.feedback_function),
+            "Feedback 'trial_values' setting must be a function"
         )
 
     def _prepare_components(self, trial_values: dict) -> None:

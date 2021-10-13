@@ -6,14 +6,13 @@ from conflict_task.sequence.sequence import Sequence
 
 
 @pytest.fixture(scope="session")
-def sequence(win, input, settings=None) -> Sequence:
-    if settings is None:
-        settings = {
-            "name": "TestSequence",
-            "visual_components": [
-                {"name": "Text", "type": "TextStim", "spec": {}, "stop": 0.3}
-            ],
-        }
+def sequence(win, input) -> Sequence:
+    settings = {
+        "name": "TestSequence",
+        "visual_components": [
+            {"name": "Text", "type": "TextStim", "spec": {}, "stop": 0.3}
+        ],
+    }
     sequence = Sequence(
         win,
         input,
@@ -22,27 +21,14 @@ def sequence(win, input, settings=None) -> Sequence:
     return sequence
 
 
-@pytest.fixture(
-    scope="session",
-    params=[
-        {
-            "settings": None,
-            "win_setting": None,
-        },
-    ],
-)
-def screen(win, input, request) -> Screen:
-    settings = request.param.get("settings")
-    if settings is None:
-        settings = {
-            "name": "TestScreen",
-            "visual_components": [
-                {"name": "Text", "type": "TextStim", "spec": {"text": "Hello"}, "stop": 0.0}
-            ],
-            "response": {"keys": ["space"]},
-        }
-    if (win_setting := request.param.get("win_setting")) is not None:
-        win = Window(win_setting)
+def screen(win, input) -> Screen:
+    settings = {
+        "name": "TestScreen",
+        "visual_components": [
+            {"name": "Text", "type": "TextStim", "spec": {}, "stop": 0.3}
+        ],
+        "response": {"keys": ["space"]},
+    }
     screen = Screen(
         win,
         input,

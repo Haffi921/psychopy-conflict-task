@@ -32,6 +32,7 @@ profile = "black"
 clean = { shell = "rm -rf ./data" }
 test = "pytest ."
 retest = "pytest . --lf"
+mtest = "pytest tests/manual_tests.py"
 isort = "isort ."
 style = "black ."
 format = ["isort", "style"]
