@@ -3,7 +3,7 @@ import pytest
 from conflict_task.devices import Keyboard, Window
 from conflict_task.sequence import Screen, Sequence, Trial, screen
 
-win = Window({"color": [0, 0, 0]})
+win = Window({"color": [-1, -1, -1]})
 win_refresh = 1.0 / win.getActualFrameRate()
 input = Keyboard()
 
@@ -18,15 +18,18 @@ def xtest_screen():
                 {
                     "name": "Text",
                     "type": "TextStim",
-                    "spec": {"text": "You need to press [space] to continue", "height": 0.05},
+                    "spec": {
+                        "text": "You need to press [space] to continue",
+                        "height": 0.05,
+                    },
                 }
             ],
             "response": {"keys": ["space"]},
         },
     )
-    
+
     text = screen.visual[0]
-    response = screen.response 
+    response = screen.response
     global_flip = win.getFutureFlipTime()
 
     screen.run()
@@ -58,20 +61,30 @@ def xtest_timed_screen():
                 {
                     "name": "Text",
                     "type": "TextStim",
-                    "spec": {"text": "This one is timed for 2 seconds, but you can still press [space] to quit early", "height": 0.05},
+                    "spec": {
+                        "text": "This one is timed for 2 seconds, but you can still press [space] to quit early",
+                        "height": 0.05,
+                    },
                 }
             ],
             "response": {"keys": ["space"]},
         },
     )
-    
+
     text = screen.visual[0]
-    response = screen.response 
+    response = screen.response
 
     screen.run()
 
-    assert text.time_stopped == pytest.approx(screen.timer, abs=win_refresh) or text.time_stopped == response.time_stopped
-    assert text.time_stopped_flip == pytest.approx(screen.timer, abs=win_refresh) or text.time_stopped_flip == response.time_stopped_flip
+    assert (
+        text.time_stopped == pytest.approx(screen.timer, abs=win_refresh)
+        or text.time_stopped == response.time_stopped
+    )
+    assert (
+        text.time_stopped_flip == pytest.approx(screen.timer, abs=win_refresh)
+        or text.time_stopped_flip == response.time_stopped_flip
+    )
+
 
 def xtest_timed_screen_no_response():
     screen = Screen(
@@ -85,7 +98,10 @@ def xtest_timed_screen_no_response():
                 {
                     "name": "Text",
                     "type": "TextStim",
-                    "spec": {"text": "This one is timed for 2 seconds, you have to wait", "height": 0.05},
+                    "spec": {
+                        "text": "This one is timed for 2 seconds, you have to wait",
+                        "height": 0.05,
+                    },
                 }
             ],
         },
@@ -99,7 +115,6 @@ def xtest_timed_screen_no_response():
     assert text.time_stopped_flip == pytest.approx(screen.timer, abs=win_refresh)
 
 
-    
 def xtest_timed_screen_non_cut_response():
     screen = Screen(
         win,
@@ -113,7 +128,10 @@ def xtest_timed_screen_non_cut_response():
                 {
                     "name": "Text",
                     "type": "TextStim",
-                    "spec": {"text": "This one is timed for 2 seconds, but you can still press [space]", "height": 0.05},
+                    "spec": {
+                        "text": "This one is timed for 2 seconds, but you can still press [space]",
+                        "height": 0.05,
+                    },
                 }
             ],
             "response": {"keys": ["space"]},
@@ -123,9 +141,10 @@ def xtest_timed_screen_non_cut_response():
 
     assert not screen.response.made or screen.response.rt < screen.timer
 
-
 def test_trial_with_run():
-    trial = Trial(win, input,
+    trial = Trial(
+        win,
+        input,
         {
             "type": "Trial",
             "takes_trial_values": True,
@@ -134,25 +153,29 @@ def test_trial_with_run():
                 {
                     "name": "Text",
                     "type": "TextStim",
+                    "stop": 1.0,
                     "spec": {"text": "This is a trial, press [space]", "height": 0.05},
                 }
             ],
-            "response": {"keys": ["space"]},
+            "response": {"keys": ["space"], "stop": 1.0},
             "feedback_sequence": {
                 "visual_components": [
                     {
                         "name": "Feedback",
                         "type": "TextStim",
+                        "stop": 1.0,
                         "spec": {
                             "height": 0.05,
                         },
-                        "variable": { "text": "feedback_text" }
+                        "variable": {"text": "feedback_text"},
                     }
                 ],
                 "trial_values": lambda trial: {
-                    "feedback_text": "Correct!" if trial.correct else "Wrong!",
-                    "feedback_text2": f"Your response time was {trial.rt}",
+                    "feedback_text": f"Your response time was {round(trial['rt'] * 1000)} ms"
+                        if trial["made"]
+                        else "No answer",
                 },
-            }
-        }
+            },
+        },
     )
+    trial.run()

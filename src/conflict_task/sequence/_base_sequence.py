@@ -168,7 +168,9 @@ class BaseSequence:
             if component is not None
         ]
 
-    def _stop_all_components(self, time: float, time_flip: float, global_flip: float) -> None:
+    def _stop_all_components(
+        self, time: float, time_flip: float, global_flip: float
+    ) -> None:
         self._base_sequence_should_not_be_run()
 
         for component in self._get_all_components():

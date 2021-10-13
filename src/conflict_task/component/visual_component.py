@@ -53,8 +53,8 @@ class VisualComponent(BaseComponent):
             self.name = spec_name
         else:
             fatal_exit(
-                "Please specify a name for each VisualComponent, either at top level or in spec\n" +
-                f"Here are the unnamed settings: {component_settings}"
+                "Please specify a name for each VisualComponent, either at top level or in spec\n"
+                + f"Here are the unnamed settings: {component_settings}"
             )
 
         visual_type = get_type_or_fatal_exit(
