@@ -13,7 +13,7 @@ DEFAULT_FEEDBACK_SETTINGS = {
 
 class Feedback(Sequence):
 
-    name: str = "feedback"
+    name: str = "Feedback"
 
     def __init__(
         self, window: Window, input_device: InputDevice, sequence_settings: dict

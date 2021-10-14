@@ -164,7 +164,7 @@ def test_trial_with_run():
             "feedback_sequence": {
                 "visual_components": [
                     {
-                        "name": "Feedback",
+                        "name": "text",
                         "type": "TextStim",
                         "stop": 1.0,
                         "spec": {
@@ -189,9 +189,9 @@ def test_trial_with_run():
         data = trial.get_data()
         """for k, v in data.items():
             print(f"{k}: {v}")"""
-        text_start = data["trial.response.time_started_global_flip"]
-        response_time = data["trial.response.rt"] or data["trial.response.time_stopped"]
-        feedback_start = data["feedback.Feedback.time_started_global_flip"]
+        text_start = data["Trial.response.time_started_global_flip"]
+        response_time = data["Trial.response.rt"] or data["Trial.response.time_stopped"]
+        feedback_start = data["Feedback.text.time_started_global_flip"]
         lag.append(feedback_start - text_start - response_time)
 
     print(lag)

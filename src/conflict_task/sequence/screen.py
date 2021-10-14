@@ -9,7 +9,7 @@ DEFAULT_SCREEN_SETTINGS = {
 
 class Screen(Sequence):
 
-    name: str = "screen"
+    name: str = "Screen"
 
     def _parse_sequence_settings(
         self, sequence_settings, default_settings=DEFAULT_SCREEN_SETTINGS

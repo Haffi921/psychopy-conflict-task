@@ -86,9 +86,8 @@ class BaseSequence:
         def retrieve_valid_settings(settings, next_key) -> dict:
             if next_key in sequence_settings:
                 true_or_fatal_exit(
-                    type(default_settings[next_key])
-                    == type(sequence_settings[next_key]),
-                    f"{self.name}: '{next_key}' setting must be of type {default_settings[next_key]}",
+                    isinstance(sequence_settings[next_key], type(default_settings[next_key])),
+                    f"{self.name}: '{next_key}' setting must be of type {type(default_settings[next_key])}",
                 )
                 settings[next_key] = sequence_settings[next_key]
             return settings
@@ -250,7 +249,7 @@ class BaseSequence:
                 keep_running = KEEP_RUNNING
 
         # If sequence has a response component check for it
-        if self.response:
+        if self.response and self.response.started():
             self.response.check(self.input_device)
 
             # Two possibilities based on the response settings
@@ -264,7 +263,6 @@ class BaseSequence:
         # Finally, if timed check if sequence has finished it's timer
         if self.timed and time_flip >= self.timer:
             keep_running = STOP_RUNNING
-            self._stop_all_components(time, time_flip, time_global_flip)
 
         # Flip window
         self.window.flip()

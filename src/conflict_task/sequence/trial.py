@@ -15,7 +15,7 @@ DEFAULT_TRIAL_SETTINGS = {
 
 class Trial(Sequence):
 
-    name: str = "trial"
+    name: str = "Trial"
 
     def __init__(self, window, input_device, sequence_settings):
         self.variable_factor: dict = None
