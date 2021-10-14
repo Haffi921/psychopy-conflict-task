@@ -132,7 +132,7 @@ class BaseComponent:
             for factor_name, factor_id in self.variable_factor.items():
                 true_or_fatal_exit(
                     factor_id in trial_values.keys(),
-                    f"Subject trial sequence does not include key '{factor_id}' required by {self.name}",
+                    f"Subject trial sequence does not include key '{factor_id}' required by {self.name} component",
                 )
                 setattr(self.component, factor_name, trial_values[factor_id])
 

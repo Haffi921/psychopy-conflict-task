@@ -83,10 +83,15 @@ class BaseSequence:
         if name := get_type(sequence_settings, "name", str):
             self.name = name
 
+        if variable_factor := get_type(sequence_settings, "variable", dict):
+            self.variable_factor = variable_factor
+
         def retrieve_valid_settings(settings, next_key) -> dict:
             if next_key in sequence_settings:
                 true_or_fatal_exit(
-                    isinstance(sequence_settings[next_key], type(default_settings[next_key])),
+                    isinstance(
+                        sequence_settings[next_key], type(default_settings[next_key])
+                    ),
                     f"{self.name}: '{next_key}' setting must be of type {type(default_settings[next_key])}",
                 )
                 settings[next_key] = sequence_settings[next_key]
@@ -206,6 +211,17 @@ class BaseSequence:
             for component in self._get_all_components():
                 component.prepare(trial_values)
 
+    def prepare(self, trial_values: dict) -> None:
+        self._base_sequence_should_not_be_run()
+
+        if self.variable_factor:
+            for factor_name, factor_id in self.variable_factor.items():
+                true_or_fatal_exit(
+                    factor_id in trial_values.keys(),
+                    f"Subject trial values does not include key '{factor_id}' required by {self.name} sequence",
+                )
+                setattr(self, factor_name, trial_values[factor_id])
+
     def refresh(self, new_t: float = 0.0) -> None:
         self._base_sequence_should_not_be_run()
 
@@ -249,16 +265,19 @@ class BaseSequence:
                 keep_running = KEEP_RUNNING
 
         # If sequence has a response component check for it
-        if self.response and self.response.started():
-            self.response.check(self.input_device)
+        if self.response:
+            if self.response.not_started():
+                self.input_device.reset_events()
+            elif self.response.started():
+                self.response.check(self.input_device)
 
-            # Two possibilities based on the response settings
-            if self.response.made and self.cut_on_response:
-                # Cutting sequence short after a response has been made
-                keep_running = STOP_RUNNING
-            elif self.wait_for_response:
-                # Wait for response even though all components have finished
-                keep_running = KEEP_RUNNING
+                # Two possibilities based on the response settings
+                if self.response.made and self.cut_on_response:
+                    # Cutting sequence short after a response has been made
+                    keep_running = STOP_RUNNING
+                elif self.wait_for_response:
+                    # Wait for response even though all components have finished
+                    keep_running = KEEP_RUNNING
 
         # Finally, if timed check if sequence has finished it's timer
         if self.timed and time_flip >= self.timer:
@@ -279,6 +298,7 @@ class BaseSequence:
     def run(self, trial_values: dict = {}, allow_escape=False) -> None:
         self._base_sequence_should_not_be_run()
 
+        self.prepare(trial_values)
         self._refresh_components()
         self._prepare_components(trial_values)
         self.refresh(new_t=-self.window.getFutureFlipTime(clock="now"))
@@ -296,10 +316,9 @@ class BaseSequence:
     def get_data(self, prepend_key=True) -> dict:
         self._base_sequence_should_not_be_run()
 
-        def merge_data(data: dict, next_component: BaseComponent):
-            return {**data, **next_component.get_data(prepend_key=prepend_key)}
-
-        data = reduce(merge_data, self._get_all_components(), {})
+        data = {}
+        for component in self._get_all_components():
+            data.update(component.get_data(prepend_key=prepend_key))
 
         if prepend_key:
             data = {f"{self.name}.{key}": value for key, value in data.items()}

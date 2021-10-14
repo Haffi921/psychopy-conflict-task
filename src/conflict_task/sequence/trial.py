@@ -39,14 +39,13 @@ class Trial(Sequence):
             self.feedback_sequence = Feedback(
                 self.window, self.input_device, feedback_settings
             )
+            true_or_fatal_exit(
+                self.name != self.feedback_sequence.name,
+                f"{self.name} - Trial and its feedback cannot have the same name",
+            )
 
         elif self.feedback:
             fatal_exit(f"No settings found for feedback in trial: {self.name}")
-
-        true_or_fatal_exit(
-            self.name != self.feedback_sequence.name,
-            f"{self.name} - Trial and its feedback cannot have the same name",
-        )
 
     def run(self, trial_values: dict = {}, allow_escape=False):
         super().run(trial_values=trial_values, allow_escape=allow_escape)

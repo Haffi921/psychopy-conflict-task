@@ -123,9 +123,10 @@ class ResponseComponent(BaseComponent):
 
     def get_response_data(self):
         return {
-            "made": self.made,
-            "key": self.key,
-            "rt": self.rt,
+            "response_start": self.time_started_flip,
+            "response_made": self.made,
+            "response_key": self.key,
+            "response_rt": self.rt,
         }
 
 
@@ -220,7 +221,8 @@ class CorrectResponseComponent(ResponseComponent):
         return key_pressed
 
     def get_response_data(self):
-        return super().get_response_data() | {
-            "correct_key": self.correct_key,
-            "correct": self.correct,
+        return {
+            **super().get_response_data(),
+            "response_correct_key": self.correct_key,
+            "response_correct": self.correct,
         }

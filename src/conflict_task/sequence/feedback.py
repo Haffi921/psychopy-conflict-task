@@ -19,6 +19,7 @@ class Feedback(Sequence):
         self, window: Window, input_device: InputDevice, sequence_settings: dict
     ) -> None:
         self.feedback_function: function = None
+        self.win_color = window.color
         super().__init__(window, input_device, sequence_settings)
 
     def _parse_sequence_settings(
@@ -40,6 +41,13 @@ class Feedback(Sequence):
         )
 
     def _prepare_components(self, trial_values: dict) -> None:
-        feedback_values = self.feedback_function(trial_values)
+        feedback_values: dict = self.feedback_function(trial_values)
+
+        if win_color := feedback_values.get("win_color"):
+            self.window.color = win_color
 
         super()._prepare_components(feedback_values)
+
+    def run(self, trial_values: dict, allow_escape) -> None:
+        super().run(trial_values=trial_values, allow_escape=allow_escape)
+        self.window.color = self.win_color

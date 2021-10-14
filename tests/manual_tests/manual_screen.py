@@ -156,11 +156,52 @@ def test_trial_with_run():
                 {
                     "name": "Text",
                     "type": "TextStim",
+                    "start": 1.0,
+                    "duration": 1.0,
+                    "spec": {"text": "This is a trial, press [space]", "height": 0.05},
+                }
+            ],
+            "response": {"keys": ["space"], "start": 1.0, "duration": 1.0},
+            "feedback_sequence": {
+                "visual_components": [
+                    {
+                        "name": "text",
+                        "type": "TextStim",
+                        "stop": 1.0,
+                        "spec": {
+                            "height": 0.05,
+                        },
+                        "variable": {"text": "feedback_text"},
+                    }
+                ],
+                "trial_values": lambda trial: {
+                    "feedback_text": f"Your response time was {round((trial['response_rt'] - trial['response_start']) * 1000)} ms"
+                    if trial["response_made"]
+                    else "No answer",
+                },
+            },
+        },
+    )
+
+
+def xtest_trial_with_run_with_variable_feedback():
+    trial = Trial(
+        win,
+        input,
+        {
+            "type": "Trial",
+            "takes_trial_values": True,
+            "feedback": True,
+            "visual_components": [
+                {
+                    "name": "Text",
+                    "type": "TextStim",
                     "stop": 1.0,
                     "spec": {"text": "This is a trial, press [space]", "height": 0.05},
                 }
             ],
             "response": {"keys": ["space"], "stop": 1.0},
+            "variable": {"feedback": "feedback"},
             "feedback_sequence": {
                 "visual_components": [
                     {
@@ -182,18 +223,104 @@ def test_trial_with_run():
         },
     )
 
+    trial_values = [
+        {
+            "feedback": True,
+        },
+        {"feedback": False},
+        {
+            "feedback": True,
+        },
+        {"feedback": False},
+    ]
+
+    for t in trial_values:
+        trial.run(t)
+
+
+def xtest_trial_with_correct_respone_feedback():
+    trial = Trial(
+        win,
+        input,
+        {
+            "type": "Trial",
+            "takes_trial_values": True,
+            "cut_on_response": True,
+            "feedback": True,
+            "visual_components": [
+                {
+                    "name": "Text",
+                    "type": "TextStim",
+                    "start": 1.0,
+                    "duration": 1.0,
+                    "spec": {"height": 0.05},
+                    "variable": {"text": "trial_text"},
+                }
+            ],
+            "response": {
+                "keys": ["a", "l"],
+                "start": 1.0,
+                "duration": 1.0,
+                "variable": {"correct_key": "correct_key"},
+            },
+            "feedback_sequence": {
+                "visual_components": [
+                    {
+                        "name": "text",
+                        "type": "TextStim",
+                        "stop": 1.0,
+                        "spec": {
+                            "height": 0.05,
+                        },
+                        "variable": {"text": "feedback_text"},
+                    }
+                ],
+                "trial_values": lambda trial: {
+                    "feedback_text": "Correct!"
+                    if trial["response_made"] and trial["response_correct"]
+                    else (
+                        "Incorrect!"
+                        if trial["response_made"] and not trial["response_correct"]
+                        else "No Answer"
+                    ),
+                    "win_color": "green"
+                    if trial["response_made"] and trial["response_correct"]
+                    else (
+                        "red"
+                        if trial["response_made"] and not trial["response_correct"]
+                        else "black"
+                    ),
+                },
+            },
+        },
+    )
+
+    trial_values = [
+        {
+            "trial_text": "This is a trial, press [a] for correct",
+            "correct_key": "a",
+        },
+        {
+            "trial_text": "This is a trial, press [l] for incorrect",
+            "correct_key": "a",
+        },
+    ]
+
+    for t in trial_values:
+        trial.run(t)
+
+    """
     lag = []
     for _ in range(10):
         trial.run()
 
         data = trial.get_data()
-        """for k, v in data.items():
-            print(f"{k}: {v}")"""
         text_start = data["Trial.response.time_started_global_flip"]
-        response_time = data["Trial.response.rt"] or data["Trial.response.time_stopped"]
+        response_time = data["Trial.response.time_stopped"] - data["Trial.response.time_started"]
         feedback_start = data["Feedback.text.time_started_global_flip"]
         lag.append(feedback_start - text_start - response_time)
 
     print(lag)
     print(mean(lag))
     assert 0
+    """

@@ -4,7 +4,7 @@ DEFAULT_WINDOW_SETTINGS = dict(
     # Size of the window in pixels (x, y)
     size=(1920, 1080),
     # Color of background as [r, g, b] list or single value. Each gun can take values between -1.0 and 1.0
-    color=[0, 0, 0],
+    color=[-1, -1, -1],
     # Create a window in ‘full-screen’ mode. Better timing can be achieved in full-screen mode
     fullscr=True,
     # If not fullscreen, then position of the top-left corner of the window on the screen (x, y)
