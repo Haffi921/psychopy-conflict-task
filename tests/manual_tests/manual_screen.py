@@ -143,7 +143,7 @@ def xtest_timed_screen_non_cut_response():
     assert not screen.response.made or screen.response.rt < screen.timer
 
 
-def test_trial_with_run():
+def xtest_trial_with_run():
     trial = Trial(
         win,
         input,
@@ -182,6 +182,8 @@ def test_trial_with_run():
             },
         },
     )
+
+    trial.run()
 
 
 def xtest_trial_with_run_with_variable_feedback():

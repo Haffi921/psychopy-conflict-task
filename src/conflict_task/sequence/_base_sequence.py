@@ -190,10 +190,11 @@ class BaseSequence:
 
         if self.timed and self.timed < duration:
             return self.timer
+
         return duration
 
     def reset_clock(self, new_t):
-        self.clock.reset(newT=new_t)
+        self.clock.reset(newT=-new_t)
 
     # ===============================================
     # Sequence execution functions
@@ -313,12 +314,32 @@ class BaseSequence:
 
         return True
 
+    """
     def get_data(self, prepend_key=True) -> dict:
         self._base_sequence_should_not_be_run()
 
         data = {}
         for component in self._get_all_components():
             data.update(component.get_data(prepend_key=prepend_key))
+
+        if prepend_key:
+            data = {f"{self.name}.{key}": value for key, value in data.items()}
+
+        return data
+    """
+
+    def get_data(self, prepend_key=True) -> dict:
+        self._base_sequence_should_not_be_run()
+
+        def merge_data(data: dict, component: BaseComponent):
+            data.update(component.get_data(prepend_key=prepend_key))
+            return data
+
+        data = reduce(
+            merge_data,
+            self._get_all_components(),
+            {},
+        )
 
         if prepend_key:
             data = {f"{self.name}.{key}": value for key, value in data.items()}

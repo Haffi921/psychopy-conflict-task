@@ -58,7 +58,7 @@ class Trial(Sequence):
             )
 
     def get_data(self, prepend_key: bool = True) -> dict:
-        return {
-            **super().get_data(prepend_key=prepend_key),
-            **self.feedback_sequence.get_data(prepend_key=prepend_key),
-        }
+        data = super().get_data(prepend_key=prepend_key)
+        if self.feedback_sequence:
+            data.update(self.feedback_sequence.get_data(prepend_key=prepend_key))
+        return data
