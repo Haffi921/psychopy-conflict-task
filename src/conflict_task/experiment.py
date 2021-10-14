@@ -200,14 +200,14 @@ class Experiment:
             continue_experiment = pre.run(allow_escape=self.allow_escape)
 
             self.data_handler.add_data_dict_and_next_entry(
-                experiment_data | pre.get_data()
+                {**experiment_data, **pre.get_data()}
             )
 
             if not continue_experiment:
                 self.close()
 
         for block in range(self.nr_blocks):
-            block_data = experiment_data | {"block": block + 1}
+            block_data = {**experiment_data, "block": block + 1}
 
             # BETWEEN BLOCK
             if block:  # Skip first block
@@ -216,7 +216,7 @@ class Experiment:
                 )
 
                 self.data_handler.add_data_dict_and_next_entry(
-                    block_data | self.between_blocks.get_data()
+                    {**block_data, **self.between_blocks.get_data()}
                 )
 
                 if not continue_experiment:
@@ -224,9 +224,9 @@ class Experiment:
 
             # BLOCK
             for trial in range(self.nr_trials):
-                trial_data = block_data | {"trial": trial + 1}
+                trial_data = {**block_data, "trial": trial + 1}
 
-                trial_values = trial_data | self._get_trial_values(block, trial)
+                trial_values = {**trial_data, **self._get_trial_values(block, trial)}
 
                 continue_experiment = self.block_trial.run(
                     trial_values=trial_values, allow_escape=self.allow_escape
@@ -244,6 +244,10 @@ class Experiment:
         for post in self.post:
             continue_experiment = post.run(
                 debug_data=debug_data, allow_escape=self.allow_escape
+            )
+
+            self.data_handler.add_data_dict_and_next_entry(
+                {**experiment_data, **post.get_data()}
             )
 
             if not continue_experiment:
