@@ -42,14 +42,8 @@ def test_unknown_type(win: Window, capsys: pytest.CaptureFixture):
     )
 
 
-def test_no_spec(win: Window, capsys: pytest.CaptureFixture):
-    with pytest.raises(SystemExit):
-        VisualComponent({"name": "Text", "type": "TextStim"}, win)
-
-    assert (
-        "Text: VisualComponents require specifications - use 'spec' field"
-        in capsys.readouterr().out
-    )
+def test_no_spec(win: Window):
+    VisualComponent({"name": "Text", "type": "TextStim"}, win)
 
 
 def test_spec_not_dictionary(win: Window, capsys: pytest.CaptureFixture):

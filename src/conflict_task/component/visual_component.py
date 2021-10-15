@@ -68,11 +68,12 @@ class VisualComponent(BaseComponent):
             f"{self.name}: There's no visual component type {visual_type}",
         )
 
-        visual_spec: dict = get_type_or_fatal_exit(
+        visual_spec: dict = get_type(
             component_settings,
             "spec",
             dict,
-            f"{self.name}: VisualComponents require specifications - use 'spec' field",
+            {}
+            # f"{self.name}: VisualComponents require specifications - use 'spec' field",
         )
 
         self.component: visual.TextStim = getattr(visual, visual_type)(
