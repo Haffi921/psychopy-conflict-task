@@ -10,6 +10,6 @@ A generic Conflict Task boilerplate made in PsychoPy
 ## Installation
 **Prerequisite**
 1. Python version >=3.6, <=3.8
-2. Install [Poetry](https://python-poetry.org/)
-3. Run `poetry install` with additional `-D` flag for dev-dependancies
-4. Run `poetry shell`
+2. Install [Pipenv](https://pipenv-fork.readthedocs.io/en/latest/)
+3. Run `pipenv install --python 3.8`
+4. Run `pipenv shell`
