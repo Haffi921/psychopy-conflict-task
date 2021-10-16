@@ -3,7 +3,7 @@ A generic Conflict Task boilerplate made in PsychoPy
 
 
 ## Roadmap
-- [] Add AudioComponents
+- [ ] Add AudioComponents
 - [x] Add functionality to show non-trial screens (experiment info, etc)
 - [x] Add feedback functionality
 
