@@ -53,24 +53,24 @@ feedback = {
     "spec": {"name": "feedback", "color": "black", "height": 80, "font": font_family},
     "variable": {
         "text": "feedback_text",
-        "opacity": "feedback_opacity",
+        #"opacity": "feedback_opacity",
     },
 }
 
-trial = {
+trial_sequence = {
     "type": "Trial",
     "visual_components": [distractor, target],
     "response": response,
     "takes_trial_values": True,
     "feedback": True,
     "feedback_sequence": {
-        "visual_components": [feedback, fixation_cross],
+        "visual_components": [feedback],
         "trial_values": lambda trial: {
             **trial,
             "feedback_text": "Zu langsam"
             if not trial["response_made"]
             else ("Fehler" if not trial["response_correct"] else ""),
-            "fixation_opacity": 1.0 if trial["response_correct"] else 0.0,
+            #"fixation_opacity": 1.0 if trial["response_correct"] else 0.0,
         },
     },
 }
