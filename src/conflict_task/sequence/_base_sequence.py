@@ -314,20 +314,6 @@ class BaseSequence:
 
         return True
 
-    """
-    def get_data(self, prepend_key=True) -> dict:
-        self._base_sequence_should_not_be_run()
-
-        data = {}
-        for component in self._get_all_components():
-            data.update(component.get_data(prepend_key=prepend_key))
-
-        if prepend_key:
-            data = {f"{self.name}.{key}": value for key, value in data.items()}
-
-        return data
-    """
-
     def get_data(self, prepend_key=True) -> dict:
         self._base_sequence_should_not_be_run()
 

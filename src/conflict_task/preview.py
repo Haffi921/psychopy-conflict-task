@@ -1,5 +1,11 @@
 from conflict_task import sequence
-from conflict_task.component import BaseComponent, VisualComponent, AudioComponent, ResponseComponent, WaitComponent
+from conflict_task.component import (
+    AudioComponent,
+    BaseComponent,
+    ResponseComponent,
+    VisualComponent,
+    WaitComponent,
+)
 from conflict_task.constants import *
 from conflict_task.devices import Keyboard, Window
 

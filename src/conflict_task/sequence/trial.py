@@ -48,7 +48,9 @@ class Trial(Sequence):
             fatal_exit(f"No settings found for feedback in trial: {self.name}")
 
     def run(self, trial_values: dict = {}, allow_escape=False):
-        trial_success = super().run(trial_values=trial_values, allow_escape=allow_escape)
+        trial_success = super().run(
+            trial_values=trial_values, allow_escape=allow_escape
+        )
 
         if self.feedback:
             trial_values.update(self.response.get_response_data())
@@ -56,7 +58,7 @@ class Trial(Sequence):
             feedback_success = self.feedback_sequence.run(
                 trial_values=trial_values, allow_escape=allow_escape
             )
-        
+
         return trial_success and feedback_success
 
     def get_data(self, prepend_key: bool = True) -> dict:

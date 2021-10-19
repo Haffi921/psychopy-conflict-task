@@ -17,14 +17,12 @@ between_blocks = {
                 "name": "text",
                 "color": "white",
                 "height": 48,
-                "wrapWidth": 1200, 
-                "text": between_blocks_text
-            }
+                "wrapWidth": 1200,
+                "text": between_blocks_text,
+            },
         }
     ],
-    "response": {
-        "keys": ["space"]
-    },
+    "response": {"keys": ["space"]},
 }
 
 if __name__ == "__main__":

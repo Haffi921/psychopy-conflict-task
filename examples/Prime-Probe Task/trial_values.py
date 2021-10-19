@@ -19,6 +19,7 @@ conditions = {
 trial_values = []
 for block in range(8):
     feedback_opacity = 1.0 if block < 4 else 0.0
+
     def translate(trial):
         hand, distractor, target = trial
         return {
@@ -27,15 +28,11 @@ for block in range(8):
             "distractor_text": conditions["distractor"][hand][distractor],
             "target_text": conditions["target"][hand][target],
             "correct_key": conditions["correct_key"][hand][target],
-            "feedback_opacity": feedback_opacity
+            "feedback_opacity": feedback_opacity,
         }
 
     sequence = counterbalance(
-        trials=95,
-        factor_levels=[2, 2],
-        levels=2,
-        alternating=True,
-        Force=True
+        trials=95, factor_levels=[2, 2], levels=2, alternating=True, Force=True
     )
 
     sequence = list(map(translate, sequence))

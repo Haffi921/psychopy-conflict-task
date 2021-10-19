@@ -10,9 +10,7 @@ fixation_cross = {
         "lineColor": None,
         "fillColor": "black",
     },
-    "variable": {
-        "opacity": "fixation_opacity"
-    }
+    "variable": {"opacity": "fixation_opacity"},
 }
 
 distractor = {
@@ -27,19 +25,14 @@ distractor = {
     },
     "variable": {
         "text": "distractor_text",
-    }
+    },
 }
 
 target = {
     "start": 1.166,
     "stop": 1.3,
     "type": "TextStim",
-    "spec": {
-        "name": "target",
-        "color": "black",
-        "height": 103,
-        "font": font_family
-    },
+    "spec": {"name": "target", "color": "black", "height": 103, "font": font_family},
     "variable": {
         "text": "target_text",
     },
@@ -57,12 +50,7 @@ response = {
 feedback = {
     "stop": 0.2,
     "type": "TextStim",
-    "spec": {
-        "name": "feedback",
-        "color": "black",
-        "height": 80,
-        "font": font_family
-    },
+    "spec": {"name": "feedback", "color": "black", "height": 80, "font": font_family},
     "variable": {
         "text": "feedback_text",
         "opacity": "feedback_opacity",
@@ -79,10 +67,12 @@ trial = {
         "visual_components": [feedback, fixation_cross],
         "trial_values": lambda trial: {
             **trial,
-            "feedback_text": "Zu langsam" if not trial["response_made"] else ("Fehler" if not trial["response_correct"] else ""),
+            "feedback_text": "Zu langsam"
+            if not trial["response_made"]
+            else ("Fehler" if not trial["response_correct"] else ""),
             "fixation_opacity": 1.0 if trial["response_correct"] else 0.0,
         },
-    }
+    },
 }
 
 # if __name__ == "__main__":

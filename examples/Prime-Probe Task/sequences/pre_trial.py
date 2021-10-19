@@ -22,13 +22,11 @@ start_screen = {
                 "color": "white",
                 "height": 32,
                 "wrapWidth": 1200,
-                "text": start_screen_text
-            }
+                "text": start_screen_text,
+            },
         }
     ],
-    "response": {
-        "keys": ["space"]
-    }
+    "response": {"keys": ["space"]},
 }
 
 if __name__ == "__main__":

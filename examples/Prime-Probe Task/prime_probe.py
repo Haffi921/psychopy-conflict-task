@@ -1,11 +1,9 @@
+from sequences.between_blocks import between_blocks
+from sequences.pre_trial import start_screen
+from sequences.trial import trial
+from trial_values import trial_values
 
 from conflict_task.experiment import Experiment
-
-from sequences.pre_trial import start_screen
-from sequences.between_blocks import between_blocks
-from sequences.trial import trial
-
-from trial_values import trial_values
 
 experiment_settings = dict(
     name="Prime-Probe",
