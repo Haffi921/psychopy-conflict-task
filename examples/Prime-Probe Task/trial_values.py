@@ -1,5 +1,3 @@
-from settings.experiment_settings import *
-
 from sequencing_helpers import Randomizer, counterbalance
 
 conditions = {
@@ -11,30 +9,33 @@ conditions = {
         ["Left", "Right"],
         ["Up", "Down"],
     ],
-    "correct_key": [["a", "d"], ["j", "l"]],
+    "correct_key": [
+        ["f", "g"],
+        ["j", "n"],
+    ],
 }
 
 
-def translate(trial):
-    hand, distractor, target = trial
-    return {
-        "hand": hand,
-        "congruency": int(distractor != target),
-        "distractor_text": conditions["distractor"][hand][distractor],
-        "target_text": conditions["target"][hand][target],
-        "correct_key": conditions["correct_key"][hand][target],
-    }
-
-
-rand = Randomizer(0, 1)
 trial_values = []
 for block in range(8):
+    feedback_opacity = 1.0 if block < 4 else 0.0
+    def translate(trial):
+        hand, distractor, target = trial
+        return {
+            "hand": hand,
+            "congruency": int(distractor != target),
+            "distractor_text": conditions["distractor"][hand][distractor],
+            "target_text": conditions["target"][hand][target],
+            "correct_key": conditions["correct_key"][hand][target],
+            "feedback_opacity": feedback_opacity
+        }
+
     sequence = counterbalance(
-        trials=128,
+        trials=95,
         factor_levels=[2, 2],
         levels=2,
         alternating=True,
-        alternator_start=rand.new_one(),
+        Force=True
     )
 
     sequence = list(map(translate, sequence))

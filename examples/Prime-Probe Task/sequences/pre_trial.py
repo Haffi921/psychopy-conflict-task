@@ -12,19 +12,26 @@ bibendum id, eleifend sit amet est. Curabitur sit amet tincidunt ante, at congue
 Press [space] to continue.
 """
 
-text_component = dict(
-    name="text",
-    type="TextStim",
-    spec=dict(name="text", color="white", height=0.03, text=start_screen_text),
-)
-
-start_screen = dict(
-    type="Screen",
-    visual_components=dict(text=text_component),
-    response=dict(keys=["space"]),
-)
+start_screen = {
+    "type": "Screen",
+    "visual_components": [
+        {
+            "name": "text",
+            "type": "TextStim",
+            "spec": {
+                "color": "white",
+                "height": 32,
+                "wrapWidth": 1200,
+                "text": start_screen_text
+            }
+        }
+    ],
+    "response": {
+        "keys": ["space"]
+    }
+}
 
 if __name__ == "__main__":
-    from conflict_task.experiment import preview_sequence
+    from conflict_task.preview import preview_sequence
 
-    preview_sequence(start_screen, window_settings={"color": [-1, -1, -1]})
+    preview_sequence(start_screen)
