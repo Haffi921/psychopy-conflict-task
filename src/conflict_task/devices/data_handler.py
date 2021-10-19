@@ -63,7 +63,7 @@ class DataHandler:
 
     def finish_participant_data(self):
         self.save_as_csv()
-        self._data_handler.abort()
+        self.abort()
 
     def abort(self):
         self._data_handler.abort()
