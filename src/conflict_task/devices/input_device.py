@@ -15,7 +15,7 @@ class InputDevice:
             "InputDevice: Use derived classes",
         )
 
-    def get_keys(self, keys: list[str]) -> list[tuple[str, float]]:
+    def get_keys(self, keys: list[str], wait_for_release = False) -> list[tuple[str, float]]:
         """
         Derived classes need to implement this on for their own devices
         """
@@ -36,11 +36,13 @@ class Keyboard(InputDevice):
     def __init__(self):
         self.device = keyboard.Keyboard()
 
-    def get_keys(self, keys: list[str]) -> list[tuple[str, float]]:
+    def get_keys(self, keys: list[str], wait_for_release = False) -> list[tuple[str, float]]:
         if isinstance(keys, str):
             keys = [keys]
 
-        return [(key.name, key.rt) for key in self.device.getKeys(keys)]
+        return [
+            (key.name, key.rt) for key in self.device.getKeys(keys, waitRelease=wait_for_release)
+        ]
 
     def get_last_key(self, keys: list[str]) -> tuple[str, float]:
         keys_pressed = self.get_keys(keys)

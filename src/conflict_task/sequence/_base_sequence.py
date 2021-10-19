@@ -193,8 +193,8 @@ class BaseSequence:
 
         return duration
 
-    def reset_clock(self, new_t):
-        self.clock.reset(newT=-new_t)
+    def reset_clock(self, new_t=0.0):
+        self.clock.reset(newT=new_t)
 
     # ===============================================
     # Sequence execution functions
@@ -302,7 +302,7 @@ class BaseSequence:
         self.prepare(trial_values)
         self._refresh_components()
         self._prepare_components(trial_values)
-        self.refresh(new_t=-self.window.getFutureFlipTime(clock="now"))
+        self.refresh(new_t=self.window.getFutureFlipTime(clock="now"))
 
         running = KEEP_RUNNING
 

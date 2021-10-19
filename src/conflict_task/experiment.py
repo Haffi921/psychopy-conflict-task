@@ -79,7 +79,7 @@ class Experiment:
                 f"No input device named {input_device_class}"
             ),
         )
-        self.input_device = getattr(input_device, input_device_class)
+        self.input_device = getattr(input_device, input_device_class)()
         # -----------------------------------------------
 
         # -----------------------------------------------
@@ -91,6 +91,8 @@ class Experiment:
             )
         else:
             self.data_handler = DataHandler(experiment_name=self.name)
+
+        self.data_handler.start_participant_data()
         # -----------------------------------------------
 
         # -----------------------------------------------
@@ -112,7 +114,7 @@ class Experiment:
             "Experiment must have 'sequence' settings",
         )
 
-        if pre_settings := get_type(experiment_settings, "pre", list):
+        if pre_settings := get_type(experiment_sequence, "pre", list):
             for seq in pre_settings:
                 self.pre.append(self._create_sequence(seq))
 
@@ -166,7 +168,7 @@ class Experiment:
     def _create_sequence(self, sequence_settings: dict) -> sequence.Sequence:
         sequence_type = get_type(sequence_settings, "type", str, "Sequence")
         true_or_fatal_exit(
-            isinstance(sequence, sequence_type),
+            hasattr(sequence, sequence_type),
             f"Sequence type specified in 'type' does not exist. No sequence named {sequence_type}",
         )
         return getattr(sequence, sequence_type)(
@@ -190,8 +192,6 @@ class Experiment:
 
     def run(self, debug_data=False):
         continue_experiment = True
-
-        self.data_handler.start_participant_data()
 
         experiment_data = {"experiment_name": self.name}
 

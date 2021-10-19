@@ -49,5 +49,6 @@ class Feedback(Sequence):
         super()._prepare_components(feedback_values)
 
     def run(self, trial_values: dict, allow_escape) -> None:
-        super().run(trial_values=trial_values, allow_escape=allow_escape)
+        feedback_success = super().run(trial_values=trial_values, allow_escape=allow_escape)
         self.window.color = self.win_color
+        return feedback_success

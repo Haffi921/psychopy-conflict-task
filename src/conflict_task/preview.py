@@ -1,23 +1,23 @@
 from conflict_task import sequence
-from conflict_task.component import *
+from conflict_task.component import BaseComponent, VisualComponent, AudioComponent, ResponseComponent, WaitComponent
 from conflict_task.constants import *
 from conflict_task.devices import Keyboard, Window
 
 
 def preview_component(
-    component_settings, component_type=VISUAL, component_values={}, window_settings={}
+    component_settings, component_values={}, window_settings={}, component_type=VISUAL
 ):
     window = Window(window_settings)
     keyboard = Keyboard()
     component: BaseComponent = None
 
-    if component_type == VISUAL:
+    if component_type is VISUAL:
         component = VisualComponent(component_settings, window)
-    elif component_type == AUDIO:
+    elif component_type is AUDIO:
         component = AudioComponent(component_settings)
-    elif component_type == RESPONSE:
+    elif component_type is RESPONSE:
         component = ResponseComponent(component_settings)
-    elif component_type == WAIT:
+    elif component_type is WAIT:
         component = WaitComponent(component_settings)
 
     if component.variable_factor:
@@ -47,9 +47,9 @@ def preview_sequence(sequence_settings, sequence_values={}, window_settings={}):
 
     if "type" in sequence_settings and hasattr(sequence, sequence_settings["type"]):
         seq = getattr(sequence, sequence_settings["type"])(
-            window, keyboard, None, sequence_settings
+            window, keyboard, sequence_settings
         )
     else:
-        seq = sequence.Sequence(window, keyboard, None, sequence_settings)
+        seq = sequence.Sequence(window, keyboard, sequence_settings)
 
     seq.run(sequence_values, False)
