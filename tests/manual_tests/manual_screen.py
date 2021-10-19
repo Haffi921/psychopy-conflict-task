@@ -4,7 +4,7 @@ from numpy.core.fromnumeric import mean
 from conflict_task.devices import Keyboard, Window
 from conflict_task.sequence import Screen, Sequence, Trial, screen
 
-win = Window({"color": [-1, -1, -1]})
+win = Window({"color": [0, 0, 0]})
 win_refresh = 1.0 / win.getActualFrameRate()
 input = Keyboard()
 
@@ -36,9 +36,9 @@ def xtest_screen():
     screen.run()
 
     assert text.finished()
-    assert text.time_started < win_refresh
-    assert text.time_started_flip < text.time_started + win_refresh
-    assert text.time_started_global_flip < global_flip + win_refresh
+    assert text.time_started <= win_refresh * 2
+    assert text.time_started_flip <= text.time_started + win_refresh * 2
+    assert text.time_started_global_flip <= global_flip + win_refresh * 2
 
     assert text.time_started == response.time_started
     assert text.time_started_flip == response.time_started_flip
@@ -183,7 +183,8 @@ def xtest_trial_with_run():
         },
     )
 
-    trial.run()
+    for _ in range(2):
+        trial.run()
 
 
 def xtest_trial_with_run_with_variable_feedback():
@@ -217,8 +218,8 @@ def xtest_trial_with_run_with_variable_feedback():
                     }
                 ],
                 "trial_values": lambda trial: {
-                    "feedback_text": f"Your response time was {round(trial['rt'] * 1000)} ms"
-                    if trial["made"]
+                    "feedback_text": f"Your response time was {round(trial['response_rt'] * 1000)} ms"
+                    if trial["response_made"]
                     else "No answer",
                 },
             },
@@ -229,11 +230,15 @@ def xtest_trial_with_run_with_variable_feedback():
         {
             "feedback": True,
         },
-        {"feedback": False},
+        {
+            "feedback": False,
+        },
         {
             "feedback": True,
         },
-        {"feedback": False},
+        {
+            "feedback": False,
+        },
     ]
 
     for t in trial_values:
@@ -278,12 +283,12 @@ def xtest_trial_with_correct_respone_feedback():
                     }
                 ],
                 "trial_values": lambda trial: {
-                    "feedback_text": "Correct!"
+                    "feedback_text": "+"
                     if trial["response_made"] and trial["response_correct"]
                     else (
-                        "Incorrect!"
+                        "Fehler!"
                         if trial["response_made"] and not trial["response_correct"]
-                        else "No Answer"
+                        else "Zu langsam"
                     ),
                     "win_color": "green"
                     if trial["response_made"] and trial["response_correct"]
@@ -310,19 +315,3 @@ def xtest_trial_with_correct_respone_feedback():
 
     for t in trial_values:
         trial.run(t)
-
-    """
-    lag = []
-    for _ in range(10):
-        trial.run()
-
-        data = trial.get_data()
-        text_start = data["Trial.response.time_started_global_flip"]
-        response_time = data["Trial.response.time_stopped"] - data["Trial.response.time_started"]
-        feedback_start = data["Feedback.text.time_started_global_flip"]
-        lag.append(feedback_start - text_start - response_time)
-
-    print(lag)
-    print(mean(lag))
-    assert 0
-    """
