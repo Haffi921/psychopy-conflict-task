@@ -190,7 +190,7 @@ class Experiment:
         self.window.close()
         core.quit()
 
-    def run(self, debug_data=False):
+    def run(self):
         continue_experiment = True
 
         experiment_data = {"experiment_name": self.name}
@@ -243,7 +243,7 @@ class Experiment:
         # POST
         for post in self.post:
             continue_experiment = post.run(
-                debug_data=debug_data, allow_escape=self.allow_escape
+                allow_escape=self.allow_escape
             )
 
             self.data_handler.add_data_dict_and_next_entry(

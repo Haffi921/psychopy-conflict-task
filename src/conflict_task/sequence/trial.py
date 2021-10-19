@@ -53,10 +53,10 @@ class Trial(Sequence):
         )
 
         if self.feedback:
-            trial_values.update(self.response.get_response_data())
+            feedback_values = {**trial_values, **self.response.get_response_data()}
 
             feedback_success = self.feedback_sequence.run(
-                trial_values=trial_values, allow_escape=allow_escape
+                trial_values=feedback_values, allow_escape=allow_escape
             )
 
         return trial_success and feedback_success

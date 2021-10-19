@@ -12,6 +12,7 @@ class DataHandler:
     ):
         self.filename: str = None
         self.experiment_name: str = experiment_name
+        self.participant_number: int = None
         self.subject_info: dict = {"participant": "", "session": "001", **subject_info}
         self._data_handler: data.ExperimentHandler = None
 
@@ -27,6 +28,8 @@ class DataHandler:
 
             if not dlg.OK:
                 core.quit()
+
+        self.participant_number = int(self.subject_info["participant"])
 
         self.subject_info["date"] = date
         self.subject_info["psychopyVersion"] = version
@@ -48,6 +51,9 @@ class DataHandler:
             savePickle=_save,
             dataFileName=self.filename,
         )
+    
+    def get_participant_number(self):
+        return self.participant_number
 
     def save_as_csv(self):
         self._data_handler.saveAsWideText(fileName=self.filename + ".csv")

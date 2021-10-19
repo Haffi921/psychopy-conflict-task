@@ -13,6 +13,7 @@ def counterbalance(
     Force=False,
     verbose=False,
     initial_seed=None,
+    add_initial_trial = False,
 ):
     def create_base_matrix(trials, shape):
         base_matrix = np.zeros(shape)
@@ -160,7 +161,7 @@ def counterbalance(
         else:
             break
 
-    raw_sequence = [first_trial]
+    raw_sequence = [first_trial] if add_initial_trial else []
     for cb in cb_sequence:
         if alternating:
             raw_sequence.append(cb[-1] + (length * cb[0]))
