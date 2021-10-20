@@ -52,6 +52,9 @@ class Trial(Sequence):
             trial_values=trial_values, allow_escape=allow_escape
         )
 
+        if not trial_success:
+            return trial_success
+
         if self.feedback:
             feedback_values = {**trial_values, **self.response.get_response_data()}
 
