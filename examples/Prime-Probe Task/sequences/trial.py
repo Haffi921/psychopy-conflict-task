@@ -36,6 +36,7 @@ target = {
     "variable": {
         "text": "target_text",
     },
+    "marker": 61,
 }
 
 response = {
@@ -45,6 +46,7 @@ response = {
     "variable": {
         "correct_key": "correct_key",
     },
+    "marker": [41, 42, 43],
 }
 
 feedback = {
@@ -53,7 +55,6 @@ feedback = {
     "spec": {"name": "feedback", "color": "black", "height": 80, "font": font_family},
     "variable": {
         "text": "feedback_text",
-        #"opacity": "feedback_opacity",
     },
 }
 
@@ -63,34 +64,54 @@ trial_sequence = {
     "response": response,
     "takes_trial_values": True,
     "feedback": True,
+    "marker": True,
     "feedback_sequence": {
         "visual_components": [feedback],
+        "marker": True,
+        "marker_addition": 20,
         "trial_values": lambda trial: {
             **trial,
-            "feedback_text": "Zu langsam"
-            if not trial["response_made"]
-            else ("Fehler" if not trial["response_correct"] else ""),
-            #"fixation_opacity": 1.0 if trial["response_correct"] else 0.0,
+            "feedback_text": (
+                "Zu langsam"
+                if not trial["response_made"]
+                else ("Fehler" if not trial["response_correct"] else "")
+            )
+            if trial["feedback_block"]
+            else "",
         },
     },
 }
 
-# if __name__ == "__main__":
-#     from conflict_task.preview import preview_sequence, preview_component
+if __name__ == "__main__":
+    from conflict_task.devices import EMGConnector
+    from conflict_task.preview import preview_sequence
 
-#     # preview_component(fixation_cross, {
-#     #         "distractor_text": "Left\nLeft\nLeft",
-#     #         "target_text": "Right",
-#     #         "correct_key": "f",
-#     #         "feedback_text": "Fehler"
-#     #     }, {"units": "pix"})
+    EMGConnector.connect()
 
-#     # preview_sequence(
-#     #     trial,
-#     #     sequence_values={
-#     #         "distractor_text": "Left\nLeft\nLeft",
-#     #         "target_text": "Right",
-#     #         "correct_key": "g",
-#     #     },
-#     #     window_settings={"units": "pix"}
-#     # )
+    for values in [
+        {
+            "distractor_text": "Left\nLeft\nLeft",
+            "target_text": "Right",
+            "correct_key": "g",
+            "feedback_opacity": 0.0,
+            "marker_start": 1,
+            "marker_end": 11,
+        },
+        {
+            "distractor_text": "Left\nLeft\nLeft",
+            "target_text": "Right",
+            "correct_key": "g",
+            "feedback_opacity": 1.0,
+            "marker_start": 1,
+            "marker_end": 11,
+        },
+        {
+            "distractor_text": "Left\nLeft\nLeft",
+            "target_text": "Right",
+            "correct_key": "g",
+            "feedback_opacity": 0.0,
+            "marker_start": 1,
+            "marker_end": 11,
+        },
+    ]:
+        preview_sequence(trial_sequence, sequence_values=values)

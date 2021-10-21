@@ -31,3 +31,5 @@ class Window(visual.Window):
         self.window_settings = {**DEFAULT_WINDOW_SETTINGS, **window_settings}
 
         super().__init__(**self.window_settings)
+
+        self.mouseVisible = self.window_settings["allowGUI"]

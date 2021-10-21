@@ -1,4 +1,5 @@
 from conflict_task.constants import *
+from conflict_task.devices.EMG_connector import EMGConnector
 from conflict_task.util import *
 
 BASECOMPONENT_DATA_EXCLUSION = [
@@ -46,6 +47,9 @@ class BaseComponent:
         self.stop_time: float = INFINITY
         """Stop time for component relative to sequence start. Default:`Infinity`."""
 
+        self.marker_value: int = None
+        """EMG marker to send on stimulus onset"""
+
         self.status: int = NOT_STARTED
         """Component status (NOT_STARTED, STARTED, FINISHED). Defaults: `NOT_STARTED`."""
 
@@ -89,7 +93,20 @@ class BaseComponent:
             self.stop_time >= self.start_time,
             f"{self.name} - Component stop time must not be less than the start time",
         )
+
+        self._parse_EMG_marker_settings(component_settings)
         # -----------------------------------------------
+
+    def _parse_EMG_marker_settings(self, component_settings: dict) -> None:
+        self._base_component_should_not_be_run()
+
+        if EMGConnector.connected():
+            self.marker_value = get_type(component_settings, "marker", int)
+            if self.marker_value:
+                true_or_fatal_exit(
+                    0 <= self.marker_value < 256,
+                    f"{self.name}: Marker value must be in the range of 0-255. Value is {self.marker_value}",
+                )
 
     def _base_component_should_not_be_run(self) -> None:
         true_or_fatal_exit(
@@ -129,6 +146,11 @@ class BaseComponent:
         self._base_component_should_not_be_run()
 
         if self.variable_factor:
+
+            ## Dirty hack for a stupid bug
+            if "text" in self.variable_factor:
+                self.component.text = "" # Value needs to be forcefully changed for other attributes to take effect
+
             for factor_name, factor_id in self.variable_factor.items():
                 true_or_fatal_exit(
                     factor_id in trial_values.keys(),

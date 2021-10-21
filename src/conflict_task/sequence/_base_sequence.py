@@ -13,6 +13,7 @@ from conflict_task.constants import (
     STOP_RUNNING,
 )
 from conflict_task.devices import InputDevice, Keyboard, Window
+from conflict_task.devices.EMG_connector import EMGConnector
 from conflict_task.util import (
     fatal_exit,
     get_type,
@@ -50,6 +51,8 @@ class BaseSequence:
         self.cut_on_response: bool = False
         self.takes_trial_values: bool = False
         self.feedback: bool = False
+        self.marker: bool = False
+        self.marker_addition: int = None
 
         self._parse_sequence_settings(sequence_settings)
         self._parse_component_settings(sequence_settings)
@@ -114,6 +117,11 @@ class BaseSequence:
             )
             true_or_fatal_exit(
                 self.timer > 0.0, f"{self.name}: Timer has to be greater than 0.0"
+            )
+
+        if self.marker:
+            self.marker_addition = get_type(
+                sequence_settings, "marker_addition", int, 0
             )
 
     def _parse_component_settings(self, sequence_settings: dict) -> None:
@@ -306,11 +314,19 @@ class BaseSequence:
 
         running = KEEP_RUNNING
 
+        if self.marker:
+            EMGConnector.send_marker(
+                trial_values["marker_start"] + self.marker_addition
+            )
+
         while running == KEEP_RUNNING:
             running = self._run_frame(allow_escape=allow_escape)
 
             if running == QUIT_EXPERIMENT:
                 return False
+
+        if self.marker:
+            EMGConnector.send_marker(trial_values["marker_end"] + self.marker_addition)
 
         return True
 

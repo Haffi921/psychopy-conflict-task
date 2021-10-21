@@ -8,6 +8,7 @@ DEFAULT_FEEDBACK_SETTINGS = {
     "cut_on_response": False,
     "timed": False,
     "takes_trial_values": True,
+    "marker": False,
 }
 
 

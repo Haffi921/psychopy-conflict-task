@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from conflict_task.devices import InputDevice
+from conflict_task.devices.EMG_connector import EMGConnector
 from conflict_task.util import *
 
 from ._base_component import BaseComponent
@@ -100,8 +101,6 @@ class ResponseComponent(BaseComponent):
 
             2) `key` and `rt` are recorded
 
-            3) `data_handler` records `made`, `key` and `rt`
-
         Args:
 
             `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device.
@@ -112,22 +111,30 @@ class ResponseComponent(BaseComponent):
         """
 
         if self.started() and not self.made:
-            key_pressed = input_device.get_last_key(self.keys)
+            key_press = input_device.get_last_key(self.keys)
 
-            if key_pressed is not None:
-                self.key, self.rt = key_pressed
-                self.made = True
+            if key_press is not None:
+                self._process_response(key_press)
+                self.send_response_marker()
 
-                return key_pressed
+                return key_press
         return (None, None)
 
-    def get_response_data(self):
+    def get_response_data(self) -> dict:
         return {
             "response_start": self.time_started_flip,
             "response_made": self.made,
             "response_key": self.key,
             "response_rt": self.rt,
         }
+
+    def _process_response(self, key_press) -> None:
+        self.key, self.rt = key_press
+        self.made = True
+
+    def send_response_marker(self) -> None:
+        if self.marker_value:
+            EMGConnector.send_marker(self.marker_value)
 
 
 class CorrectResponseComponent(ResponseComponent):
@@ -137,7 +144,7 @@ class CorrectResponseComponent(ResponseComponent):
     Records the key that a user responds with, the reaction time and correctness.
     """
 
-    def __init__(self, component_settings):
+    def __init__(self, component_settings) -> None:
         """
         Takes in a `component_settings` dictionary to set up component variables.
 
@@ -164,11 +171,17 @@ class CorrectResponseComponent(ResponseComponent):
         CorrectResponseComponent's settings must have `correct_key` (str) as a variable factor.
         """
 
+        # -----------------------------------------------
+        # Class variables
+        # -----------------------------------------------
         self.correct_key: str = None
         """String of the correct repsonse key"""
 
         self.correct: bool = None
         """True if response key is correct"""
+
+        self.marker_values: list = None
+        # -----------------------------------------------
 
         super().__init__(component_settings)
 
@@ -176,6 +189,23 @@ class CorrectResponseComponent(ResponseComponent):
             get_type(self.variable_factor, "correct_key", str),
             "CorrectResponse component - 'correct_key' must be a key in variable factors",
         )
+
+    def _parse_EMG_marker_settings(self, component_settings: dict) -> None:
+        if EMGConnector.connected():
+            self.marker_values = get_type(component_settings, "marker", list)
+            if self.marker_values:
+                true_or_fatal_exit(
+                    all(isinstance(value, int) for value in self.marker_values),
+                    f"{self.name}: Marker values must be integers. Values are {self.marker_values}",
+                )
+                true_or_fatal_exit(
+                    len(self.marker_values) == 3,
+                    f"{self.name}: Marker values must be exactly three for Correct (1), Incorrect (2), and No Response (3)",
+                )
+                true_or_fatal_exit(
+                    all(0 <= value < 256 for value in self.marker_values),
+                    f"{self.name}: Marker values must be in the range of 0-255. Values are {self.marker_values}",
+                )
 
     def refresh(self) -> None:
         """
@@ -193,6 +223,13 @@ class CorrectResponseComponent(ResponseComponent):
 
         self.correct_key = None
         self.correct = None
+        self.marker_value = None
+
+    def stop(self, time, time_flip, global_flip) -> None:
+        super().stop(time, time_flip, global_flip)
+        if self.marker_values and not self.made:
+            self.marker_value = self.marker_values[2]
+            self.send_response_marker()
 
     def check(self, input_device: InputDevice) -> tuple[str, float]:
         """
@@ -206,23 +243,22 @@ class CorrectResponseComponent(ResponseComponent):
 
             3) `correct` becomes True if `key` == `correct_key`, and False if `key` != `correct_key`.
 
-            4) `data_handler` records `made`, `key`, `rt`, `correct_key` and `correct`.
-
         Args:
 
             `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device.
         """
 
-        key_pressed = super().check(input_device)
+        return super().check(input_device)
 
-        if self.key is not None:
-            self.correct = self.key == self.correct_key
-
-        return key_pressed
-
-    def get_response_data(self):
+    def get_response_data(self) -> dict:
         return {
             **super().get_response_data(),
             "response_correct_key": self.correct_key,
             "response_correct": self.correct,
         }
+
+    def _process_response(self, key_press) -> None:
+        super()._process_response(key_press)
+        self.correct = self.key == self.correct_key
+        if self.marker_values:
+            self.marker_value = self.marker_values[int(not self.correct)]

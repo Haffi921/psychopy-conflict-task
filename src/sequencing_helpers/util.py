@@ -10,7 +10,6 @@ class Alternator:
 
         if start >= self.max:
             start -= self.max
-            #raise ValueError("'start' is out of bounds")
         self.index = start
 
     def next(self):

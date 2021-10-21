@@ -10,6 +10,7 @@ DEFAULT_TRIAL_SETTINGS = {
     "timed": False,
     "takes_trial_values": True,
     "feedback": False,
+    "marker": False,
 }
 
 

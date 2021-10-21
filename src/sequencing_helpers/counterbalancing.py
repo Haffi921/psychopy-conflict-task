@@ -10,10 +10,10 @@ def counterbalance(
     levels: int = 1,
     alternating: int = False,
     alternator_start: int = 0,
-    Force=False,
-    verbose=False,
-    initial_seed=None,
-    add_initial_trial = False,
+    Force: bool = False,
+    verbose: bool = False,
+    initial_seed: bool = None,
+    add_initial_trial: bool = False,
 ):
     def create_base_matrix(trials, shape):
         base_matrix = np.zeros(shape)

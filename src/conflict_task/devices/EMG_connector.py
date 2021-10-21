@@ -1,45 +1,64 @@
+from psychopy.clock import StaticPeriod
 from psychopy.parallel import ParallelPort
 
 from conflict_task.util import fatal_exit
 
+
 class EMGConnector:
     PORT_ADDRESS = 0x378
+    _connected = False
+    ISI = StaticPeriod()
 
-    def __init__(self, force = False) -> None:
-        self._connected = True
+    @classmethod
+    def connect(cls, force=False) -> None:
         try:
-            self.port = ParallelPort(address=self.PORT_ADDRESS)
-            self.set_data(0)
+            cls.port = ParallelPort(address=cls.PORT_ADDRESS)
+            cls._set_data(0)
+            cls._connected = True
         except TypeError:
-            self._connected = False
-        
-        if self.read_data() != 0:
-            self._connected = False
-        
-        if force and not self._connected:
+            cls._connected = False
+
+        if cls._read_data() != 0:
+            cls._connected = False
+
+        if force and not cls._connected:
             fatal_exit("EMGConnector requested but no ParallelPort connection made")
 
-    def read_data(self):
-        if self._connected:
-            return self.port.readData()
+    @classmethod
+    def _read_data(cls):
+        if cls._connected:
+            return cls.port.readData()
         else:
             return None
-    
-    def read_pin(self, pin):
-        if self._connected:
-            return self.port.readPin(pin)
+
+    @classmethod
+    def _read_pin(cls, pin):
+        if cls._connected:
+            return cls.port.readPin(pin)
         else:
             return None
-    
-    def _print_all_pins(self):
-        print(f"{self.read_pin(15):b}x", end="")
+
+    @classmethod
+    def _print_all_pins(cls):
+        print(f"{cls._read_pin(15):b}x", end="")
         for i in range(13, 1, -1):
-            print(f"{self.read_pin(i):b}", end="")
+            print(f"{cls._read_pin(i):b}", end="")
         print()
 
-    def set_data(self, data):
-        if self._connected:
-            self.port.setData(data)
+    @classmethod
+    def _set_data(cls, data):
+        if cls._connected:
+            cls.port.setData(data)
 
-    def connected(self):
-        return self._connected
+    @classmethod
+    def send_marker(cls, marker, t=0.005, t_after=0.0):
+        cls.ISI.start(t)
+        cls._set_data(marker)
+        cls.ISI.complete()
+        if t_after > 0.0:
+            cls.ISI.start(t_after)
+            cls.ISI.complete()
+
+    @classmethod
+    def connected(cls):
+        return cls._connected

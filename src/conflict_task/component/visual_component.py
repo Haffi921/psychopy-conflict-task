@@ -1,5 +1,6 @@
 from psychopy import visual
 
+from conflict_task.devices import EMGConnector
 from conflict_task.util import *
 
 from ._base_component import BaseComponent
@@ -68,13 +69,7 @@ class VisualComponent(BaseComponent):
             f"{self.name}: There's no visual component type {visual_type}",
         )
 
-        visual_spec: dict = get_type(
-            component_settings,
-            "spec",
-            dict,
-            {}
-            # f"{self.name}: VisualComponents require specifications - use 'spec' field",
-        )
+        visual_spec: dict = get_type(component_settings, "spec", dict, {})
 
         self.component: visual.TextStim = getattr(visual, visual_type)(
             window, **visual_spec
@@ -130,6 +125,8 @@ class VisualComponent(BaseComponent):
 
         super().start(time, time_flip, global_flip)
         self._turn_auto_draw_on()
+        if self.marker_value:
+            EMGConnector.send_marker(self.marker_value)
 
     def stop(self, time, time_flip, global_flip) -> None:
         """

@@ -242,9 +242,7 @@ class Experiment:
 
         # POST
         for post in self.post:
-            continue_experiment = post.run(
-                allow_escape=self.allow_escape
-            )
+            continue_experiment = post.run(allow_escape=self.allow_escape)
 
             self.data_handler.add_data_dict_and_next_entry(
                 {**experiment_data, **post.get_data()}

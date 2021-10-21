@@ -31,9 +31,9 @@ class DataHandler:
 
         self.participant_number = int(self.subject_info["participant"])
 
+        self.subject_info["experiment_name"] = self.experiment_name
+        self.subject_info["psychopy_version"] = version
         self.subject_info["date"] = date
-        self.subject_info["psychopyVersion"] = version
-        self.subject_info["expName"] = self.experiment_name
 
         self.filename = (
             this_dir
@@ -46,12 +46,14 @@ class DataHandler:
         self._data_handler = data.ExperimentHandler(
             name=self.experiment_name,
             version=version,
-            extraInfo=self.subject_info,
+            # extraInfo=self.subject_info,
             saveWideText=_save,
             savePickle=_save,
             dataFileName=self.filename,
         )
-    
+
+        self.next_entry()
+
     def get_participant_number(self):
         return self.participant_number
 
