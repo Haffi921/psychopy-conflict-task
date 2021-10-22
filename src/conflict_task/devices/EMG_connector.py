@@ -55,6 +55,7 @@ class EMGConnector:
         cls.ISI.start(t)
         cls._set_data(marker)
         cls.ISI.complete()
+        cls._set_data(0)
         if t_after > 0.0:
             cls.ISI.start(t_after)
             cls.ISI.complete()
