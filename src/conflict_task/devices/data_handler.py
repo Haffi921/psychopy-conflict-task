@@ -52,8 +52,6 @@ class DataHandler:
             dataFileName=self.filename,
         )
 
-        self.next_entry()
-
     def get_participant_number(self):
         return self.participant_number
 
