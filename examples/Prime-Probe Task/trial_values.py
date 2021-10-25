@@ -32,7 +32,7 @@ def get_trial_values(
             if not practice
             else True
         )
-        practice_modifier = 100 if practice else 0
+        practice_modifier = 70 if practice else 0
 
         def translate(trial):
             hand, distractor, target = trial

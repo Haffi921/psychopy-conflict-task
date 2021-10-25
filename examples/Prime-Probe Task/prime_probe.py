@@ -83,7 +83,7 @@ for pre in pre_trial:
         emergency_quit()
 
 for practice_block_nr in range(NR_PRACTICE_BLOCKS):
-    EMGConnector.send_marker(80, t=0.5, t_after=0.5)
+    EMGConnector.send_marker(50, t=0.5, t_after=0.5)
     practice_block_data = {
         **experiment_data,
         "trial_block": "practice",
@@ -103,7 +103,7 @@ for practice_block_nr in range(NR_PRACTICE_BLOCKS):
         if not continue_experiment:
             emergency_quit()
 
-    EMGConnector.send_marker(90, t=0.5)
+    EMGConnector.send_marker(60, t=0.5)
 
     continue_experiment = between.run()
 
@@ -126,7 +126,7 @@ for block_nr in range(NR_BLOCKS):
         if not continue_experiment:
             emergency_quit()
 
-    EMGConnector.send_marker(81 + block_nr, t=0.5, t_after=0.5)
+    EMGConnector.send_marker(51 + block_nr, t=0.5, t_after=0.5)
     for trial_nr in range(NR_TRIALS):
         trial_data = {**block_data, "trial": trial_nr + 1}
 
@@ -139,7 +139,7 @@ for block_nr in range(NR_BLOCKS):
 
         if not continue_experiment:
             emergency_quit()
-    EMGConnector.send_marker(91 + block_nr, t=0.5)
+    EMGConnector.send_marker(61 + block_nr, t=0.5)
 
 for post in post_trial:
     post.run()
