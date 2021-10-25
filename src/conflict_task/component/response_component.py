@@ -115,7 +115,7 @@ class ResponseComponent(BaseComponent):
 
             if key_press is not None:
                 self._process_response(key_press)
-                self.send_response_marker()
+                self.send_marker_value()
 
                 return key_press
         return (None, None)
@@ -131,10 +131,6 @@ class ResponseComponent(BaseComponent):
     def _process_response(self, key_press) -> None:
         self.key, self.rt = key_press
         self.made = True
-
-    def send_response_marker(self) -> None:
-        if self.marker_value:
-            EMGConnector.send_marker(self.marker_value)
 
 
 class CorrectResponseComponent(ResponseComponent):
@@ -229,7 +225,7 @@ class CorrectResponseComponent(ResponseComponent):
         super().stop(time, time_flip, global_flip)
         if self.marker_values and not self.made:
             self.marker_value = self.marker_values[2]
-            self.send_response_marker()
+            self.send_marker_value()
 
     def check(self, input_device: InputDevice) -> tuple[str, float]:
         """

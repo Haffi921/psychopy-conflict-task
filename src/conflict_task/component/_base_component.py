@@ -96,6 +96,10 @@ class BaseComponent:
 
         self._parse_EMG_marker_settings(component_settings)
         # -----------------------------------------------
+    
+    def send_marker_value(self) -> None:
+        if self.marker_value:
+            EMGConnector.send_marker(self.marker_value)
 
     def _parse_EMG_marker_settings(self, component_settings: dict) -> None:
         self._base_component_should_not_be_run()
@@ -104,8 +108,8 @@ class BaseComponent:
             self.marker_value = get_type(component_settings, "marker", int)
             if self.marker_value:
                 true_or_fatal_exit(
-                    0 <= self.marker_value < 256,
-                    f"{self.name}: Marker value must be in the range of 0-255. Value is {self.marker_value}",
+                    0 < self.marker_value < 256,
+                    f"{self.name}: Marker value must be in the range of 1-255. Value is {self.marker_value}",
                 )
 
     def _base_component_should_not_be_run(self) -> None:

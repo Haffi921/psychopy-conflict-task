@@ -125,8 +125,7 @@ class VisualComponent(BaseComponent):
 
         super().start(time, time_flip, global_flip)
         self._turn_auto_draw_on()
-        if self.marker_value:
-            EMGConnector.send_marker(self.marker_value)
+        self.send_marker_value()
 
     def stop(self, time, time_flip, global_flip) -> None:
         """

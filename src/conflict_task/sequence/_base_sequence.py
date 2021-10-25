@@ -203,6 +203,10 @@ class BaseSequence:
 
     def reset_clock(self, new_t=0.0):
         self.clock.reset(newT=new_t)
+    
+    def send_marker_value(self, marker):
+        true_or_fatal_exit(0 < marker < 256, f"{self.name}: Marker value must be in the range of 1-255. Value is {marker}")
+        EMGConnector.send_marker(marker)
 
     # ===============================================
     # Sequence execution functions
@@ -315,9 +319,7 @@ class BaseSequence:
         running = KEEP_RUNNING
 
         if self.marker:
-            EMGConnector.send_marker(
-                trial_values["marker_start"] + self.marker_addition
-            )
+            self.send_marker_value(trial_values["marker_start"] + self.marker_addition)
 
         while running == KEEP_RUNNING:
             running = self._run_frame(allow_escape=allow_escape)
@@ -326,7 +328,7 @@ class BaseSequence:
                 return False
 
         if self.marker:
-            EMGConnector.send_marker(trial_values["marker_end"] + self.marker_addition)
+            self.send_marker_value(trial_values["marker_end"] + self.marker_addition)
 
         return True
 
