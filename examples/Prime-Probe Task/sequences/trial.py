@@ -1,17 +1,4 @@
-font_family = "Courier New"
-
-fixation_cross = {
-    "stop": 0.2,
-    "type": "ShapeStim",
-    "spec": {
-        "name": "fixation_cross",
-        "vertices": "cross",
-        "size": 64,
-        "lineColor": None,
-        "fillColor": "black",
-    },
-    "variable": {"opacity": "fixation_opacity"},
-}
+FONT_FAMILY = "Courier New"
 
 distractor = {
     "start": 1.0,
@@ -21,7 +8,7 @@ distractor = {
         "name": "distractor",
         "color": "black",
         "height": 64,
-        "font": font_family,
+        "font": FONT_FAMILY,
     },
     "variable": {
         "text": "distractor_text",
@@ -32,7 +19,7 @@ target = {
     "start": 1.166,
     "stop": 1.3,
     "type": "TextStim",
-    "spec": {"name": "target", "color": "black", "height": 103, "font": font_family},
+    "spec": {"name": "target", "color": "black", "height": 103, "font": FONT_FAMILY},
     "variable": {
         "text": "target_text",
     },
@@ -52,7 +39,7 @@ response = {
 feedback = {
     "stop": 0.2,
     "type": "TextStim",
-    "spec": {"name": "feedback", "color": "black", "height": 80, "font": font_family},
+    "spec": {"name": "feedback", "color": "black", "height": 80, "font": FONT_FAMILY},
     "variable": {
         "text": "feedback_text",
     },

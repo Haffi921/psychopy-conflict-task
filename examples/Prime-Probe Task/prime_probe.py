@@ -1,6 +1,7 @@
 from psychopy import core
 from sequences.between_blocks import between_blocks
-from sequences.pre_trial import start_screen
+from sequences.pre_trial import pre_trial
+from sequences.post_trial import post_trial
 from sequences.trial import trial_sequence
 
 from conflict_task.devices import DataHandler, EMGConnector, Keyboard, Window
@@ -24,7 +25,6 @@ from conflict_task.sequence import Screen, Trial
 
 
 EXPERIMENT_NAME = "Prime-Probe"
-DEBUG = True
 
 NR_PRACTICE_BLOCKS = 1
 NR_PRACTICE_TRIALS = 24
@@ -53,6 +53,7 @@ EMGConnector.connect()
 
 
 def emergency_quit():
+    print("Aborting!")
     data_handler.abort()
     window.flip()
     window.close()
@@ -65,17 +66,16 @@ def quit():
     window.close()
     core.quit()
 
-
-pre_screens = [Screen(window, input_device, start_screen)]
+pre_trial = list(map(lambda screen: Screen(window, input_device, screen), pre_trial))
 trial = Trial(window, input_device, trial_sequence)
 between = Screen(window, input_device, between_blocks)
-post_screens = [Screen(window, input_device, start_screen)]
+post_trial = list(map(lambda screen: Screen(window, input_device, screen), post_trial))
 
 
 experiment_data = {**data_handler.subject_info}
 
-for pre in pre_screens:
-    continue_experiment = pre.run(allow_escape=True)
+for pre in pre_trial:
+    continue_experiment = pre.run()
 
     data_handler.add_data_dict_and_next_entry({**experiment_data, **pre.get_data()})
 
@@ -95,7 +95,7 @@ for practice_block_nr in range(NR_PRACTICE_BLOCKS):
 
         trial_values = {**trial_data, **practice_values[practice_block_nr][trial_nr]}
 
-        continue_experiment = trial.run(trial_values=trial_values, allow_escape=DEBUG)
+        continue_experiment = trial.run(trial_values=trial_values)
 
         data_handler.add_data_dict(trial_values)
         data_handler.add_data_dict_and_next_entry(trial.get_data())
@@ -105,7 +105,7 @@ for practice_block_nr in range(NR_PRACTICE_BLOCKS):
 
     EMGConnector.send_marker(90, t=0.5)
 
-    continue_experiment = between.run(allow_escape=DEBUG)
+    continue_experiment = between.run()
 
     data_handler.add_data_dict_and_next_entry(
         {**practice_block_data, **between.get_data()}
@@ -119,7 +119,7 @@ for block_nr in range(NR_BLOCKS):
     block_data = {**experiment_data, "trial_block": "block", "block": block_nr + 1}
 
     if block_nr:
-        continue_experiment = between.run(allow_escape=DEBUG)
+        continue_experiment = between.run()
 
         data_handler.add_data_dict_and_next_entry({**block_data, **between.get_data()})
 
@@ -132,7 +132,7 @@ for block_nr in range(NR_BLOCKS):
 
         trial_values = {**trial_data, **experiment_values[block_nr][trial_nr]}
 
-        continue_experiment = trial.run(trial_values=trial_values, allow_escape=DEBUG)
+        continue_experiment = trial.run(trial_values=trial_values)
 
         data_handler.add_data_dict(trial_values)
         data_handler.add_data_dict_and_next_entry(trial.get_data())
@@ -141,8 +141,8 @@ for block_nr in range(NR_BLOCKS):
             emergency_quit()
     EMGConnector.send_marker(91 + block_nr, t=0.5)
 
-for post in post_screens:
-    post.run(allow_escape=DEBUG)
+for post in post_trial:
+    post.run()
 
     data_handler.add_data_dict_and_next_entry({**experiment_data, **post.get_data()})
 

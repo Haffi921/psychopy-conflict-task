@@ -1,35 +1,78 @@
-start_screen_text = """
-Welcome to this test experiment. Right now you are looking at a Static Information Screen. \
-This is to provide you with some information about this experiment and what you should know before starting.
+FONT_FAMILY = "Courier New"
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam venenatis accumsan eros a vehicula. Quisque mollis \
-ante ac leo tempus egestas ut vitae lectus. Suspendisse maximus venenatis tortor, in imperdiet ipsum rutrum quis. \
-Nulla quis est in mauris feugiat cursus feugiat nec tellus. Quisque a purus iaculis, commodo nibh id, pharetra odio. \
-Sed sit amet ligula a diam placerat imperdiet. Fusce in quam vehicula odio pharetra maximus. Aliquam eget nunc sollicitudin, \
-fermentum ipsum bibendum, convallis nisl. In nec eros turpis. Donec et ultricies quam. Etiam ipsum erat, consequat et \
-bibendum id, eleifend sit amet est. Curabitur sit amet tincidunt ante, at congue orci.
+def text_stim(name, text, size):
+    return {
+        "type": "Screen",
+        "visual_components": [
+            {
+                "name": name,
+                "type": "TextStim",
+                "spec": {
+                    "text": text,
+                    "height": size,
+                    "wrapWidth": 1500,
+                    "font": FONT_FAMILY,
+                    "color": "black",
+                }
+            }
+        ],
+        "response": {"keys": ["space"]},
+        "early_quit_keys": ["f12"]
+    }
 
-Press [space] to continue.
+welcome_screen_text = """
+Herzlich Willkommen bei unserem Experiment! 
+
+Vielen Dank für Ihre Teilnahme.
+
+Um weiterzugehen, bitte Leertaste drücken 
 """
 
-start_screen = {
-    "type": "Screen",
-    "visual_components": [
-        {
-            "name": "text",
-            "type": "TextStim",
-            "spec": {
-                "color": "white",
-                "height": 32,
-                "wrapWidth": 1200,
-                "text": start_screen_text,
-            },
-        }
-    ],
-    "response": {"keys": ["space"]},
-}
+instructions1_text = """
+Im folgenden Experiment werden Ihnen in jedem Durchgang zuerst drei Wörter untereinander präsentiert. Danach wird ein einzelnes Wort präsentiert. Reagieren sie nur auf dieses eine Wort.
+
+Mögliche Wörter, die erscheinen können, sind: 
+Links, Rechts, Oben, Unten 
+
+Weiter mit Leertaste
+"""
+
+instructions2_text = """
+Bitte reagieren Sie auf das einzeln präsentierte Wort wie folgt:
+ 
+Für
+Links -> F-Taste
+Rechts -> G-Taste
+Oben -> J-Taste
+Unten -> N-Taste
+
+Weiter mit Leertaste
+"""
+
+instructions3_text = """
+Sie werden zunächst eine Übungsblock bearbeiten, um sich mit der Aufgabe vertraut zu machen. 
+Danach folgen acht Experimentalblöcke.
+Zwischen den einzelnen Blöcken haben Sie immer die Möglichkeit, eine kurze Pause zu machen.
+
+Weiter mit Leertaste
+"""
+
+instructions4_text = """
+Sollten während des Experiments Probleme oder Fragen auftauchen, wenden Sie sich bitte an den/die Versuchsleiter/in.
+
+Wenn Sie bereit sind, starten Sie den Übungsblock mit der Leertaste
+"""
+
+pre_trial = [
+    text_stim("welcome_screen", welcome_screen_text, 72),
+    text_stim("instructions1", instructions1_text, 64),
+    text_stim("instructions2", instructions2_text, 64),
+    text_stim("instructions3", instructions3_text, 64),
+    text_stim("instructions4", instructions4_text, 64),
+]
 
 if __name__ == "__main__":
     from conflict_task.preview import preview_sequence
 
-    preview_sequence(start_screen)
+    for pre in pre_trial:
+        preview_sequence(pre)
