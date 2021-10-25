@@ -2,15 +2,12 @@ from conflict_task.constants import *
 from conflict_task.util import *
 
 from .feedback import Feedback
-from .sequence import Sequence
+from .sequence import Sequence, DEFAULT_SEQUENCE_SETTINGS
 
 DEFAULT_TRIAL_SETTINGS = {
-    "wait_for_response": False,
-    "cut_on_response": False,
-    "timed": False,
+    **DEFAULT_SEQUENCE_SETTINGS,
     "takes_trial_values": True,
     "feedback": False,
-    "marker": False,
 }
 
 

@@ -20,7 +20,7 @@ from conflict_task.util import (
     get_type_or_fatal_exit,
     true_or_fatal_exit,
 )
-
+     
 
 class BaseSequence:
     name: str = "UNKNOWN_SEQUENCE"
@@ -44,23 +44,24 @@ class BaseSequence:
         self.clock: clock.Clock = clock.Clock()
 
         # Sequence settings
-        self.variable_factor: dict = {}
+        self.variable_factor: dict = None
 
         # Base
+        self.early_quit_keys: list = None
         self.wait_for_response: bool = False
         self.cut_on_response: bool = False
         self.timed: bool = False
         self.timer: float = None
 
-        # Trial
-        self.takes_trial_values: bool = False
-        self.feedback: bool = False
-
-        # Marker
+        # Markers
         self.marker: bool = False
         self.marker_addition: int = None
         self.marker_start: int = None
         self.marker_end: int = None
+
+        # Trial
+        self.takes_trial_values: bool = False
+        self.feedback: bool = False
 
         self._parse_sequence_settings(sequence_settings)
         self._parse_component_settings(sequence_settings)
@@ -86,16 +87,8 @@ class BaseSequence:
     # ===============================================
     # Dictionary parsing
     # ===============================================
-    def _parse_sequence_settings(
-        self, sequence_settings: dict, default_settings: dict = {}
-    ) -> None:
+    def _get_sequence_settings(self, sequence_settings: dict, default_settings: dict):
         self._base_sequence_should_not_be_run()
-
-        if name := get_type(sequence_settings, "name", str):
-            self.name = name
-
-        if variable_factor := get_type(sequence_settings, "variable", dict):
-            self.variable_factor = variable_factor
 
         def retrieve_valid_settings(settings, next_key) -> dict:
             if next_key in sequence_settings:
@@ -108,10 +101,22 @@ class BaseSequence:
                 settings[next_key] = sequence_settings[next_key]
             return settings
 
-        settings: dict = {
+        return {
             **default_settings,
             **reduce(retrieve_valid_settings, default_settings.keys(), {}),
         }
+
+    def _parse_sequence_settings(
+        self, sequence_settings: dict, default_settings: dict = {}
+    ) -> None:
+        self._base_sequence_should_not_be_run()
+        
+        if name := get_type(sequence_settings, "name", str):
+            self.name = name
+        
+        self.variable_factor = get_type(sequence_settings, "variable", dict, {})
+
+        settings = self._get_sequence_settings(sequence_settings, default_settings)
 
         for key, value in settings.items():
             setattr(self, key, value)
@@ -252,11 +257,11 @@ class BaseSequence:
         self.input_device.reset_clock(new_t=new_t)
         self.input_device.reset_events()
 
-    def _run_frame(self, allow_escape=False) -> None:
+    def _run_frame(self, early_quit=[]) -> None:
         self._base_sequence_should_not_be_run()
 
         # Check if user wants to quit experiment
-        if allow_escape and self.input_device.was_key_pressed("escape"):
+        if len(early_quit) and self.input_device.was_key_pressed(early_quit):
             return QUIT_EXPERIMENT
 
         # Get current timers
@@ -321,6 +326,10 @@ class BaseSequence:
     def run(self, trial_values: dict = {}, allow_escape=False) -> None:
         self._base_sequence_should_not_be_run()
 
+        early_quit = self.early_quit_keys.copy()
+        if allow_escape:
+            early_quit.append("escape")
+        
         self.prepare(trial_values)
         self._refresh_components()
         self._prepare_components(trial_values)
@@ -332,7 +341,7 @@ class BaseSequence:
             self.send_marker_value(self.marker_start + self.marker_addition)
 
         while running == KEEP_RUNNING:
-            running = self._run_frame(allow_escape=allow_escape)
+            running = self._run_frame(early_quit=early_quit)
 
             if running == QUIT_EXPERIMENT:
                 return False

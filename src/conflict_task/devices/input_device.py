@@ -39,14 +39,14 @@ class Keyboard(InputDevice):
         self.device = keyboard.Keyboard()
 
     def get_keys(
-        self, keys: list[str], wait_for_release=False
+        self, keys: list[str], wait_for_release=False, clear = True
     ) -> list[tuple[str, float]]:
         if isinstance(keys, str):
             keys = [keys]
 
         return [
             (key.name, key.rt)
-            for key in self.device.getKeys(keys, waitRelease=wait_for_release)
+            for key in self.device.getKeys(keys, waitRelease=wait_for_release, clear=clear)
         ]
 
     def get_last_key(self, keys: list[str]) -> tuple[str, float]:
@@ -56,8 +56,8 @@ class Keyboard(InputDevice):
             return keys_pressed[-1]
         return None
 
-    def was_key_pressed(self, keys) -> bool:
-        key_pressed = self.get_keys(keys)
+    def was_key_pressed(self, keys, clear=False) -> bool:
+        key_pressed = self.get_keys(keys, clear=clear)
 
         return bool(len(key_pressed))
 

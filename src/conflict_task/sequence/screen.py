@@ -1,9 +1,9 @@
-from .sequence import Sequence
+from .sequence import Sequence, DEFAULT_SEQUENCE_SETTINGS
 
 DEFAULT_SCREEN_SETTINGS = {
+    **DEFAULT_SEQUENCE_SETTINGS,
     "wait_for_response": True,
     "cut_on_response": True,
-    "timed": False,
 }
 
 

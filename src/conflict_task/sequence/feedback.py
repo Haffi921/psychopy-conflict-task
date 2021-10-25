@@ -1,14 +1,11 @@
 from conflict_task.devices import InputDevice, Window
 from conflict_task.util import get_or_fatal_exit, true_or_fatal_exit
 
-from .sequence import Sequence
+from .sequence import Sequence, DEFAULT_SEQUENCE_SETTINGS
 
 DEFAULT_FEEDBACK_SETTINGS = {
-    "wait_for_response": False,
-    "cut_on_response": False,
-    "timed": False,
+    **DEFAULT_SEQUENCE_SETTINGS,
     "takes_trial_values": True,
-    "marker": False,
 }
 
 

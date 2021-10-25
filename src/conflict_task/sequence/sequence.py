@@ -1,9 +1,11 @@
 from ._base_sequence import BaseSequence
 
 DEFAULT_SEQUENCE_SETTINGS = {
+    "early_quit_keys": [],
     "wait_for_response": False,
     "cut_on_response": False,
     "timed": False,
+    "marker": False
 }
 
 
