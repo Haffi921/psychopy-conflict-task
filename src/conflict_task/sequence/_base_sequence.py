@@ -44,15 +44,23 @@ class BaseSequence:
         self.clock: clock.Clock = clock.Clock()
 
         # Sequence settings
-        self.variable_factor: dict = None
-        self.timed: bool = False
-        self.timer: float = None
+        self.variable_factor: dict = {}
+
+        # Base
         self.wait_for_response: bool = False
         self.cut_on_response: bool = False
+        self.timed: bool = False
+        self.timer: float = None
+
+        # Trial
         self.takes_trial_values: bool = False
         self.feedback: bool = False
+
+        # Marker
         self.marker: bool = False
         self.marker_addition: int = None
+        self.marker_start: int = None
+        self.marker_end: int = None
 
         self._parse_sequence_settings(sequence_settings)
         self._parse_component_settings(sequence_settings)
@@ -123,6 +131,8 @@ class BaseSequence:
             self.marker_addition = get_type(
                 sequence_settings, "marker_addition", int, 0
             )
+            self.variable_factor["marker_start"] = "marker_start"
+            self.variable_factor["marker_end"] = "marker_end"
 
     def _parse_component_settings(self, sequence_settings: dict) -> None:
         self._base_sequence_should_not_be_run()
@@ -319,7 +329,7 @@ class BaseSequence:
         running = KEEP_RUNNING
 
         if self.marker:
-            self.send_marker_value(trial_values["marker_start"] + self.marker_addition)
+            self.send_marker_value(self.marker_start + self.marker_addition)
 
         while running == KEEP_RUNNING:
             running = self._run_frame(allow_escape=allow_escape)
@@ -328,7 +338,7 @@ class BaseSequence:
                 return False
 
         if self.marker:
-            self.send_marker_value(trial_values["marker_end"] + self.marker_addition)
+            self.send_marker_value(self.marker_end + self.marker_addition)
 
         return True
 
