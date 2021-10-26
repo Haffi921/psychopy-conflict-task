@@ -11,11 +11,12 @@ def text_stim(name, text, size):
                     "wrapWidth": 1500,
                     "font": FONT_FAMILY,
                     "color": "black",
-                }
+                },
             }
         ],
         "response": {"keys": ["f12"]},
     }
+
 
 FONT_FAMILY = "Courier New"
 
@@ -26,9 +27,7 @@ Vielen Dank für Ihre Teilnahme!
 Bitte melden Sie sich bei dem/der Versuchsleiter/in, dass Sie fertig sind. 
 """
 
-post_trial = [
-    text_stim("post_trial", post_trial_text, 72)
-]
+post_trial = [text_stim("post_trial", post_trial_text, 72)]
 
 if __name__ == "__main__":
     from conflict_task.preview import preview_sequence

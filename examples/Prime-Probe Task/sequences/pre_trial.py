@@ -1,5 +1,6 @@
 FONT_FAMILY = "Courier New"
 
+
 def text_stim(name, text, size):
     return {
         "type": "Screen",
@@ -13,12 +14,13 @@ def text_stim(name, text, size):
                     "wrapWidth": 1500,
                     "font": FONT_FAMILY,
                     "color": "black",
-                }
+                },
             }
         ],
         "response": {"keys": ["space"]},
-        "early_quit_keys": ["f12"]
+        "early_quit_keys": ["f12"],
     }
+
 
 welcome_screen_text = """
 Herzlich Willkommen bei unserem Experiment! 

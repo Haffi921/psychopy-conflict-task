@@ -38,20 +38,20 @@ def get_trial_values(
             hand, distractor, target = trial
 
             # Markers
-            marker_start = 1 + (distractor + (target * 2) + (hand * 4)) + practice_modifier
+            marker_start = (
+                1 + (distractor + (target * 2) + (hand * 4)) + practice_modifier
+            )
             marker_end = marker_start + 10
 
             return {
                 # Data
                 "hand": hand,
                 "congruency": int(distractor != target),
-
                 # Stim variables
                 "distractor_text": conditions["distractor"][hand][distractor],
                 "target_text": conditions["target"][hand][target],
                 "correct_key": conditions["correct_key"][hand][target],
                 "feedback_block": feedback_block,
-
                 # Markers
                 "marker_start": marker_start,
                 "marker_end": marker_end,

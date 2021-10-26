@@ -1,4 +1,4 @@
-from .sequence import Sequence, DEFAULT_SEQUENCE_SETTINGS
+from .sequence import DEFAULT_SEQUENCE_SETTINGS, Sequence
 
 DEFAULT_SCREEN_SETTINGS = {
     **DEFAULT_SEQUENCE_SETTINGS,

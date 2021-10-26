@@ -1,7 +1,7 @@
 from psychopy import core
 from sequences.between_blocks import between_blocks
-from sequences.pre_trial import pre_trial
 from sequences.post_trial import post_trial
+from sequences.pre_trial import pre_trial
 from sequences.trial import trial_sequence
 
 from conflict_task.devices import DataHandler, EMGConnector, Keyboard, Window
@@ -65,6 +65,7 @@ def quit():
     window.flip()
     window.close()
     core.quit()
+
 
 pre_trial = list(map(lambda screen: Screen(window, input_device, screen), pre_trial))
 trial = Trial(window, input_device, trial_sequence)

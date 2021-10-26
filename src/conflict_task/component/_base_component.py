@@ -96,7 +96,7 @@ class BaseComponent:
 
         self._parse_EMG_marker_settings(component_settings)
         # -----------------------------------------------
-    
+
     def send_marker_value(self) -> None:
         if self.marker_value:
             EMGConnector.send_marker(self.marker_value)
@@ -153,7 +153,7 @@ class BaseComponent:
 
             ## Dirty hack for a stupid bug
             if "text" in self.variable_factor:
-                self.component.text = "" # Value needs to be forcefully changed for other attributes to take effect
+                self.component.text = ""  # Value needs to be forcefully changed for other attributes to take effect
 
             for factor_name, factor_id in self.variable_factor.items():
                 true_or_fatal_exit(

@@ -1,7 +1,7 @@
 from conflict_task.devices import InputDevice, Window
 from conflict_task.util import get_or_fatal_exit, true_or_fatal_exit
 
-from .sequence import Sequence, DEFAULT_SEQUENCE_SETTINGS
+from .sequence import DEFAULT_SEQUENCE_SETTINGS, Sequence
 
 DEFAULT_FEEDBACK_SETTINGS = {
     **DEFAULT_SEQUENCE_SETTINGS,

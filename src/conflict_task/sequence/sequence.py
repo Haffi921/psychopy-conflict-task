@@ -5,7 +5,7 @@ DEFAULT_SEQUENCE_SETTINGS = {
     "wait_for_response": False,
     "cut_on_response": False,
     "timed": False,
-    "marker": False
+    "marker": False,
 }
 
 

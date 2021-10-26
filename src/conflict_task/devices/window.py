@@ -33,3 +33,10 @@ class Window(visual.Window):
         super().__init__(**self.window_settings)
 
         self.mouseVisible = self.window_settings["allowGUI"]
+        self.fullscr = False
+
+    def toggle_fullscr(self):
+        self.fullscr = not self.fullscr
+
+    def start(self):
+        self.fullscr = False

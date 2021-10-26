@@ -21,7 +21,7 @@ between_blocks = {
         }
     ],
     "response": {"keys": ["space"]},
-    "early_quit_keys": ["f12"]
+    "early_quit_keys": ["f12"],
 }
 
 if __name__ == "__main__":

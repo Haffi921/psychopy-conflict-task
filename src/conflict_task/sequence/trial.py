@@ -2,7 +2,7 @@ from conflict_task.constants import *
 from conflict_task.util import *
 
 from .feedback import Feedback
-from .sequence import Sequence, DEFAULT_SEQUENCE_SETTINGS
+from .sequence import DEFAULT_SEQUENCE_SETTINGS, Sequence
 
 DEFAULT_TRIAL_SETTINGS = {
     **DEFAULT_SEQUENCE_SETTINGS,

@@ -20,7 +20,7 @@ from conflict_task.util import (
     get_type_or_fatal_exit,
     true_or_fatal_exit,
 )
-     
+
 
 class BaseSequence:
     name: str = "UNKNOWN_SEQUENCE"
@@ -110,10 +110,10 @@ class BaseSequence:
         self, sequence_settings: dict, default_settings: dict = {}
     ) -> None:
         self._base_sequence_should_not_be_run()
-        
+
         if name := get_type(sequence_settings, "name", str):
             self.name = name
-        
+
         self.variable_factor = get_type(sequence_settings, "variable", dict, {})
 
         settings = self._get_sequence_settings(sequence_settings, default_settings)
@@ -218,14 +218,25 @@ class BaseSequence:
 
     def reset_clock(self, new_t=0.0):
         self.clock.reset(newT=new_t)
-    
+
     def send_marker_value(self, marker):
-        true_or_fatal_exit(0 < marker < 256, f"{self.name}: Marker value must be in the range of 1-255. Value is {marker}")
+        true_or_fatal_exit(
+            0 < marker < 256,
+            f"{self.name}: Marker value must be in the range of 1-255. Value is {marker}",
+        )
         EMGConnector.send_marker(marker)
 
     # ===============================================
     # Sequence execution functions
     # ===============================================
+    def _get_all_trial_values(self) -> list:
+        requested_trial_values = []
+        if self.takes_trial_values:
+            for component in self._get_all_components():
+                if component.variable_factor:
+                    requested_trial_values.append(*component.variable_factor.values())
+        return requested_trial_values
+
     def _refresh_components(self) -> None:
         self._base_sequence_should_not_be_run()
 
@@ -329,7 +340,7 @@ class BaseSequence:
         early_quit = self.early_quit_keys.copy()
         if allow_escape:
             early_quit.append("escape")
-        
+
         self.prepare(trial_values)
         self._refresh_components()
         self._prepare_components(trial_values)

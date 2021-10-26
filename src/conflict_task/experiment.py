@@ -1,15 +1,21 @@
 from __future__ import annotations
 
-from psychopy import clock, core
+from psychopy import clock, core, logging
 
 from conflict_task.devices import DataHandler, Window, input_device
 from conflict_task.util import get_type, get_type_or_fatal_exit, true_or_fatal_exit
+from conflict_task.util.error import fatal_exit
 
 from . import sequence
 
 
 class Experiment:
-    def __init__(self, trial_values: list, experiment_settings: dict) -> None:
+    def __init__(
+        self,
+        experiment_settings: dict,
+        trial_values: list = None,
+        validate: bool = False,
+    ) -> None:
 
         # -----------------------------------------------
         # Class variables
@@ -31,16 +37,16 @@ class Experiment:
         self.between_blocks: sequence.Sequence = None
 
         # Values
-        self.trial_values = trial_values
+        self.trial_values = (
+            self.load_trial_values(trial_values, validate)
+            if trial_values is not None
+            else None
+        )
         # -----------------------------------------------
 
         # -----------------------------------------------
         # Sanity check
         # -----------------------------------------------
-        true_or_fatal_exit(
-            isinstance(trial_values, list),
-            "Trial values must be a list of dictionaries",
-        )
         true_or_fatal_exit(
             isinstance(experiment_settings, dict),
             "Experiment settings must be a dictionary",
@@ -85,9 +91,9 @@ class Experiment:
         # -----------------------------------------------
         # Data handler
         # -----------------------------------------------
-        if subject_info := experiment_settings.get("subject_info"):
+        if data_extra_info := experiment_settings.get("data_extra_info"):
             self.data_handler = DataHandler(
-                experiment_name=self.name, subject_info=subject_info
+                experiment_name=self.name, subject_info=data_extra_info
             )
         else:
             self.data_handler = DataHandler(experiment_name=self.name)
@@ -166,10 +172,13 @@ class Experiment:
     # ===============================================
 
     def _create_sequence(self, sequence_settings: dict) -> sequence.Sequence:
+        if isinstance(sequence_settings, sequence.Sequence):
+            return sequence_settings
         sequence_type = get_type(sequence_settings, "type", str, "Sequence")
         true_or_fatal_exit(
             hasattr(sequence, sequence_type),
-            f"Sequence type specified in 'type' does not exist. No sequence named {sequence_type}",
+            "Sequence type specified in 'type' does not exist. "
+            f"No sequence named {sequence_type}",
         )
         return getattr(sequence, sequence_type)(
             self.window, self.input_device, sequence_settings
@@ -179,10 +188,60 @@ class Experiment:
         if self.block_trial.takes_trial_values:
             return self.trial_values[block][trial]
         return {}
+    
+    def _get_all_sequences(self) -> list[sequence.Sequence]:
+        return [
+            *self.pre,
+            self.block_trial,
+            self.between_blocks,
+            *self.post
+        ]
+
+    def _get_all_trial_values(self) -> list[str]:
+        requested_trial_values = []
+        for seq in self._get_all_sequences():
+            if seq.takes_trial_values:
+                requested_trial_values.append(*seq._get_all_trial_values())
+        return requested_trial_values
+
+    def _validate_trial_values(self) -> None:
+        requested_trial_values = self._get_all_trial_values()
+        if len(requested_trial_values):
+            for i, values in enumerate(self.trial_values):
+                for key in requested_trial_values:
+                    if key not in values:
+                        fatal_exit(
+                            "Trial values missing component request: "
+                            f"Trial values nr. {i} missing {key}"
+                        )
+
+    def _abort(self):
+        logging.warning("Aborting!")
+        self.data_handler.abort()
+        self.window.flip()
+        self.window.close()
+        core.quit()
 
     # ===============================================
     # Public member functions
     # ===============================================
+
+    def load_trial_values(self, trial_values: list, validate: bool = False):
+
+        # -----------------------------------------------
+        # Sanity check
+        # -----------------------------------------------
+        true_or_fatal_exit(
+            isinstance(trial_values, list)
+            and all(isinstance(value, dict) for value in trial_values),
+            "Trial values must be a list of dictionaries",
+        )
+        # -----------------------------------------------
+
+        self.trial_values = trial_values
+
+        if validate:
+            self._validate_trial_values()
 
     def close(self):
         self.data_handler.finish_participant_data()
