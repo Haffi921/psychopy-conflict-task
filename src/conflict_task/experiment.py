@@ -120,9 +120,9 @@ class Experiment:
         # -----------------------------------------------
         experiment_sequence: dict = get_type_or_fatal_exit(
             experiment_settings,
-            "experiment_sequence",
+            "sequences",
             dict,
-            "Experiment must have 'sequence' settings",
+            "Experiment must have 'sequences' settings",
         )
 
         if pre_settings := get_type(experiment_sequence, "pre", list):
@@ -133,46 +133,39 @@ class Experiment:
             for seq in post_settings:
                 self.post.append(self._create_sequence(seq))
 
-        block_settings: dict = get_type_or_fatal_exit(
-            experiment_sequence,
-            "block",
-            dict,
-            "Experiment sequence must have 'block' settings",
-        )
-
         self.nr_blocks = get_type_or_fatal_exit(
-            block_settings, "nr_blocks", int, "'nr_blocks' must be specified"
+            experiment_sequence, "nr_blocks", int, "'nr_blocks' must be specified"
         )
         self.nr_trials = get_type_or_fatal_exit(
-            block_settings, "nr_trials", int, "'nr_trials' must be specified"
+            experiment_sequence, "nr_trials", int, "'nr_trials' must be specified"
         )
 
-        self.nr_practice_blocks = get_type(block_settings, "nr_practice_blocks", int, 0)
-        self.nr_practice_trials = get_type(block_settings, "nr_practice_trials", int, 0)
+        self.nr_practice_blocks = get_type(experiment_sequence, "nr_practice_blocks", int, 0)
+        self.nr_practice_trials = get_type(experiment_sequence, "nr_practice_trials", int, 0)
 
         if trial_settings := get_type_or_fatal_exit(
-            block_settings, "trial", dict, "'trial' settings must be specified"
+            experiment_sequence, "trial", dict, "'trial' settings must be specified"
         ):
             self.block_trial = self._create_sequence(trial_settings)
 
-        if between_blocks_settings := get_type(block_settings, "between_blocks", dict):
+        if between_blocks_settings := get_type(experiment_sequence, "between_blocks", dict):
             self.between_blocks = self._create_sequence(between_blocks_settings)
 
-        if self.block_trial.takes_trial_values:
-            true_or_fatal_exit(
-                len(self.trial_values) == self.nr_blocks,
-                (
-                    "Number of blocks in trial values not corresponding to 'nr_blocks': "
-                    f"{len(self.trial_values)} != {self.nr_blocks}"
-                ),
-            )
-            true_or_fatal_exit(
-                all(len(trials) == self.nr_trials for trials in self.trial_values),
-                (
-                    "Number of trial values in all blocks must correspond to 'nr_trials': "
-                    f"{self.nr_trials}"
-                ),
-            )
+        # if self.block_trial.takes_trial_values:
+        #     true_or_fatal_exit(
+        #         len(self.trial_values) == self.nr_blocks,
+        #         (
+        #             "Number of blocks in trial values not corresponding to 'nr_blocks': "
+        #             f"{len(self.trial_values)} != {self.nr_blocks}"
+        #         ),
+        #     )
+        #     true_or_fatal_exit(
+        #         all(len(trials) == self.nr_trials for trials in self.trial_values),
+        #         (
+        #             "Number of trial values in all blocks must correspond to 'nr_trials': "
+        #             f"{self.nr_trials}"
+        #         ),
+        #     )
         # -----------------------------------------------
 
     # ===============================================
@@ -204,7 +197,7 @@ class Experiment:
         requested_trial_values = []
         for seq in self._get_all_sequences():
             if seq.takes_trial_values:
-                requested_trial_values.append(*seq._get_all_trial_values())
+                requested_trial_values.extend(seq._get_all_trial_values())
         return requested_trial_values
 
     def _abort(self):
@@ -224,7 +217,7 @@ class Experiment:
         if nr_trial_values:
             true_or_fatal_exit(
                 len(trial_values) == self.nr_blocks + self.nr_practice_blocks,
-                "Number of blocks of trial values does not match up with spcified block length"
+                "Number of blocks of trial values does not match up with spcified block length "
                 f"{len(trial_values)} (trial values) != {self.nr_blocks + self.nr_practice_blocks} (nr blocks)",
             )
             for block_nr, block_values in enumerate(trial_values):
@@ -236,7 +229,7 @@ class Experiment:
                 # TODO: Take in account practice
                 true_or_fatal_exit(
                     len(block_values) == nr_trials,
-                    "Number of trial values does not match up with spcified number of trials"
+                    "Number of trial values does not match up with spcified number of trials "
                     f"{len(block_values)} (trial values) != {nr_trials} (nr trials)"
                     f" in block nr {block_nr}",
                 )
@@ -258,6 +251,21 @@ class Experiment:
             and all(isinstance(value, dict) for value in trial_values),
             "Trial values must be a list of dictionaries",
         )
+        if self.block_trial.takes_trial_values:
+            true_or_fatal_exit(
+                len(self.trial_values) == self.nr_blocks,
+                (
+                    "Number of blocks in trial values not corresponding to 'nr_blocks': "
+                    f"{len(self.trial_values)} != {self.nr_blocks}"
+                ),
+            )
+            true_or_fatal_exit(
+                all(len(trials) == self.nr_trials for trials in self.trial_values),
+                (
+                    "Number of trial values in all blocks must correspond to 'nr_trials': "
+                    f"{self.nr_trials}"
+                ),
+            )
         # -----------------------------------------------
 
         self.trial_values = trial_values
@@ -323,7 +331,7 @@ class Experiment:
                 )
                 EMGConnector.send_marker(marker_start, t=0.5)
 
-    def run(self):
+    def run(self):    
         for pre in self.pre:
             self._run_sequence(pre)
 

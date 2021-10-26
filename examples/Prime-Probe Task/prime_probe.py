@@ -1,11 +1,10 @@
-from psychopy import core
+from conflict_task.experiment import Experiment
+from trial_values import get_trial_values
 from sequences.between_blocks import between_blocks
 from sequences.post_trial import post_trial
 from sequences.pre_trial import pre_trial
 from sequences.trial import trial_sequence
 
-from conflict_task.devices import DataHandler, EMGConnector, Keyboard, Window
-from conflict_task.sequence import Screen, Trial
 
 EXPERIMENT_NAME = "Prime-Probe"
 
@@ -20,7 +19,7 @@ NR_TRIALS = 97
 #         "age": "",
 #         "gender": ""
 #     },
-#     "experiment_sequence": {
+#     "sequences": {
 #         "pre": pre_trial,
 #         "trial": trial_sequence,
 #         "between_blocks": between_blocks,
@@ -36,11 +35,20 @@ NR_TRIALS = 97
 
 # experiment = Experiment(experiment_settings)
 
+# p_nr = experiment.data_handler.participant_number
+
+# trial_values = [
+#     *get_trial_values(NR_PRACTICE_TRIALS, NR_PRACTICE_BLOCKS, p_nr, True, Force=True),
+#     *get_trial_values(NR_TRIALS, NR_BLOCKS, p_nr, add_initial_trial=True),
+# ]
+
 # experiment.validate_trial_values(trial_values)
 
-# experiment.run()
+#experiment.run()
+from psychopy import core
 
-from trial_values import get_trial_values
+from conflict_task.devices import DataHandler, EMGConnector, Keyboard, Window
+from conflict_task.sequence import Screen, Trial
 
 data_handler = DataHandler(EXPERIMENT_NAME, subject_info={"age": "", "gender": ""})
 data_handler.start_participant_data()
