@@ -3,6 +3,7 @@ from __future__ import annotations
 from psychopy import clock, core, logging
 
 from conflict_task.devices import DataHandler, Window, input_device
+from conflict_task.devices.EMG_connector import EMGConnector
 from conflict_task.util import get_type, get_type_or_fatal_exit, true_or_fatal_exit
 from conflict_task.util.error import fatal_exit
 
@@ -22,7 +23,7 @@ class Experiment:
         # -----------------------------------------------
         # Experiment settings
         self.name = None
-        self.allow_escape = None
+        self.debug = None
 
         # Devices
         self.input_device: input_device.InputDevice = None
@@ -37,6 +38,7 @@ class Experiment:
         self.between_blocks: sequence.Sequence = None
 
         # Values
+        self.extra_info = None
         self.trial_values = (
             self.load_trial_values(trial_values, validate)
             if trial_values is not None
@@ -69,7 +71,9 @@ class Experiment:
         self.name = get_type_or_fatal_exit(
             experiment_settings, "name", str, "Please specify experiment 'name'"
         )
-        self.allow_escape = experiment_settings.get("allow_escape", False)
+
+        self.debug = experiment_settings.get("debug", False)
+        self.marker = get_type(experiment_settings, "marker", list, None)
         # -----------------------------------------------
 
         # -----------------------------------------------
@@ -99,6 +103,7 @@ class Experiment:
             self.data_handler = DataHandler(experiment_name=self.name)
 
         self.data_handler.start_participant_data()
+        self.extra_info = {**self.data_handler.subject_info}
         # -----------------------------------------------
 
         # -----------------------------------------------
@@ -141,6 +146,9 @@ class Experiment:
         self.nr_trials = get_type_or_fatal_exit(
             block_settings, "nr_trials", int, "'nr_trials' must be specified"
         )
+
+        self.nr_practice_blocks = get_type(block_settings, "nr_practice_blocks", int, 0)
+        self.nr_practice_trials = get_type(block_settings, "nr_practice_trials", int, 0)
 
         if trial_settings := get_type_or_fatal_exit(
             block_settings, "trial", dict, "'trial' settings must be specified"
@@ -188,14 +196,9 @@ class Experiment:
         if self.block_trial.takes_trial_values:
             return self.trial_values[block][trial]
         return {}
-    
+
     def _get_all_sequences(self) -> list[sequence.Sequence]:
-        return [
-            *self.pre,
-            self.block_trial,
-            self.between_blocks,
-            *self.post
-        ]
+        return [*self.pre, self.block_trial, self.between_blocks, *self.post]
 
     def _get_all_trial_values(self) -> list[str]:
         requested_trial_values = []
@@ -203,17 +206,6 @@ class Experiment:
             if seq.takes_trial_values:
                 requested_trial_values.append(*seq._get_all_trial_values())
         return requested_trial_values
-
-    def _validate_trial_values(self) -> None:
-        requested_trial_values = self._get_all_trial_values()
-        if len(requested_trial_values):
-            for i, values in enumerate(self.trial_values):
-                for key in requested_trial_values:
-                    if key not in values:
-                        fatal_exit(
-                            "Trial values missing component request: "
-                            f"Trial values nr. {i} missing {key}"
-                        )
 
     def _abort(self):
         logging.warning("Aborting!")
@@ -225,6 +217,36 @@ class Experiment:
     # ===============================================
     # Public member functions
     # ===============================================
+
+    def validate_trial_values(self, trial_values) -> None:
+        requested_trial_values = self._get_all_trial_values()
+        nr_trial_values = len(requested_trial_values)
+        if nr_trial_values:
+            true_or_fatal_exit(
+                len(trial_values) == self.nr_blocks + self.nr_practice_blocks,
+                "Number of blocks of trial values does not match up with spcified block length"
+                f"{len(trial_values)} (trial values) != {self.nr_blocks + self.nr_practice_blocks} (nr blocks)",
+            )
+            for block_nr, block_values in enumerate(trial_values):
+                nr_trials = (
+                    self.nr_practice_trials
+                    if block_nr < self.nr_practice_blocks
+                    else self.nr_trials
+                )
+                # TODO: Take in account practice
+                true_or_fatal_exit(
+                    len(block_values) == nr_trials,
+                    "Number of trial values does not match up with spcified number of trials"
+                    f"{len(block_values)} (trial values) != {nr_trials} (nr trials)"
+                    f" in block nr {block_nr}",
+                )
+                for trial_nr, values in enumerate(block_values):
+                    for key in requested_trial_values:
+                        true_or_fatal_exit(
+                            key in values,
+                            "Trial values missing component request: "
+                            f"Block {block_nr}, Trial {trial_nr} missing {key}",
+                        )
 
     def load_trial_values(self, trial_values: list, validate: bool = False):
 
@@ -241,7 +263,7 @@ class Experiment:
         self.trial_values = trial_values
 
         if validate:
-            self._validate_trial_values()
+            self.validate_trial_values(self.trial_values)
 
     def close(self):
         self.data_handler.finish_participant_data()
@@ -249,65 +271,76 @@ class Experiment:
         self.window.close()
         core.quit()
 
+    def _run_sequence(self, seq: sequence.Sequence, trial_values={}):
+        if seq is None:
+            return
+
+        continue_experiment = seq.run(trial_values, self.debug)
+
+        self.data_handler.add_data_dict(self.extra_info)
+        self.data_handler.add_data_dict(trial_values)
+        self.data_handler.add_data_dict(seq.get_data())
+        self.data_handler.next_entry()
+
+        if not continue_experiment:
+            if self.debug:
+                self._abort()
+            self.close()
+
+    def _run_blocks(self, nr_blocks: int, nr_trials: int, practice=False):
+        for block_nr in range(nr_blocks):
+            block_info = {
+                "trial_block": "practice" if practice else "block",
+                "block": block_nr + 1,
+            }
+            trial_values = self.trial_values[
+                block_nr + (self.nr_practice_blocks if not practice else 0)
+            ]
+            if block_nr:
+                self._run_sequence(self.between_blocks)
+
+            if self.marker:
+                marker_start = (
+                    self.marker[0]
+                    + block_nr
+                    + (self.nr_practice_blocks if not practice else 0)
+                )
+                EMGConnector.send_marker(marker_start, t=0.5, t_after=0.5)
+
+            for trial_nr in range(nr_trials):
+                trial_values = {
+                    **block_info,
+                    "trial": trial_nr + 1,
+                    **trial_values[trial_nr],
+                }
+                self._run_sequence(self.block_trial, trial_values)
+
+            if self.marker:
+                marker_start = (
+                    self.marker[1]
+                    + block_nr
+                    + (self.nr_practice_blocks if not practice else 0)
+                )
+                EMGConnector.send_marker(marker_start, t=0.5)
+
     def run(self):
-        continue_experiment = True
-
-        experiment_data = {"experiment_name": self.name}
-
-        # PRE
         for pre in self.pre:
-            continue_experiment = pre.run(allow_escape=self.allow_escape)
+            self._run_sequence(pre)
 
-            self.data_handler.add_data_dict_and_next_entry(
-                {**experiment_data, **pre.get_data()}
-            )
+        self._run_blocks(
+            nr_blocks=self.nr_practice_blocks,
+            nr_trials=self.nr_practice_trials,
+            practice=True,
+        )
 
-            if not continue_experiment:
-                self.close()
+        self._run_sequence(self.between_blocks)
 
-        for block in range(self.nr_blocks):
-            block_data = {**experiment_data, "block": block + 1}
+        self._run_blocks(
+            nr_blocks=self.nr_blocks,
+            nr_trials=self.nr_trials,
+        )
 
-            # BETWEEN BLOCK
-            if block:  # Skip first block
-                continue_experiment = self.between_blocks.run(
-                    allow_escape=self.allow_escape
-                )
-
-                self.data_handler.add_data_dict_and_next_entry(
-                    {**block_data, **self.between_blocks.get_data()}
-                )
-
-                if not continue_experiment:
-                    self.close()
-
-            # BLOCK
-            for trial in range(self.nr_trials):
-                trial_data = {**block_data, "trial": trial + 1}
-
-                trial_values = {**trial_data, **self._get_trial_values(block, trial)}
-
-                continue_experiment = self.block_trial.run(
-                    trial_values=trial_values, allow_escape=self.allow_escape
-                )
-
-                self.data_handler.add_data_dict(trial_values)
-                self.data_handler.add_data_dict_and_next_entry(
-                    self.block_trial.get_data()
-                )
-
-                if not continue_experiment:
-                    self.close()
-
-        # POST
         for post in self.post:
-            continue_experiment = post.run(allow_escape=self.allow_escape)
-
-            self.data_handler.add_data_dict_and_next_entry(
-                {**experiment_data, **post.get_data()}
-            )
-
-            if not continue_experiment:
-                self.close()
+            self._run_sequence(post)
 
         self.close()

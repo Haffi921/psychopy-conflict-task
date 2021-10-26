@@ -13,13 +13,15 @@ class EMGConnector:
     def connect(cls, force=False) -> None:
         try:
             cls.port = ParallelPort(address=cls.PORT_ADDRESS)
-            cls._set_data(0)
             cls._connected = True
         except TypeError:
             cls._connected = False
 
-        if cls._read_data() != 0:
-            cls._connected = False
+        for bits in [0b11111111, 0b00000000]:
+            cls._set_data(bits)
+            cls._connected = cls._read_data() == bits
+            if not cls._connected:
+                break
 
         if force and not cls._connected:
             fatal_exit("EMGConnector requested but no ParallelPort connection made")

@@ -7,29 +7,38 @@ from sequences.trial import trial_sequence
 from conflict_task.devices import DataHandler, EMGConnector, Keyboard, Window
 from conflict_task.sequence import Screen, Trial
 
-# experiment_settings = dict(
-#     name="Prime-Probe",
-#     allow_escape=True,
-#     experiment_sequence=dict(
-#         pre=[start_screen],
-#         block=dict(
-#             nr_blocks=8, nr_trials=97, trial=trial, between_blocks=between_blocks
-#         ),
-#         post=[start_screen],
-#     ),
-# )
-
-# prime_probe = Experiment(trial_values, experiment_settings)
-
-# prime_probe.run()
-
-
 EXPERIMENT_NAME = "Prime-Probe"
 
 NR_PRACTICE_BLOCKS = 1
 NR_PRACTICE_TRIALS = 24
 NR_BLOCKS = 8
 NR_TRIALS = 97
+
+# experiment_settings = {
+#     "name": "Prime-Probe",
+#     "extra_info": {
+#         "age": "",
+#         "gender": ""
+#     },
+#     "experiment_sequence": {
+#         "pre": pre_trial,
+#         "trial": trial_sequence,
+#         "between_blocks": between_blocks,
+#         "post": post_trial,
+#         "nr_blocks": NR_BLOCKS,
+#         "nr_trials": NR_TRIALS,
+#         "nr_practice_blocks": NR_PRACTICE_BLOCKS,
+#         "nr_practice_trials": NR_TRIALS,
+#     },
+#     "marker": [50, 60],
+#     "debug": True,
+# }
+
+# experiment = Experiment(experiment_settings)
+
+# experiment.validate_trial_values(trial_values)
+
+# experiment.run()
 
 from trial_values import get_trial_values
 
