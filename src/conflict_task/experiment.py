@@ -329,7 +329,7 @@ class Experiment:
                     + block_nr
                     + (self.nr_practice_blocks if not practice else 0)
                 )
-                EMGConnector.send_marker(marker_start, t=0.5)
+                EMGConnector.send_marker(marker_start, t=0.5, t_before=0.5)
 
     def run(self):    
         for pre in self.pre:

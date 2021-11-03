@@ -121,7 +121,7 @@ for practice_block_nr in range(NR_PRACTICE_BLOCKS):
         if not continue_experiment:
             emergency_quit()
 
-    EMGConnector.send_marker(60, t=0.5)
+    EMGConnector.send_marker(60, t=0.5, t_before=0.5)
 
     continue_experiment = between.run()
 
@@ -157,7 +157,7 @@ for block_nr in range(NR_BLOCKS):
 
         if not continue_experiment:
             emergency_quit()
-    EMGConnector.send_marker(61 + block_nr, t=0.5)
+    EMGConnector.send_marker(61 + block_nr, t=0.5, t_before=0.5)
 
 for post in post_trial:
     post.run()

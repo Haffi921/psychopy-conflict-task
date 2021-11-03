@@ -2,4 +2,6 @@ from .screen import Screen
 
 
 class Instructions:
-    pass
+    def __init__(self, text) -> None:
+        screens: list[Screen] = None
+        

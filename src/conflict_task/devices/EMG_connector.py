@@ -53,7 +53,10 @@ class EMGConnector:
             cls.port.setData(data)
 
     @classmethod
-    def send_marker(cls, marker, t=0.005, t_after=0.0):
+    def send_marker(cls, marker, t=0.005, t_before = 0.0, t_after=0.0):
+        if t_before > 0.0:
+            cls.ISI.start(t_before)
+            cls.ISI.complete()
         cls.ISI.start(t)
         cls._set_data(marker)
         cls.ISI.complete()
@@ -65,3 +68,8 @@ class EMGConnector:
     @classmethod
     def connected(cls):
         return cls._connected
+
+
+if __name__ == "__main__":
+    EMGConnector.connect(force=True)
+    print(EMGConnector.connected())
