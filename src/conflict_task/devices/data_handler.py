@@ -1,5 +1,4 @@
-import os
-from sys import path
+from pathlib import Path
 
 from psychopy import __version__, core, data, gui
 
@@ -17,7 +16,7 @@ class DataHandler:
         self._data_handler: data.ExperimentHandler = None
 
     def start_participant_data(self, _save=True, _dlg=True):
-        this_dir = os.path.abspath(path[0])
+        data_dir = Path().absolute() / "data"
         version = __version__
         date = data.getDateStr()
 
@@ -35,13 +34,9 @@ class DataHandler:
         self.subject_info["psychopy_version"] = version
         self.subject_info["date"] = date
 
-        self.filename = (
-            this_dir
-            + os.sep
-            + "data"
-            + os.sep
-            + f"{self.subject_info['participant']}_{self.subject_info['session']}_{self.experiment_name}_{self.subject_info['date']}"
-        )
+        file_name = f"{self.subject_info['participant']}_{self.subject_info['session']}_{self.experiment_name}_{self.subject_info['date']}"
+
+        self.filename = str(data_dir / file_name)
 
         self._data_handler = data.ExperimentHandler(
             name=self.experiment_name,
