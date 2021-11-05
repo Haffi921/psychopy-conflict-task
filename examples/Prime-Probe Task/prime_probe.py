@@ -1,10 +1,10 @@
-from conflict_task.experiment import Experiment
-from trial_values import get_trial_values
 from sequences.between_blocks import between_blocks
 from sequences.post_trial import post_trial
 from sequences.pre_trial import pre_trial
 from sequences.trial import trial_sequence
+from trial_values import get_trial_values
 
+from conflict_task.experiment import Experiment
 
 EXPERIMENT_NAME = "Prime-Probe"
 
@@ -44,7 +44,7 @@ NR_TRIALS = 97
 
 # experiment.validate_trial_values(trial_values)
 
-#experiment.run()
+# experiment.run()
 from psychopy import core
 
 from conflict_task.devices import DataHandler, EMGConnector, Keyboard, Window

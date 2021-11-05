@@ -53,7 +53,7 @@ class EMGConnector:
             cls.port.setData(data)
 
     @classmethod
-    def send_marker(cls, marker, t=0.005, t_before = 0.0, t_after=0.0):
+    def send_marker(cls, marker, t=0.005, t_before=0.0, t_after=0.0):
         if t_before > 0.0:
             cls.ISI.start(t_before)
             cls.ISI.complete()

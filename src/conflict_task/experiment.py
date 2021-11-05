@@ -140,15 +140,21 @@ class Experiment:
             experiment_sequence, "nr_trials", int, "'nr_trials' must be specified"
         )
 
-        self.nr_practice_blocks = get_type(experiment_sequence, "nr_practice_blocks", int, 0)
-        self.nr_practice_trials = get_type(experiment_sequence, "nr_practice_trials", int, 0)
+        self.nr_practice_blocks = get_type(
+            experiment_sequence, "nr_practice_blocks", int, 0
+        )
+        self.nr_practice_trials = get_type(
+            experiment_sequence, "nr_practice_trials", int, 0
+        )
 
         if trial_settings := get_type_or_fatal_exit(
             experiment_sequence, "trial", dict, "'trial' settings must be specified"
         ):
             self.block_trial = self._create_sequence(trial_settings)
 
-        if between_blocks_settings := get_type(experiment_sequence, "between_blocks", dict):
+        if between_blocks_settings := get_type(
+            experiment_sequence, "between_blocks", dict
+        ):
             self.between_blocks = self._create_sequence(between_blocks_settings)
 
         # if self.block_trial.takes_trial_values:
@@ -331,7 +337,7 @@ class Experiment:
                 )
                 EMGConnector.send_marker(marker_start, t=0.5, t_before=0.5)
 
-    def run(self):    
+    def run(self):
         for pre in self.pre:
             self._run_sequence(pre)
 

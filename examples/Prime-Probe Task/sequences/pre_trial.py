@@ -95,8 +95,8 @@ image = {
                 "wrapWidth": 1500,
                 "font": FONT_FAMILY,
                 "color": "black",
-                "pos": (0, 180)
-            }
+                "pos": (0, 180),
+            },
         },
         {
             "name": "image",
@@ -105,7 +105,7 @@ image = {
                 "image": "examples\Prime-Probe Task\Keyboard_with_fingers.jpg",
                 "size": (3062 * 0.2, 1788 * 0.2),
                 "pos": (0, -350),
-            }
+            },
         },
     ],
     "response": {"keys": ["space"]},
@@ -116,5 +116,5 @@ if __name__ == "__main__":
 
     preview_sequence(image)
 
-    #for pre in pre_trial:
+    # for pre in pre_trial:
     #    preview_sequence(pre)

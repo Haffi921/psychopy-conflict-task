@@ -9,7 +9,9 @@ class DataHandler:
     _data_handler: data.ExperimentHandler = None
 
     @classmethod
-    def start_participant_data(cls, experiment_name: str, dlg_info: dict = {}, _save=True, _dlg=True):
+    def start_participant_data(
+        cls, experiment_name: str, dlg_info: dict = {}, _save=True, _dlg=True
+    ):
         data_dir = Path().absolute() / "data"
         version = __version__
         date = data.getDateStr()
@@ -17,9 +19,7 @@ class DataHandler:
         dlg_info: dict = {"participant": "", "session": "001", **dlg_info}
 
         if _dlg:
-            dlg = gui.DlgFromDict(
-                dlg_info, sortKeys=False, title=experiment_name
-            )
+            dlg = gui.DlgFromDict(dlg_info, sortKeys=False, title=experiment_name)
 
             if not dlg.OK:
                 core.quit()
@@ -28,7 +28,7 @@ class DataHandler:
             "experiment_name": experiment_name,
             **dlg_info,
             "psychopy_version": version,
-            "date": date
+            "date": date,
         }
 
         file_name = f"{cls.subject_info['participant']}_{cls.subject_info['session']}_{experiment_name}_{cls.subject_info['date']}"
@@ -44,14 +44,14 @@ class DataHandler:
         )
 
         cls.add_data_dict(cls.subject_info)
-    
+
     @classmethod
     def __del__(cls):
         cls.finish_participant_data()
 
     @classmethod
     def get_participant_number(cls):
-        return int(cls.subject_info['participant'])
+        return int(cls.subject_info["participant"])
 
     @classmethod
     def save_as_csv(cls):
