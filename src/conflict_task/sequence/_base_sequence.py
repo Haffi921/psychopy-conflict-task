@@ -4,7 +4,7 @@ from functools import reduce
 
 from psychopy import clock
 
-from conflict_task.component import *
+from conflict_task.component import BaseComponent, VisualComponent, AudioComponent, WaitComponent, ResponseComponent, CorrectResponseComponent
 from conflict_task.constants import (
     FRAMETOLERANCE,
     INFINITY,

@@ -4,75 +4,87 @@ from psychopy import __version__, core, data, gui
 
 
 class DataHandler:
-    def __init__(
-        self,
-        experiment_name: str,
-        subject_info: dict = {},
-    ):
-        self.filename: str = None
-        self.experiment_name: str = experiment_name
-        self.participant_number: int = None
-        self.subject_info: dict = {"participant": "", "session": "001", **subject_info}
-        self._data_handler: data.ExperimentHandler = None
+    filename: str = None
+    subject_info: dict = None
+    _data_handler: data.ExperimentHandler = None
 
-    def start_participant_data(self, _save=True, _dlg=True):
+    @classmethod
+    def start_participant_data(cls, experiment_name: str, dlg_info: dict = {}, _save=True, _dlg=True):
         data_dir = Path().absolute() / "data"
         version = __version__
         date = data.getDateStr()
 
+        dlg_info: dict = {"participant": "", "session": "001", **dlg_info}
+
         if _dlg:
             dlg = gui.DlgFromDict(
-                self.subject_info, sortKeys=False, title=self.experiment_name
+                dlg_info, sortKeys=False, title=experiment_name
             )
 
             if not dlg.OK:
                 core.quit()
 
-        self.participant_number = int(self.subject_info["participant"])
+        cls.subject_info = {
+            "experiment_name": experiment_name,
+            **dlg_info,
+            "psychopy_version": version,
+            "date": date
+        }
 
-        self.subject_info["experiment_name"] = self.experiment_name
-        self.subject_info["psychopy_version"] = version
-        self.subject_info["date"] = date
+        file_name = f"{cls.subject_info['participant']}_{cls.subject_info['session']}_{experiment_name}_{cls.subject_info['date']}"
 
-        file_name = f"{self.subject_info['participant']}_{self.subject_info['session']}_{self.experiment_name}_{self.subject_info['date']}"
+        cls.filename = str(data_dir / file_name)
 
-        self.filename = str(data_dir / file_name)
-
-        self._data_handler = data.ExperimentHandler(
-            name=self.experiment_name,
+        cls._data_handler = data.ExperimentHandler(
+            name=experiment_name,
             version=version,
-            # extraInfo=self.subject_info,
             saveWideText=_save,
             savePickle=_save,
-            dataFileName=self.filename,
+            dataFileName=cls.filename,
         )
 
-    def get_participant_number(self):
-        return self.participant_number
+        cls.add_data_dict(cls.subject_info)
+    
+    @classmethod
+    def __del__(cls):
+        cls.finish_participant_data()
 
-    def save_as_csv(self):
-        self._data_handler.saveAsWideText(fileName=self.filename + ".csv")
+    @classmethod
+    def get_participant_number(cls):
+        return int(cls.subject_info['participant'])
 
-    def save_as_psydat(self):
-        self._data_handler.saveAsPickle(fileName=self.filename)
+    @classmethod
+    def save_as_csv(cls):
+        cls._data_handler.saveAsWideText(fileName=cls.filename + ".csv")
 
-    def finish_participant_data(self):
-        self.save_as_csv()
-        self.abort()
+    @classmethod
+    def save_as_psydat(cls):
+        cls._data_handler.saveAsPickle(fileName=cls.filename)
 
-    def abort(self):
-        self._data_handler.abort()
+    @classmethod
+    def finish_participant_data(cls):
+        cls.save_as_csv()
+        cls.abort()
 
-    def next_entry(self):
-        self._data_handler.nextEntry()
+    @classmethod
+    def abort(cls):
+        cls._data_handler.abort()
 
-    def add_data(self, key, value):
-        self._data_handler.addData(key, value)
+    @classmethod
+    def next_entry(cls):
+        cls._data_handler.nextEntry()
+        cls.add_data_dict(cls.subject_info)
 
-    def add_data_dict(self, data_dict: dict):
+    @classmethod
+    def add_data(cls, key, value):
+        cls._data_handler.addData(key, value)
+
+    @classmethod
+    def add_data_dict(cls, data_dict: dict):
         for key, value in data_dict.items():
-            self.add_data(str(key), str(value).encode("unicode_escape").decode())
+            cls.add_data(str(key), str(value).encode("unicode_escape").decode())
 
-    def add_data_dict_and_next_entry(self, data_dict: dict):
-        self.add_data_dict(data_dict)
-        self.next_entry()
+    @classmethod
+    def add_data_dict_and_next_entry(cls, data_dict: dict):
+        cls.add_data_dict(data_dict)
+        cls.next_entry()

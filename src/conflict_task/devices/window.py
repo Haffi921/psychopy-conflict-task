@@ -1,4 +1,4 @@
-from psychopy import visual
+from psychopy import visual, core, clock
 
 DEFAULT_WINDOW_SETTINGS = dict(
     # Size of the window in pixels (x, y)
@@ -33,3 +33,32 @@ class Window(visual.Window):
         super().__init__(**self.window_settings)
 
         self.mouseVisible = self.window_settings["allowGUI"]
+
+class WindowSingleton:
+    _window: visual.Window = None
+
+    @classmethod
+    def start(cls, window_settings={}):
+        window_settings = {**DEFAULT_WINDOW_SETTINGS, **window_settings}
+
+        cls._window = visual.Window(**window_settings)
+
+        cls._window.mouseVisible = window_settings["allowGUI"]
+    
+    @classmethod
+    def get_future_flip_time(cls, target_time: float = 0, clock: clock = None) -> float:
+        return cls._window.getFutureFlipTime(targetTime=target_time, clock=clock)
+
+    @classmethod
+    def flip(cls, clear_buffer: bool = True):
+        cls._window.flip(clearBuffer=clear_buffer)
+    
+    @classmethod
+    def quit(cls):
+        cls._window.flip()
+        cls._window.close()
+        core.quit()
+    
+    @classmethod
+    def __del__(cls):
+        cls.quit()
