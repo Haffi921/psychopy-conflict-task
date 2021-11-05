@@ -71,7 +71,8 @@ class Block:
                 "block": block + 1,
             }
             if self.between and block:
-                self.run_sequence(self.between, data=block_data)
+                for between in self.between:
+                    self.run_sequence(between, data=block_data)
 
             if self.marker:
                 EMGConnector.send_marker(self.marker[0] + block, t=0.5, t_after=0.5)
@@ -91,4 +92,5 @@ class Block:
                 EMGConnector.send_marker(self.marker[1] + block, t=0.5, t_before=0.5)
 
         if self.post:
-            self.run_sequence(self.post, data=experiment_data)
+            for post in self.post:
+                self.run_sequence(post, data=experiment_data)
