@@ -16,7 +16,7 @@ class Instructions:
             instructions = [instructions]
         for i, s in enumerate(instructions):
             if not isinstance(s, Screen):
-                instructions[i] = Screen(s)
+                instructions[i] = Screen(self.win, self.input_device, s)
 
         self.screens = instructions
 

@@ -8,8 +8,8 @@ class BlockExperiment:
     def __init__(
         self, win: Window, input_device: InputDevice, experiment_settings: dict
     ) -> None:
-        self.win = (win,)
-        self.input_device = (input_device,)
+        self.win = win
+        self.input_device = input_device
 
         self.practice_block = None
         self.nr_practice_blocks = 0

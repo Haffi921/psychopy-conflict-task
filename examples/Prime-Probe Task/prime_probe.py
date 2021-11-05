@@ -50,18 +50,17 @@ from psychopy import core
 from conflict_task.devices import DataHandler, EMGConnector, Keyboard, Window
 from conflict_task.sequence import Screen, Trial
 
-data_handler = DataHandler(EXPERIMENT_NAME, subject_info={"age": "", "gender": ""})
-data_handler.start_participant_data()
+DataHandler.start_participant_data(EXPERIMENT_NAME, dlg_info={"age": "", "gender": ""})
 
 practice_values = get_trial_values(
     NR_PRACTICE_TRIALS,
     NR_PRACTICE_BLOCKS,
-    data_handler.get_participant_number(),
+    DataHandler.get_participant_number(),
     practice=True,
     Force=True,
 )
 experiment_values = get_trial_values(
-    NR_TRIALS, NR_BLOCKS, data_handler.get_participant_number(), add_initial_trial=True
+    NR_TRIALS, NR_BLOCKS, DataHandler.get_participant_number(), add_initial_trial=True
 )
 
 window = Window()
@@ -71,14 +70,14 @@ EMGConnector.connect()
 
 def emergency_quit():
     print("Aborting!")
-    data_handler.abort()
+    DataHandler.abort()
     window.flip()
     window.close()
     core.quit()
 
 
 def quit():
-    data_handler.finish_participant_data()
+    DataHandler.finish_participant_data()
     window.flip()
     window.close()
     core.quit()
@@ -90,12 +89,10 @@ between = Screen(window, input_device, between_blocks)
 post_trial = list(map(lambda screen: Screen(window, input_device, screen), post_trial))
 
 
-experiment_data = {**data_handler.subject_info}
-
 for pre in pre_trial:
     continue_experiment = pre.run()
 
-    data_handler.add_data_dict_and_next_entry({**experiment_data, **pre.get_data()})
+    DataHandler.add_data_dict_and_next_entry(pre.get_data())
 
     if not continue_experiment:
         emergency_quit()
@@ -103,7 +100,6 @@ for pre in pre_trial:
 for practice_block_nr in range(NR_PRACTICE_BLOCKS):
     EMGConnector.send_marker(50, t=0.5, t_after=0.5)
     practice_block_data = {
-        **experiment_data,
         "trial_block": "practice",
         "block": practice_block_nr + 1,
     }
@@ -115,8 +111,8 @@ for practice_block_nr in range(NR_PRACTICE_BLOCKS):
 
         continue_experiment = trial.run(trial_values=trial_values)
 
-        data_handler.add_data_dict(trial_values)
-        data_handler.add_data_dict_and_next_entry(trial.get_data())
+        DataHandler.add_data_dict(trial_values)
+        DataHandler.add_data_dict_and_next_entry(trial.get_data())
 
         if not continue_experiment:
             emergency_quit()
@@ -125,7 +121,7 @@ for practice_block_nr in range(NR_PRACTICE_BLOCKS):
 
     continue_experiment = between.run()
 
-    data_handler.add_data_dict_and_next_entry(
+    DataHandler.add_data_dict_and_next_entry(
         {**practice_block_data, **between.get_data()}
     )
 
@@ -134,12 +130,12 @@ for practice_block_nr in range(NR_PRACTICE_BLOCKS):
 
 
 for block_nr in range(NR_BLOCKS):
-    block_data = {**experiment_data, "trial_block": "block", "block": block_nr + 1}
+    block_data = {"trial_block": "block", "block": block_nr + 1}
 
     if block_nr:
         continue_experiment = between.run()
 
-        data_handler.add_data_dict_and_next_entry({**block_data, **between.get_data()})
+        DataHandler.add_data_dict_and_next_entry({**block_data, **between.get_data()})
 
         if not continue_experiment:
             emergency_quit()
@@ -152,8 +148,8 @@ for block_nr in range(NR_BLOCKS):
 
         continue_experiment = trial.run(trial_values=trial_values)
 
-        data_handler.add_data_dict(trial_values)
-        data_handler.add_data_dict_and_next_entry(trial.get_data())
+        DataHandler.add_data_dict(trial_values)
+        DataHandler.add_data_dict_and_next_entry(trial.get_data())
 
         if not continue_experiment:
             emergency_quit()
@@ -162,7 +158,7 @@ for block_nr in range(NR_BLOCKS):
 for post in post_trial:
     post.run()
 
-    data_handler.add_data_dict_and_next_entry({**experiment_data, **post.get_data()})
+    DataHandler.add_data_dict_and_next_entry(post.get_data())
 
     if not continue_experiment:
         emergency_quit()
