@@ -52,6 +52,15 @@ Weiter mit Leertaste
 """
 
 instructions3_text = """
+Bitte lassen Sie Zeige- und Mittelfinger während der Experimentalblöcke auf den entsprechenden Tasten liegen:
+
+Linker Mittelfinger -> F-Taste
+Rechter Zeigefinger -> G-Taste
+Linker Zeigefinger -> N-Taste
+Rechter Mittelfinger -> J-Taste
+"""
+
+instructions4_text = """
 Sie werden zunächst eine Übungsblock bearbeiten, um sich mit der Aufgabe vertraut zu machen. 
 Danach folgen acht Experimentalblöcke.
 Zwischen den einzelnen Blöcken haben Sie immer die Möglichkeit, eine kurze Pause zu machen.
@@ -59,7 +68,7 @@ Zwischen den einzelnen Blöcken haben Sie immer die Möglichkeit, eine kurze Pau
 Weiter mit Leertaste
 """
 
-instructions4_text = """
+instructions5_text = """
 Sollten während des Experiments Probleme oder Fragen auftauchen, wenden Sie sich bitte an den/die Versuchsleiter/in.
 
 Wenn Sie bereit sind, starten Sie den Übungsblock mit der Leertaste
@@ -71,10 +80,41 @@ pre_trial = [
     text_stim("instructions2", instructions2_text, 64),
     text_stim("instructions3", instructions3_text, 64),
     text_stim("instructions4", instructions4_text, 64),
+    text_stim("instructions5", instructions5_text, 64),
 ]
+
+image = {
+    "type": "Screen",
+    "visual_components": [
+        {
+            "name": "instructions",
+            "type": "TextStim",
+            "spec": {
+                "text": instructions3_text,
+                "height": 64,
+                "wrapWidth": 1500,
+                "font": FONT_FAMILY,
+                "color": "black",
+                "pos": (0, 180)
+            }
+        },
+        {
+            "name": "image",
+            "type": "ImageStim",
+            "spec": {
+                "image": "examples\Prime-Probe Task\Keyboard_with_fingers.jpg",
+                "size": (3062 * 0.2, 1788 * 0.2),
+                "pos": (0, -350),
+            }
+        },
+    ],
+    "response": {"keys": ["space"]},
+}
 
 if __name__ == "__main__":
     from conflict_task.preview import preview_sequence
 
-    for pre in pre_trial:
-        preview_sequence(pre)
+    preview_sequence(image)
+
+    #for pre in pre_trial:
+    #    preview_sequence(pre)
