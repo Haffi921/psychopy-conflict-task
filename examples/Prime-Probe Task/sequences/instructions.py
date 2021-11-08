@@ -74,7 +74,7 @@ Sollten während des Experiments Probleme oder Fragen auftauchen, wenden Sie sic
 Wenn Sie bereit sind, starten Sie den Übungsblock mit der Leertaste
 """
 
-pre_trial = [
+instructions = [
     text_stim("welcome_screen", welcome_screen_text, 72),
     text_stim("instructions1", instructions1_text, 64),
     text_stim("instructions2", instructions2_text, 64),

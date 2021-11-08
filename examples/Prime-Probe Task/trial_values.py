@@ -1,4 +1,4 @@
-from sequencing_helpers import Randomizer, counterbalance
+from sequencing_helpers import counterbalance
 
 conditions = {
     "distractor": [

@@ -1,4 +1,4 @@
-from psychopy import clock, core, visual
+from psychopy import clock, core, logging, visual
 
 DEFAULT_WINDOW_SETTINGS = dict(
     # Size of the window in pixels (x, y)
@@ -24,7 +24,7 @@ DEFAULT_WINDOW_SETTINGS = dict(
     units="pix",
 )
 
-
+"""
 class Window(visual.Window):
     def __init__(self, window_settings={}):
 
@@ -33,31 +33,54 @@ class Window(visual.Window):
         super().__init__(**self.window_settings)
 
         self.mouseVisible = self.window_settings["allowGUI"]
+"""
 
 
-class WindowSingleton:
+class Window:
     _window: visual.Window = None
+    _settings: dict = DEFAULT_WINDOW_SETTINGS
+    started: bool = False
 
     @classmethod
-    def start(cls, window_settings={}):
-        window_settings = {**DEFAULT_WINDOW_SETTINGS, **window_settings}
+    def settings(cls, window_settings={}):
+        cls._settings = {**DEFAULT_WINDOW_SETTINGS, **window_settings}
 
-        cls._window = visual.Window(**window_settings)
+    @classmethod
+    def start(cls, window_settings=None):
+        if not cls.started:
+            if window_settings:
+                cls.settings(window_settings)
 
-        cls._window.mouseVisible = window_settings["allowGUI"]
+            cls._window = visual.Window(**cls._settings)
+
+            cls._window.mouseVisible = cls._settings["allowGUI"]
+
+            cls.started = True
+        else:
+            logging.warning(
+                "Window already started. 'Window.start' is called more than once."
+            )
+
+    @classmethod
+    def error_if_window_not_started(cls):
+        if not cls.started:
+            logging.error(f"Remember to start window: 'Window.start()'")
 
     @classmethod
     def get_future_flip_time(cls, target_time: float = 0, clock: clock = None) -> float:
+        cls.error_if_window_not_started()
         return cls._window.getFutureFlipTime(targetTime=target_time, clock=clock)
 
     @classmethod
     def flip(cls, clear_buffer: bool = True):
+        cls.error_if_window_not_started()
         cls._window.flip(clearBuffer=clear_buffer)
 
     @classmethod
     def quit(cls):
-        cls._window.flip()
-        cls._window.close()
+        if cls.started:
+            cls._window.flip()
+            cls._window.close()
         core.quit()
 
     @classmethod

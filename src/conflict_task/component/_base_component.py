@@ -12,7 +12,7 @@ class BaseComponent:
     name = "UNKNOWN_COMPONENT"
     """Name of component for data registration."""
 
-    def __init__(self, component_settings: dict, window=None) -> None:
+    def __init__(self, component_settings: dict) -> None:
         """
         Takes in a `component_settings` dictionary to set up component variables.
 

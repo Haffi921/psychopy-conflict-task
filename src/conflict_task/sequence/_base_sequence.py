@@ -19,8 +19,7 @@ from conflict_task.constants import (
     QUIT_EXPERIMENT,
     STOP_RUNNING,
 )
-from conflict_task.devices import InputDevice, Keyboard, Window
-from conflict_task.devices.EMG_connector import EMGConnector
+from conflict_task.devices import EMGConnector, Keyboard, Window
 from conflict_task.util import (
     fatal_exit,
     get_type,
@@ -32,14 +31,8 @@ from conflict_task.util import (
 class BaseSequence:
     name: str = "UNKNOWN_SEQUENCE"
 
-    def __init__(
-        self, window: Window, input_device: InputDevice, sequence_settings: dict
-    ) -> None:
+    def __init__(self, sequence_settings: dict) -> None:
         self._base_sequence_should_not_be_run()
-
-        # Devices
-        self.window: Window = window
-        self.input_device: Keyboard = input_device
 
         # Components
         self.response: ResponseComponent = None
@@ -150,14 +143,10 @@ class BaseSequence:
         self._base_sequence_should_not_be_run()
 
         if visual_components := get_type(sequence_settings, "visual_components", list):
-            self.visual = self._create_components(
-                visual_components, VisualComponent, self.window
-            )
+            self.visual = self._create_components(visual_components, VisualComponent)
 
         if audio_components := get_type(sequence_settings, "audio_components", list):
-            self.audio = self._create_components(
-                audio_components, AudioComponent, self.window
-            )
+            self.audio = self._create_components(audio_components, AudioComponent)
 
         if wait_components := get_type(sequence_settings, "wait_components", list):
             self.wait = self._create_components(wait_components, WaitComponent)
@@ -172,7 +161,7 @@ class BaseSequence:
     # Helper functions
     # ===============================================
     def _create_components(
-        self, component_settings: list, component_class: BaseComponent, *args, **kwargs
+        self, component_settings: list, component_class: BaseComponent
     ) -> BaseComponent:
         self._base_sequence_should_not_be_run()
 
@@ -184,7 +173,7 @@ class BaseSequence:
         )
 
         for component in component_settings:
-            components.append(component_class(component, *args, **kwargs))
+            components.append(component_class(component))
 
         return components
 
@@ -272,20 +261,20 @@ class BaseSequence:
         self._base_sequence_should_not_be_run()
 
         self.reset_clock(new_t=new_t)
-        self.input_device.reset_clock(new_t=new_t)
-        self.input_device.reset_events()
+        Keyboard.reset_clock(new_t=new_t)
+        # Keyboard.reset_events()
 
     def _run_frame(self, early_quit=[]) -> None:
         self._base_sequence_should_not_be_run()
 
         # Check if user wants to quit experiment
-        if len(early_quit) and self.input_device.was_key_pressed(early_quit):
+        if len(early_quit) and Keyboard.was_key_pressed(early_quit):
             return QUIT_EXPERIMENT
 
         # Get current timers
         time = self.clock.getTime()
-        time_flip = self.window.getFutureFlipTime(clock=self.clock)
-        time_global_flip = self.window.getFutureFlipTime(clock=None)
+        time_flip = Window.get_future_flip_time(clock=self.clock)
+        time_global_flip = Window.get_future_flip_time()
 
         # Return variable is whether or not to continue the sequence
         keep_running = STOP_RUNNING
@@ -312,10 +301,10 @@ class BaseSequence:
 
         # If sequence has a response component check for it
         if self.response:
-            if self.response.not_started():
-                self.input_device.reset_events()
-            elif self.response.started():
-                self.response.check(self.input_device)
+            # if self.response.not_started():
+            #     Keyboard.reset_events()
+            if self.response.started():
+                self.response.check()
 
                 # Two possibilities based on the response settings
                 if self.response.made and self.cut_on_response:
@@ -330,7 +319,7 @@ class BaseSequence:
             keep_running = STOP_RUNNING
 
         # Flip window
-        self.window.flip()
+        Window.flip()
 
         if keep_running == STOP_RUNNING:
             self._stop_all_components(time, time_flip, time_global_flip)
@@ -351,7 +340,7 @@ class BaseSequence:
         self.prepare(trial_values)
         self._refresh_components()
         self._prepare_components(trial_values)
-        self.refresh(new_t=self.window.getFutureFlipTime(clock="now"))
+        self.refresh(new_t=Window.get_future_flip_time(clock="now"))
 
         running = KEEP_RUNNING
 

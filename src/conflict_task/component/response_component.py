@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from conflict_task.devices import InputDevice
-from conflict_task.devices.EMG_connector import EMGConnector
+from conflict_task.devices import EMGConnector, Keyboard
 from conflict_task.util import *
 
 from ._base_component import BaseComponent
@@ -16,7 +15,7 @@ class ResponseComponent(BaseComponent):
 
     name = "response"
 
-    def __init__(self, component_settings, window=None) -> None:
+    def __init__(self, component_settings) -> None:
         """
         Takes in a `component_settings` dictionary to set up component variables.
 
@@ -75,6 +74,10 @@ class ResponseComponent(BaseComponent):
         )
         # -----------------------------------------------
 
+    def start(self, time, time_flip, global_flip) -> None:
+        super().start(time, time_flip, global_flip)
+        Keyboard.reset_events()
+
     def refresh(self) -> None:
         """
         Used before each component use.
@@ -91,7 +94,7 @@ class ResponseComponent(BaseComponent):
         self.key = None
         self.rt = None
 
-    def check(self, input_device: InputDevice) -> tuple[str, float]:
+    def check(self) -> tuple[str, float]:
         """
         Checks for input using `input_device` and logs data using `data_handler`.
 
@@ -111,7 +114,7 @@ class ResponseComponent(BaseComponent):
         """
 
         if self.started() and not self.made:
-            key_press = input_device.get_last_key(self.keys)
+            key_press = Keyboard.get_last_key(self.keys)
 
             if key_press is not None:
                 self._process_response(key_press)
@@ -227,7 +230,7 @@ class CorrectResponseComponent(ResponseComponent):
             self.marker_value = self.marker_values[2]
             self.send_marker_value()
 
-    def check(self, input_device: InputDevice) -> tuple[str, float]:
+    def check(self) -> tuple[str, float]:
         """
         Checks for input using `input_device` and logs data using `data_handler`. \n
 
@@ -244,7 +247,13 @@ class CorrectResponseComponent(ResponseComponent):
             `input_device`        (InputDevice): Device used to check input. Can be Keyboard or any Parallel port device.
         """
 
-        return super().check(input_device)
+        return super().check()
+
+    def _process_response(self, key_press) -> None:
+        super()._process_response(key_press)
+        self.correct = self.key == self.correct_key
+        if self.marker_values:
+            self.marker_value = self.marker_values[int(not self.correct)]
 
     def get_response_data(self) -> dict:
         return {
@@ -252,9 +261,3 @@ class CorrectResponseComponent(ResponseComponent):
             "response_correct_key": self.correct_key,
             "response_correct": self.correct,
         }
-
-    def _process_response(self, key_press) -> None:
-        super()._process_response(key_press)
-        self.correct = self.key == self.correct_key
-        if self.marker_values:
-            self.marker_value = self.marker_values[int(not self.correct)]

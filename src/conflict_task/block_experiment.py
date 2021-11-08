@@ -1,35 +1,58 @@
 from conflict_task.block import Block
-from conflict_task.devices.input_device import InputDevice
-from conflict_task.devices.window import Window
-from conflict_task.util.error import true_or_fatal_exit
+from conflict_task.devices import DataHandler, EMGConnector, Window
+from conflict_task.instructions import Instructions
+from conflict_task.util.dictionary import get_type_or_fatal_exit
 
 
 class BlockExperiment:
-    def __init__(
-        self, win: Window, input_device: InputDevice, experiment_settings: dict
-    ) -> None:
-        self.win = win
-        self.input_device = input_device
+    def __init__(self, experiment_settings: dict) -> None:
+        self.name = None
 
-        self.practice_block = None
-        self.nr_practice_blocks = 0
-        self.nr_practice_trials = None
+        self.instructions: Instructions = None
 
-        self.trial_block = None
-        self.nr_blocks = 0
-        self.nr_trials = None
+        self.practice_block: Block = None
+        self.nr_practice_blocks: int = 0
+        self.nr_practice_trials: int = None
+
+        self.trial_block: Block = None
+        self.nr_blocks: int = 0
+        self.nr_trials: int = None
 
         self._parse_experiment_settings(experiment_settings)
 
     def _parse_experiment_settings(self, experiment_settings: dict):
-        if practice := experiment_settings.get("practice_block"):
-            self.practice_block = Block(self.win, self.input_device, practice)
+        self.name = get_type_or_fatal_exit(
+            experiment_settings, "name", str, "Please specify experiment 'name'"
+        )
+        dlg_info = experiment_settings.get("extra_info", {})
 
-        self.trial_block = Block(
-            self.win, self.input_device, experiment_settings.get("trial_block")
+        DataHandler.start_participant_data(self.name, dlg_info=dlg_info)
+
+        if experiment_settings.get("marker", False):
+            EMGConnector.connect()
+
+        Window.start()
+
+        self.instructions = Instructions(experiment_settings.get("instructions"))
+
+        block_settings: dict = get_type_or_fatal_exit(
+            experiment_settings,
+            "blocks",
+            dict,
+            "Experiment settings must include key 'block' - none found",
         )
 
+        if practice := block_settings.get("practice_block"):
+            self.practice_block = Block(practice)
+
+        self.trial_block = Block(block_settings.get("trial_block"))
+
+    def get_participant_number(self):
+        return DataHandler.get_participant_number()
+
     def run(self, practice_trial_values: list = [], trial_values: list = []):
+        self.instructions.run()
+
         if self.practice_block:
             self.practice_block.run(practice_trial_values, {"trial_block": "practice"})
 

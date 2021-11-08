@@ -1,6 +1,6 @@
 from psychopy import visual
 
-from conflict_task.devices import EMGConnector
+from conflict_task.devices import Window
 from conflict_task.util import *
 
 from ._base_component import BaseComponent
@@ -13,7 +13,7 @@ class VisualComponent(BaseComponent):
     Basically this is a wrapper for all of PsychoPy's visual stimuli.
     """
 
-    def __init__(self, component_settings: dict, window) -> None:
+    def __init__(self, component_settings: dict) -> None:
         """
         Takes in a `component_settings` dictionary to set up component variables.
 
@@ -72,7 +72,7 @@ class VisualComponent(BaseComponent):
         visual_spec: dict = get_type(component_settings, "spec", dict, {})
 
         self.component: visual.TextStim = getattr(visual, visual_type)(
-            window, **visual_spec
+            Window._window, **visual_spec
         )
         # -----------------------------------------------
 

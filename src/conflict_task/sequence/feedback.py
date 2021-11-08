@@ -1,4 +1,4 @@
-from conflict_task.devices import InputDevice, Window
+from conflict_task.devices import Window
 from conflict_task.util import get_or_fatal_exit, true_or_fatal_exit
 
 from .sequence import DEFAULT_SEQUENCE_SETTINGS, Sequence
@@ -13,12 +13,10 @@ class Feedback(Sequence):
 
     name: str = "Feedback"
 
-    def __init__(
-        self, window: Window, input_device: InputDevice, sequence_settings: dict
-    ) -> None:
+    def __init__(self, sequence_settings: dict) -> None:
         self.feedback_function: function = None
-        self.win_color = window.color
-        super().__init__(window, input_device, sequence_settings)
+        self.win_color = Window._window.color
+        super().__init__(sequence_settings)
 
     def _parse_sequence_settings(
         self,
@@ -42,7 +40,7 @@ class Feedback(Sequence):
         feedback_values: dict = self.feedback_function(trial_values)
 
         if win_color := feedback_values.get("win_color"):
-            self.window.color = win_color
+            Window._window.color = win_color
 
         super()._prepare_components(feedback_values)
 
@@ -50,5 +48,5 @@ class Feedback(Sequence):
         feedback_success = super().run(
             trial_values=trial_values, allow_escape=allow_escape
         )
-        self.window.color = self.win_color
+        Window._window.color = self.win_color
         return feedback_success

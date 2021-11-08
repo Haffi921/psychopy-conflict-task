@@ -1,20 +1,12 @@
 from __future__ import annotations
 
-from psychopy import core
-
-from conflict_task.devices import DataHandler, InputDevice, Window
-from conflict_task.devices.EMG_connector import EMGConnector
+from conflict_task.devices import DataHandler, EMGConnector, Keyboard, Window
 from conflict_task.sequence import Screen, Sequence, Trial
 from conflict_task.util import get_or_fatal_exit, get_type
 
 
 class Block:
-    def __init__(
-        self, win: Window, input_device: InputDevice, block_settings: dict = {}
-    ) -> None:
-        self.win = win
-        self.input_device = input_device
-
+    def __init__(self, block_settings: dict) -> None:
         self.nr_blocks: int = 0
         self.nr_trials: int = None
         self.marker: list = None
@@ -36,7 +28,7 @@ class Block:
             block_settings, "trial", "Block settings must have 'trial' settings"
         )
         if not isinstance(self.trial, Trial):
-            self.trial = Trial(self.win, self.input_device, self.trial)
+            self.trial = Trial(self.trial)
 
         def produce_auxiliary_screen_lists(name: str):
             settings = block_settings.get(name)
@@ -45,24 +37,25 @@ class Block:
                     settings = [settings]
                 for i, s in enumerate(settings):
                     if not isinstance(s, Screen):
-                        settings[i] = Screen(self.win, self.input_device, s)
+                        settings[i] = Screen(s)
             return settings
 
         self.between = produce_auxiliary_screen_lists("between")
         self.post = produce_auxiliary_screen_lists("post")
 
-    def quit(self):
-        self.win.flip()
-        self.win.close()
-        core.quit()
-
     def run_sequence(self, sequence: Sequence, trial_values={}, data={}):
         continue_experiment = sequence.run(trial_values)
 
-        DataHandler.add_data_dict_and_next_entry({**data, **sequence.get_data()})
+        DataHandler.add_data_dict_and_next_entry(
+            {
+                **data,
+                **sequence.get_data(),
+                "post_response_keypresses": Keyboard.get_keys(),
+            }
+        )
 
         if not continue_experiment:
-            self.quit()
+            Window.quit()
 
     def run(self, trial_values_list: list[list[dict]] = [], experiment_data: dict = {}):
         for block in range(self.nr_blocks):

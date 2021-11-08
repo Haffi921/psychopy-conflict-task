@@ -15,13 +15,13 @@ class Trial(Sequence):
 
     name: str = "Trial"
 
-    def __init__(self, window, input_device, sequence_settings):
+    def __init__(self, sequence_settings: dict):
         self.variable_factor: dict = None
 
         self.feedback: bool = False
         self.feedback_sequence: Feedback = None
 
-        super().__init__(window, input_device, sequence_settings)
+        super().__init__(sequence_settings)
 
         self._parse_feedback_settings(sequence_settings)
 
@@ -34,9 +34,7 @@ class Trial(Sequence):
         feedback_settings = get_type(sequence_settings, "feedback_sequence", dict)
 
         if feedback_settings:
-            self.feedback_sequence = Feedback(
-                self.window, self.input_device, feedback_settings
-            )
+            self.feedback_sequence = Feedback(feedback_settings)
             true_or_fatal_exit(
                 self.name != self.feedback_sequence.name,
                 f"{self.name} - Trial and its feedback cannot have the same name",
