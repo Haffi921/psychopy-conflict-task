@@ -6,6 +6,7 @@ from psychopy import __version__, core, data, gui
 class DataHandler:
     filename: str = None
     subject_info: dict = None
+    new_entry: bool = True
     _data_handler: data.ExperimentHandler = None
 
     @classmethod
@@ -46,10 +47,6 @@ class DataHandler:
         cls.add_data_dict(cls.subject_info)
 
     @classmethod
-    def __del__(cls):
-        cls.finish_participant_data()
-
-    @classmethod
     def get_participant_number(cls):
         return int(cls.subject_info["participant"])
 
@@ -73,10 +70,13 @@ class DataHandler:
     @classmethod
     def next_entry(cls):
         cls._data_handler.nextEntry()
-        cls.add_data_dict(cls.subject_info)
+        cls.new_entry = True
 
     @classmethod
     def add_data(cls, key, value):
+        if cls.new_entry:
+            cls.new_entry = False
+            cls.add_data_dict(cls.subject_info)
         cls._data_handler.addData(key, value)
 
     @classmethod

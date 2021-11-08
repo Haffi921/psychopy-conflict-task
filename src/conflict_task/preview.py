@@ -7,14 +7,14 @@ from conflict_task.component import (
     WaitComponent,
 )
 from conflict_task.constants import *
-from conflict_task.devices import Keyboard, Window
+from conflict_task.devices import InputDevice, Window
 
 
 def preview_component(
     component_settings, component_values={}, window_settings={}, component_type=VISUAL
 ):
     window = Window(window_settings)
-    keyboard = Keyboard()
+    keyboard = InputDevice()
     component: BaseComponent = None
 
     if component_type is VISUAL:
@@ -49,7 +49,7 @@ def preview_component(
 
 def preview_sequence(sequence_settings, sequence_values={}, window_settings={}):
     window = Window(window_settings)
-    keyboard = Keyboard()
+    keyboard = InputDevice()
 
     if "type" in sequence_settings and hasattr(sequence, sequence_settings["type"]):
         seq = getattr(sequence, sequence_settings["type"])(

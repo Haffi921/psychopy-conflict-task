@@ -1,10 +1,10 @@
 from time import perf_counter
 
-from conflict_task.devices import Keyboard, Window
+from conflict_task.devices import InputDevice, Window
 from conflict_task.sequence import Trial
 
 win = Window({"fullscr": False, "size": (1, 1)})
-input = Keyboard()
+input = InputDevice()
 
 visual_components = []
 

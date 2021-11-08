@@ -153,8 +153,8 @@ class InputDevice:
 
     @classmethod
     def reset_clock(cls, new_t=0.0) -> None:
-        cls.reset_clock(new_t)
+        cls.instance.reset_clock(new_t)
 
     @classmethod
     def reset_events(cls) -> None:
-        cls.reset_events
+        cls.instance.reset_events()

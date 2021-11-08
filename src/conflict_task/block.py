@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from conflict_task.devices import DataHandler, EMGConnector, Keyboard, Window
+from conflict_task.devices import DataHandler, EMGConnector, InputDevice, Window
 from conflict_task.sequence import Screen, Sequence, Trial
 from conflict_task.util import get_or_fatal_exit, get_type
 
@@ -50,7 +50,7 @@ class Block:
             {
                 **data,
                 **sequence.get_data(),
-                "post_response_keypresses": Keyboard.get_keys(),
+                "post_response_keypresses": InputDevice.get_keys([]),
             }
         )
 

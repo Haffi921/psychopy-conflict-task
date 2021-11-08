@@ -62,18 +62,23 @@ class Window:
             )
 
     @classmethod
-    def error_if_window_not_started(cls):
+    def _error_if_window_not_started(cls):
         if not cls.started:
             logging.error(f"Remember to start window: 'Window.start()'")
 
     @classmethod
+    def get_actual_framerate(cls, nIdentical=10, nMaxFrames=100, nWarmUpFrames=10, threshold=1):
+        cls._error_if_window_not_started()
+        return cls._window.getActualFrameRate(nIdentical=nIdentical, nMaxFrames=nMaxFrames, nWarmUpFrames=nWarmUpFrames, threshold=threshold)
+
+    @classmethod
     def get_future_flip_time(cls, target_time: float = 0, clock: clock = None) -> float:
-        cls.error_if_window_not_started()
+        cls._error_if_window_not_started()
         return cls._window.getFutureFlipTime(targetTime=target_time, clock=clock)
 
     @classmethod
     def flip(cls, clear_buffer: bool = True):
-        cls.error_if_window_not_started()
+        cls._error_if_window_not_started()
         cls._window.flip(clearBuffer=clear_buffer)
 
     @classmethod
@@ -82,7 +87,3 @@ class Window:
             cls._window.flip()
             cls._window.close()
         core.quit()
-
-    @classmethod
-    def __del__(cls):
-        cls.quit()

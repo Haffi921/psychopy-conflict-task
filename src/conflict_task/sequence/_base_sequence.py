@@ -19,7 +19,7 @@ from conflict_task.constants import (
     QUIT_EXPERIMENT,
     STOP_RUNNING,
 )
-from conflict_task.devices import EMGConnector, Keyboard, Window
+from conflict_task.devices import EMGConnector, InputDevice, Window
 from conflict_task.util import (
     fatal_exit,
     get_type,
@@ -261,14 +261,14 @@ class BaseSequence:
         self._base_sequence_should_not_be_run()
 
         self.reset_clock(new_t=new_t)
-        Keyboard.reset_clock(new_t=new_t)
+        InputDevice.reset_clock(new_t=new_t)
         # Keyboard.reset_events()
 
     def _run_frame(self, early_quit=[]) -> None:
         self._base_sequence_should_not_be_run()
 
         # Check if user wants to quit experiment
-        if len(early_quit) and Keyboard.was_key_pressed(early_quit):
+        if len(early_quit) and InputDevice.was_key_pressed(early_quit):
             return QUIT_EXPERIMENT
 
         # Get current timers

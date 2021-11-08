@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from conflict_task.devices import EMGConnector, Keyboard
+from conflict_task.devices import EMGConnector, InputDevice
 from conflict_task.util import *
 
 from ._base_component import BaseComponent
@@ -76,7 +76,7 @@ class ResponseComponent(BaseComponent):
 
     def start(self, time, time_flip, global_flip) -> None:
         super().start(time, time_flip, global_flip)
-        Keyboard.reset_events()
+        InputDevice.reset_events()
 
     def refresh(self) -> None:
         """
@@ -114,7 +114,7 @@ class ResponseComponent(BaseComponent):
         """
 
         if self.started() and not self.made:
-            key_press = Keyboard.get_last_key(self.keys)
+            key_press = InputDevice.get_last_key(self.keys)
 
             if key_press is not None:
                 self._process_response(key_press)

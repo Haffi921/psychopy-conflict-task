@@ -1,18 +1,14 @@
 import pytest
 from numpy.core.fromnumeric import mean
 
-from conflict_task.devices import Keyboard, Window
+from conflict_task.devices import InputDevice, Window
 from conflict_task.sequence import Screen, Sequence, Trial, screen
 
-win = Window({"color": [0, 0, 0]})
-win_refresh = 1.0 / win.getActualFrameRate()
-input = Keyboard()
-
+Window.start({"color": [0, 0, 0]})
+win_refresh = 1.0 / Window.get_actual_framerate()
 
 def xtest_screen():
     screen = Screen(
-        win,
-        input,
         {
             "name": "TestScreen",
             "visual_components": [
@@ -31,7 +27,7 @@ def xtest_screen():
 
     text = screen.visual[0]
     response = screen.response
-    global_flip = win.getFutureFlipTime()
+    global_flip = Window.get_future_flip_time()
 
     screen.run()
 
@@ -52,8 +48,6 @@ def xtest_screen():
 
 def xtest_timed_screen():
     screen = Screen(
-        win,
-        input,
         {
             "name": "TestScreen",
             "timed": True,
@@ -89,8 +83,6 @@ def xtest_timed_screen():
 
 def xtest_timed_screen_no_response():
     screen = Screen(
-        win,
-        input,
         {
             "name": "TestScreen",
             "timed": True,
@@ -118,8 +110,6 @@ def xtest_timed_screen_no_response():
 
 def xtest_timed_screen_non_cut_response():
     screen = Screen(
-        win,
-        input,
         {
             "name": "TestScreen",
             "timed": True,
@@ -145,8 +135,6 @@ def xtest_timed_screen_non_cut_response():
 
 def xtest_trial_with_run():
     trial = Trial(
-        win,
-        input,
         {
             "type": "Trial",
             "takes_trial_values": True,
@@ -189,8 +177,6 @@ def xtest_trial_with_run():
 
 def xtest_trial_with_run_with_variable_feedback():
     trial = Trial(
-        win,
-        input,
         {
             "type": "Trial",
             "takes_trial_values": True,
@@ -247,8 +233,6 @@ def xtest_trial_with_run_with_variable_feedback():
 
 def xtest_trial_with_correct_respone_feedback():
     trial = Trial(
-        win,
-        input,
         {
             "type": "Trial",
             "takes_trial_values": True,

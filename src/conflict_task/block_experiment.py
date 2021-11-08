@@ -50,6 +50,10 @@ class BlockExperiment:
     def get_participant_number(self):
         return DataHandler.get_participant_number()
 
+    def quit(self):
+        DataHandler.finish_participant_data()
+        Window.quit()
+
     def run(self, practice_trial_values: list = [], trial_values: list = []):
         self.instructions.run()
 
@@ -57,3 +61,5 @@ class BlockExperiment:
             self.practice_block.run(practice_trial_values, {"trial_block": "practice"})
 
         self.trial_block.run(trial_values, {"trial_block": "trial"})
+
+        self.quit()
