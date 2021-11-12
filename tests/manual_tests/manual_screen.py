@@ -7,6 +7,7 @@ from conflict_task.sequence import Screen, Sequence, Trial, screen
 Window.start({"color": [0, 0, 0]})
 win_refresh = 1.0 / Window.get_actual_framerate()
 
+
 def xtest_screen():
     screen = Screen(
         {

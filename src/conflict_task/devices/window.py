@@ -67,9 +67,16 @@ class Window:
             logging.error(f"Remember to start window: 'Window.start()'")
 
     @classmethod
-    def get_actual_framerate(cls, nIdentical=10, nMaxFrames=100, nWarmUpFrames=10, threshold=1):
+    def get_actual_framerate(
+        cls, nIdentical=10, nMaxFrames=100, nWarmUpFrames=10, threshold=1
+    ):
         cls._error_if_window_not_started()
-        return cls._window.getActualFrameRate(nIdentical=nIdentical, nMaxFrames=nMaxFrames, nWarmUpFrames=nWarmUpFrames, threshold=threshold)
+        return cls._window.getActualFrameRate(
+            nIdentical=nIdentical,
+            nMaxFrames=nMaxFrames,
+            nWarmUpFrames=nWarmUpFrames,
+            threshold=threshold,
+        )
 
     @classmethod
     def get_future_flip_time(cls, target_time: float = 0, clock: clock = None) -> float:
