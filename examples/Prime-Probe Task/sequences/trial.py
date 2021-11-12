@@ -1,5 +1,5 @@
-from between_blocks import between_blocks
-from post_trial import post_trial
+from .between_blocks import between_blocks
+from .post_trial import post_trial
 
 FONT_FAMILY = "Courier New"
 

@@ -22,7 +22,7 @@ def get_trial_values(
     participant_number: int,
     practice=False,
     add_initial_trial=False,
-    Force=False,
+    force=False,
 ):
     trial_values = []
     for block in range(nr_blocks):
@@ -63,7 +63,7 @@ def get_trial_values(
             levels=1,
             alternating=True,
             add_initial_trial=add_initial_trial,
-            Force=Force,
+            force=force,
         )
 
         sequence = list(map(translate, sequence))

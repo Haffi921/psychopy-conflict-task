@@ -33,7 +33,9 @@ class BlockExperiment:
 
         Window.start()
 
-        self.instructions = Instructions(experiment_settings.get("instructions"))
+        self.instructions = experiment_settings.get("instructions")
+        if not isinstance(self.instructions, Instructions):
+            self.instructions = Instructions(self.instructions)
 
         block_settings: dict = get_type_or_fatal_exit(
             experiment_settings,
@@ -55,7 +57,8 @@ class BlockExperiment:
         Window.quit()
 
     def run(self, practice_trial_values: list = [], trial_values: list = []):
-        self.instructions.run()
+        if self.instructions:
+            self.instructions.run()
 
         if self.practice_block:
             self.practice_block.run(practice_trial_values, {"trial_block": "practice"})

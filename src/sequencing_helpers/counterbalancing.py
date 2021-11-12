@@ -10,7 +10,7 @@ def counterbalance(
     levels: int = 1,
     alternating: int = False,
     alternator_start: int = 0,
-    Force: bool = False,
+    force: bool = False,
     verbose: bool = False,
     initial_seed: bool = None,
     add_initial_trial: bool = False,
@@ -78,7 +78,7 @@ def counterbalance(
     condition_indices = create_condition_indices(factor_levels)
     base_matrix = create_base_matrix(trials, matrix_shape)
 
-    if not Force:
+    if not force:
         for i in base_matrix.flat:
             if i % 1 != 0:
                 raise RuntimeError(

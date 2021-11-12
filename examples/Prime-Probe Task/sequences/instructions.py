@@ -17,7 +17,6 @@ def text_stim(name, text, size):
                 },
             }
         ],
-        "response": {"keys": ["space"]},
         "early_quit_keys": ["f12"],
     }
 
@@ -74,14 +73,18 @@ Sollten während des Experiments Probleme oder Fragen auftauchen, wenden Sie sic
 Wenn Sie bereit sind, starten Sie den Übungsblock mit der Leertaste
 """
 
-instructions = [
-    text_stim("welcome_screen", welcome_screen_text, 72),
-    text_stim("instructions1", instructions1_text, 64),
-    text_stim("instructions2", instructions2_text, 64),
-    text_stim("instructions3", instructions3_text, 64),
-    text_stim("instructions4", instructions4_text, 64),
-    text_stim("instructions5", instructions5_text, 64),
-]
+instructions = {
+    "screens": [
+        text_stim("welcome_screen", welcome_screen_text, 72),
+        text_stim("instructions1", instructions1_text, 64),
+        text_stim("instructions2", instructions2_text, 64),
+        text_stim("instructions3", instructions3_text, 64),
+        text_stim("instructions4", instructions4_text, 64),
+        text_stim("instructions5", instructions5_text, 64),
+    ],
+    "key_forward": "right",
+    "key_backward": "left",
+}
 
 image = {
     "type": "Screen",

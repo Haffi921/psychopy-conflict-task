@@ -40,7 +40,7 @@ practice_values = get_trial_values(
     NR_PRACTICE_BLOCKS,
     experiment.get_participant_number(),
     practice=True,
-    Force=True,
+    force=True,
 )
 
 experiment_values = get_trial_values(
