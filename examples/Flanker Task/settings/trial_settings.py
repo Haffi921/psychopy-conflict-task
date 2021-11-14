@@ -8,10 +8,10 @@ fixation_cross = dict(
     type="text",
     spec=dict(
         name="fixation_cross",
-        size=FONT_SIZE,
+        text="+",
         color="black",
         font="Courier New",
-        text="+",
+        size=FONT_SIZE,
     ),
 )
 
@@ -62,8 +62,6 @@ trial_sequence = {
 
 if __name__ == "__main__":
     from conflict_task.preview import preview_sequence, preview_component
-
-    #preview_component(fixation_cross)
 
     for values in [
         {

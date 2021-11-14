@@ -104,6 +104,7 @@ class VisualComponent(BaseComponent):
         else:
             if self.type == "shape":
                 self.type = "ShapeStim"
+            visual_spec["size"] = Window.pix2norm_size(visual_spec["size"])
             self.component = self.create_other_component(self.type, visual_spec)
 
     @staticmethod
@@ -146,6 +147,9 @@ class VisualComponent(BaseComponent):
                     self.component.text = ""  # Value needs to be forcefully changed for other attributes to take effect
                 if "size" in self.variable_factor:
                     trial_values["height"] = Window.pt2norm_size(trial_values["size"])
+            elif "size" in self.variable_factor:
+                if self.type in ["shape", "Rect", "Circle", "Polygon", "Line", "Pie"]:
+                    trial_values["size"] = Window.pix2norm_size(trial_values["size"])
             
             if self.type == "image":
                 if "image" in trial_values and self.preload:

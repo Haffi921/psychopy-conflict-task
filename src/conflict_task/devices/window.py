@@ -3,8 +3,6 @@ from __future__ import annotations
 from psychopy import clock, core, logging, visual
 
 DEFAULT_WINDOW_SETTINGS = dict(
-    # Size of the window in pixels (x, y)
-    size=(1920, 1080),
     # Color of background as [r, g, b] list or single value. Each gun can take values between -1.0 and 1.0
     color=[0, 0, 0],
     # Create a window in ‘full-screen’ mode. Better timing can be achieved in full-screen mode
@@ -23,9 +21,6 @@ DEFAULT_WINDOW_SETTINGS = dict(
     useFBO=True,
     # Anti-aliasing
     multiSample=True,
-    # Defines the default units of stimuli drawn in the window (can be overridden by each stimulus).
-    # Values can be None, ‘height’ (of the window), ‘norm’ (normalised), ‘deg’, ‘cm’, ‘pix’
-    #units="norm",
 )
 
 """

@@ -28,6 +28,8 @@ def preview_component(
     if component.variable_factor:
         component.prepare(component_values)
 
+    print(component.component.size)
+
     running = KEEP_RUNNING
 
     component.start(0, 0, 0)
@@ -59,4 +61,5 @@ def preview_sequence(sequence_settings, sequence_values={}, window_settings={}, 
     seq.run(sequence_values, False)
     
     if print_data:
-        print(seq.get_data())
+        for data, value in seq.get_data().items():
+            print(data, value)
