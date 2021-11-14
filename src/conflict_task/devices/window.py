@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from psychopy import clock, core, logging, visual
 
 DEFAULT_WINDOW_SETTINGS = dict(
@@ -19,9 +21,11 @@ DEFAULT_WINDOW_SETTINGS = dict(
     winType="pyglet",
     # Use framebuffer object
     useFBO=True,
+    # Anti-aliasing
+    multiSample=True,
     # Defines the default units of stimuli drawn in the window (can be overridden by each stimulus).
     # Values can be None, ‘height’ (of the window), ‘norm’ (normalised), ‘deg’, ‘cm’, ‘pix’
-    units="pix",
+    #units="norm",
 )
 
 """
@@ -50,7 +54,7 @@ class Window:
         if not cls.started:
             if window_settings:
                 cls.settings(window_settings)
-
+            
             cls._window = visual.Window(**cls._settings)
 
             cls._window.mouseVisible = cls._settings["allowGUI"]
@@ -65,6 +69,29 @@ class Window:
     def _error_if_window_not_started(cls):
         if not cls.started:
             logging.error(f"Remember to start window: 'Window.start()'")
+    
+    @classmethod
+    def size(cls):
+        return cls._window.size
+    
+    @classmethod
+    def pix2norm_size(cls, pix: tuple[int, int]):
+        if cls._window.useRetina:
+            return (pix / cls._window.size) * 2.0
+        else:
+            return pix / cls._window.size
+        
+    @classmethod
+    def pix2norm_pos(cls, pix: tuple[int, int]):
+        return (cls.pix2norm_size(pix) * 2.0) - (1, 1)
+
+    @classmethod
+    def pt2norm_size(cls, pt: int):
+        pix = pt * 4 / 3
+        if cls._window.useRetina:
+            return (pix / cls._window.size[1]) * 2.0
+        else:
+            return pix / cls._window.size[1] * 2.0
 
     @classmethod
     def get_actual_framerate(

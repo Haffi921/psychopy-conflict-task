@@ -151,10 +151,6 @@ class BaseComponent:
 
         if self.variable_factor:
 
-            ## Dirty hack for a stupid bug
-            if "text" in self.variable_factor:
-                self.component.text = ""  # Value needs to be forcefully changed for other attributes to take effect
-
             for factor_name, factor_id in self.variable_factor.items():
                 true_or_fatal_exit(
                     factor_id in trial_values.keys(),

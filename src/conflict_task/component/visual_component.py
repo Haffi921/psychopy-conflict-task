@@ -58,23 +58,73 @@ class VisualComponent(BaseComponent):
                 + f"Here are the unnamed settings: {component_settings}"
             )
 
-        visual_type = get_type_or_fatal_exit(
+        self.type = get_type_or_fatal_exit(
             component_settings,
             "type",
             str,
             f"{self.name}: VisualComponents must specify a 'type'",
         )
-        true_or_fatal_exit(
-            hasattr(visual, visual_type),
-            f"{self.name}: There's no visual component type {visual_type}",
-        )
 
+        self.create_visual_component(component_settings)
+        # true_or_fatal_exit(
+        #     hasattr(visual, visual_type),
+        #     f"{self.name}: There's no visual component type {visual_type}",
+        # )
+        # -----------------------------------------------
+
+    def create_visual_component(self, component_settings):
         visual_spec: dict = get_type(component_settings, "spec", dict, {})
 
-        self.component: visual.TextStim = getattr(visual, visual_type)(
-            Window._window, **visual_spec
-        )
-        # -----------------------------------------------
+        if self.type == "text":
+            if self.variable_factor and "size" in self.variable_factor:
+                self.variable_factor["height"] = self.variable_factor["size"]
+                del self.variable_factor["size"]
+            self.component = self.create_text_component(visual_spec)
+        
+        elif self.type == "image":
+            self.preload = None
+            if "preload" in component_settings:
+                self.preload = {}
+                self.aspect_ratios = {}
+                for image in component_settings["preload"]:
+                    self.preload[image] = self.create_image_component({
+                            **visual_spec,
+                            "image": image,
+                        })
+            
+            if "image" in visual_spec and self.preload:
+                if (image := visual_spec["image"]) in self.preload:
+                    self.component = self.preload[image]
+                else:
+                    self.component = self.create_image_component(visual_spec)
+                    self.preload[image] = self.component
+            else:
+                self.component = self.create_image_component(visual_spec)
+        
+        else:
+            if self.type == "shape":
+                self.type = "ShapeStim"
+            self.component = self.create_other_component(self.type, visual_spec)
+
+    @staticmethod
+    def create_text_component(spec_settings):
+        if "size" in spec_settings:
+            spec_settings["height"] = Window.pt2norm_size(spec_settings["size"])
+            del spec_settings["size"]
+
+        return visual.TextStim(Window._window, **spec_settings)
+
+
+    @staticmethod
+    def create_image_component(spec_settings):
+        return visual.TextStim(Window._window, **spec_settings)
+
+    @staticmethod
+    def create_other_component(type, spec_settings):
+        if hasattr(visual, type):
+            return getattr(visual, type)(Window._window, **spec_settings)
+        else:
+            fatal_exit(f"No component named {type}")
 
     def refresh(self) -> None:
         """
@@ -87,6 +137,27 @@ class VisualComponent(BaseComponent):
 
         super().refresh()
         self._turn_auto_draw_off()
+    
+    def prepare(self, trial_values: dict) -> None:
+        if self.variable_factor:
+            if self.type == "text":
+                ## Dirty hack for a stupid bug
+                if "text" in self.variable_factor:
+                    self.component.text = ""  # Value needs to be forcefully changed for other attributes to take effect
+                if "size" in self.variable_factor:
+                    trial_values["height"] = Window.pt2norm_size(trial_values["size"])
+            
+            if self.type == "image":
+                if "image" in trial_values and self.preload:
+                    image = trial_values["image"]
+                    self.component = self.preload[image]
+                    del trial_values["image"]
+                    super().prepare(trial_values)
+                    trial_values["image"] = image
+            
+            else:
+                super().prepare(trial_values)
+
 
     def _turn_auto_draw_on(self) -> None:
         """

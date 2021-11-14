@@ -58,7 +58,10 @@ class Trial(Sequence):
                 trial_values=feedback_values, allow_escape=allow_escape
             )
 
-        return trial_success and feedback_success
+            if not feedback_success:
+                return feedback_success
+        
+        return trial_success
 
     def get_data(self, prepend_key: bool = True) -> dict:
         data = super().get_data(prepend_key=prepend_key)

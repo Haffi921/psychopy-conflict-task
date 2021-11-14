@@ -6,11 +6,11 @@ FONT_FAMILY = "Courier New"
 distractor = {
     "start": 1.0,
     "stop": 1.133,
-    "type": "TextStim",
+    "type": "text",
     "spec": {
         "name": "distractor",
         "color": "black",
-        "height": 64,
+        "size": 48,
         "font": FONT_FAMILY,
     },
     "variable": {
@@ -21,8 +21,13 @@ distractor = {
 target = {
     "start": 1.166,
     "stop": 1.3,
-    "type": "TextStim",
-    "spec": {"name": "target", "color": "black", "height": 103, "font": FONT_FAMILY},
+    "type": "text",
+    "spec": {
+        "name": "target",
+        "color": "black",
+        "size": 77,
+        "font": FONT_FAMILY
+    },
     "variable": {
         "text": "target_text",
     },
@@ -41,8 +46,13 @@ response = {
 
 feedback = {
     "stop": 0.2,
-    "type": "TextStim",
-    "spec": {"name": "feedback", "color": "black", "height": 80, "font": FONT_FAMILY},
+    "type": "text",
+    "spec": {
+        "name": "feedback",
+        "color": "black",
+        "size": 60,
+        "font": FONT_FAMILY
+    },
     "variable": {
         "text": "feedback_text",
     },
@@ -84,6 +94,7 @@ if __name__ == "__main__":
             "target_text": "Right",
             "correct_key": "g",
             "feedback_opacity": 0.0,
+            "feedback_block": True,
             "marker_start": 1,
             "marker_end": 11,
         },
@@ -92,6 +103,7 @@ if __name__ == "__main__":
             "target_text": "Right",
             "correct_key": "g",
             "feedback_opacity": 1.0,
+            "feedback_block": False,
             "marker_start": 1,
             "marker_end": 11,
         },
@@ -100,6 +112,7 @@ if __name__ == "__main__":
             "target_text": "Right",
             "correct_key": "g",
             "feedback_opacity": 0.0,
+            "feedback_block": True,
             "marker_start": 1,
             "marker_end": 11,
         },

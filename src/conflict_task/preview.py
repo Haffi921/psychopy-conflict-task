@@ -13,12 +13,11 @@ from conflict_task.devices import InputDevice, Window
 def preview_component(
     component_settings, component_values={}, window_settings={}, component_type=VISUAL
 ):
-    window = Window(window_settings)
-    keyboard = InputDevice()
+    Window.start(window_settings)
     component: BaseComponent = None
 
     if component_type is VISUAL:
-        component = VisualComponent(component_settings, window)
+        component = VisualComponent(component_settings)
     elif component_type is AUDIO:
         component = AudioComponent(component_settings)
     elif component_type is RESPONSE:
@@ -34,28 +33,30 @@ def preview_component(
     component.start(0, 0, 0)
 
     while running == KEEP_RUNNING:
-        if keyboard.was_key_pressed("escape"):
+        if InputDevice.was_key_pressed("escape"):
             running = QUIT_EXPERIMENT
             continue
 
         if component_type == RESPONSE:
-            component.check(keyboard)
+            component.check()
 
             if component.made:
                 running = STOP_RUNNING
 
-        window.flip()
+        Window.flip()
 
 
-def preview_sequence(sequence_settings, sequence_values={}, window_settings={}):
-    window = Window(window_settings)
-    keyboard = InputDevice()
+def preview_sequence(sequence_settings, sequence_values={}, window_settings={}, print_data = False):
+    if not Window.started:
+        Window.start(window_settings)
+    InputDevice()
 
     if "type" in sequence_settings and hasattr(sequence, sequence_settings["type"]):
-        seq = getattr(sequence, sequence_settings["type"])(
-            window, keyboard, sequence_settings
-        )
+        seq = getattr(sequence, sequence_settings["type"])(sequence_settings)
     else:
-        seq = sequence.Sequence(window, keyboard, sequence_settings)
-
+        seq = sequence.Sequence(sequence_settings)
+    
     seq.run(sequence_values, False)
+    
+    if print_data:
+        print(seq.get_data())
