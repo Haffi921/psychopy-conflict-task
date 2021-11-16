@@ -85,7 +85,6 @@ class VisualComponent(BaseComponent):
             self.preload = None
             if "preload" in component_settings:
                 self.preload = {}
-                self.aspect_ratios = {}
                 for image in component_settings["preload"]:
                     self.preload[image] = self.create_image_component({
                             **visual_spec,
@@ -219,3 +218,92 @@ class VisualComponent(BaseComponent):
 
         super().stop(time, time_flip, global_flip)
         self._turn_auto_draw_off()
+
+
+class TextComponent(VisualComponent):
+    def __init__(self, component_settings: dict) -> None:
+        super().__init__(component_settings)
+
+        visual_spec: dict = get_type(component_settings, "spec", dict, {})
+
+        self.handle_size_height(self.variable_factor)
+        self.handle_size_height(visual_spec, Window.pt2norm_size)
+        
+        self.component = visual.TextStim(Window._window, **visual_spec)
+
+    @staticmethod
+    def handle_size_height(dictionary: dict, func = None):
+        if dictionary and "size" in dictionary:
+            size = dictionary["size"] if not func else func(dictionary["size"])
+            dictionary["height"] = size
+            del dictionary["size"]
+
+    def prepare(self, trial_values: dict) -> None:
+        # Dirty hack for a stupid bug
+        if "text" in self.variable_factor:
+            # Value needs to be forcefully changed for other attributes to take effect
+            self.component.text = ""
+
+        if "size" in self.variable_factor:
+            trial_values["height"] = Window.pt2norm_size(trial_values["size"])
+        
+        super().prepare(trial_values)
+    
+
+class ImageComponent(VisualComponent):
+    def __init__(self, component_settings: dict) -> None:
+        self.preload = None
+
+        super().__init__(component_settings)
+        visual_spec: dict = get_type(component_settings, "spec", dict, {})
+
+        if "preload" in component_settings:
+            self.preload = {}
+            for image in component_settings["preload"]:
+                self.preload[image] = visual.ImageStim(Window._window, {
+                        **visual_spec,
+                        "image": image,
+                    })
+        
+        if "image" in visual_spec and self.preload:
+            if (image := visual_spec["image"]) in self.preload:
+                self.component = self.preload[image]
+            else:
+                self.component = visual.ImageStim(Window._window, **visual_spec)
+                self.preload[image] = self.component
+        else:
+            self.component = visual.ImageStim(Window._window, **visual_spec)
+
+    def prepare(self, trial_values: dict) -> None:
+        if "image" in trial_values and self.preload:
+            image = trial_values["image"]
+            self.component = self.preload[image]
+            del trial_values["image"]
+            super().prepare(trial_values)
+            trial_values["image"] = image
+        else:
+            super().prepare(trial_values)
+
+
+class ShapeComponent(VisualComponent):
+    def __init__(self, component_settings: dict) -> None:
+        super().__init__(component_settings)
+        visual_spec: dict = get_type(component_settings, "spec", dict, {})
+
+        if self.type == "shape":
+            self.type = "ShapeStim"
+        elif self.type == "cross":
+            self.type = "ShapeStim"
+            visual_spec["vertices"] = "cross"
+        visual_spec["size"] = Window.pix2norm_size(visual_spec["size"])
+        
+        if hasattr(visual, self.type):
+            self.component = getattr(visual, self.type)(Window._window, **visual_spec)
+        else:
+            fatal_exit(f"No component named {type}")
+    
+    def prepare(self, trial_values: dict) -> None:
+        if "size" in self.variable_factor:
+            trial_values["size"] = Window.pix2norm_size(trial_values["size"])
+        
+        super().prepare(trial_values)
