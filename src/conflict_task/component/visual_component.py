@@ -65,6 +65,8 @@ class VisualComponent(BaseComponent):
             f"{self.name}: VisualComponents must specify a 'type'",
         )
 
+        self.use_norm = get_type(component_settings, "use_norm", bool, False)
+
         self.create_visual_component(component_settings)
         # true_or_fatal_exit(
         #     hasattr(visual, visual_type),
@@ -73,7 +75,7 @@ class VisualComponent(BaseComponent):
         # -----------------------------------------------
 
     def create_visual_component(self, component_settings):
-        visual_spec: dict = get_type(component_settings, "spec", dict, {})
+        visual_spec: dict = get_type(component_settings, "spec", dict, {}).copy()
 
         if self.type == "text":
             if self.variable_factor and "size" in self.variable_factor:
@@ -99,11 +101,20 @@ class VisualComponent(BaseComponent):
                     self.preload[image] = self.component
             else:
                 self.component = self.create_image_component(visual_spec)
+            
+            if "image" in self.variable_factor and self.preload:
+                self.variable_image = self.variable_factor["image"]
+                del self.variable_factor["image"]
+            else:
+                self.variable_image = None
         
         else:
             if self.type == "shape":
                 self.type = "ShapeStim"
-            visual_spec["size"] = Window.pix2norm_size(visual_spec["size"])
+            
+            if not self.use_norm and "size" in visual_spec:
+                visual_spec["size"] = Window.pix2norm_size(visual_spec["size"])
+                
             self.component = self.create_other_component(self.type, visual_spec)
 
     @staticmethod
@@ -117,7 +128,7 @@ class VisualComponent(BaseComponent):
 
     @staticmethod
     def create_image_component(spec_settings):
-        return visual.TextStim(Window._window, **spec_settings)
+        return visual.ImageStim(Window._window, **spec_settings)
 
     @staticmethod
     def create_other_component(type, spec_settings):
@@ -139,7 +150,7 @@ class VisualComponent(BaseComponent):
         self._turn_auto_draw_off()
     
     def prepare(self, trial_values: dict) -> None:
-        if self.variable_factor:
+        if self.variable_factor is not None:
             if self.type == "text":
                 ## Dirty hack for a stupid bug
                 if "text" in self.variable_factor:
@@ -151,12 +162,12 @@ class VisualComponent(BaseComponent):
                     trial_values["size"] = Window.pix2norm_size(trial_values["size"])
             
             if self.type == "image":
-                if "image" in trial_values and self.preload:
-                    image = trial_values["image"]
+                if self.variable_image:
+                    image = trial_values[self.variable_image]
                     self.component = self.preload[image]
-                    del trial_values["image"]
                     super().prepare(trial_values)
-                    trial_values["image"] = image
+                else:
+                    super().prepare(trial_values)
             
             else:
                 super().prepare(trial_values)

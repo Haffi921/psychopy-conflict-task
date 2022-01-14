@@ -1,6 +1,7 @@
 from ._base_sequence import BaseSequence
 
 DEFAULT_SEQUENCE_SETTINGS = {
+    "post_trial_interval": 0.0,
     "early_quit_keys": [],
     "wait_for_response": False,
     "cut_on_response": False,

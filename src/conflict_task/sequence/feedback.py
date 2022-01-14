@@ -1,5 +1,5 @@
 from conflict_task.devices import Window
-from conflict_task.util import get_or_fatal_exit, true_or_fatal_exit
+from conflict_task.util import get_type_or_fatal_exit
 
 from .sequence import DEFAULT_SEQUENCE_SETTINGS, Sequence
 
@@ -26,23 +26,30 @@ class Feedback(Sequence):
         super()._parse_sequence_settings(
             sequence_settings, default_settings=default_settings
         )
-        self.feedback_function = get_or_fatal_exit(
+        feedback_values_base = get_type_or_fatal_exit(
             sequence_settings,
-            "trial_values",
-            "Feedback must have 'trial_values' setting",
+            "feedback_values",
+            dict,
+            "Feedback must have 'feedback_values' setting",
         )
-        true_or_fatal_exit(
-            callable(self.feedback_function),
-            "Feedback 'trial_values' setting must be a function",
-        )
+
+        self.feedback_values = {}
+        self.feedback_values_dynamic = {}
+
+        for value in feedback_values_base:
+            if callable(feedback_values_base[value]):
+                self.feedback_values_dynamic[value] = feedback_values_base[value]
+            else:
+                self.feedback_values[value] = feedback_values_base[value]
 
     def _prepare_components(self, trial_values: dict) -> None:
-        feedback_values: dict = self.feedback_function(trial_values)
+        for key, func in self.feedback_values_dynamic.items():
+            self.feedback_values[key] = func(trial_values)
 
-        if win_color := feedback_values.get("win_color"):
+        if win_color := self.feedback_values.get("win_color"):
             Window._window.color = win_color
 
-        super()._prepare_components(feedback_values)
+        super()._prepare_components(self.feedback_values)
 
     def run(self, trial_values: dict, allow_escape) -> None:
         feedback_success = super().run(

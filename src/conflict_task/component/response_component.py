@@ -184,10 +184,9 @@ class CorrectResponseComponent(ResponseComponent):
 
         super().__init__(component_settings)
 
-        true_or_fatal_exit(
-            get_type(self.variable_factor, "correct_key", str),
-            "CorrectResponse component - 'correct_key' must be a key in variable factors",
-        )
+        if not self.variable_factor:
+            self.variable_factor = {}
+        self.variable_factor = {"correct_key": "correct_key", **self.variable_factor}
 
     def _parse_EMG_marker_settings(self, component_settings: dict) -> None:
         if EMGConnector.connected():

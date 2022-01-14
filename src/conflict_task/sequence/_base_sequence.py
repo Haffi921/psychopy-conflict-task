@@ -37,6 +37,7 @@ class BaseSequence:
         # Components
         self.response: ResponseComponent = None
         self.visual: list[VisualComponent] = []
+        self.persistent: list[VisualComponent] = None
         self.audio: list[AudioComponent] = []
         self.wait: list[WaitComponent] = []
 
@@ -47,6 +48,7 @@ class BaseSequence:
         self.variable_factor: dict = None
 
         # Base
+        self.post_trial_interval: float = None
         self.early_quit_keys: list = None
         self.wait_for_response: bool = False
         self.cut_on_response: bool = False
@@ -142,17 +144,20 @@ class BaseSequence:
     def _parse_component_settings(self, sequence_settings: dict) -> None:
         self._base_sequence_should_not_be_run()
 
-        if visual_components := get_type(sequence_settings, "visual_components", list):
+        if persistent_components := get_type(sequence_settings, "persistent", list):
+            self.persistent = self._create_components(persistent_components, VisualComponent)
+
+        if visual_components := get_type(sequence_settings, "visual", list):
             self.visual = self._create_components(visual_components, VisualComponent)
 
-        if audio_components := get_type(sequence_settings, "audio_components", list):
+        if audio_components := get_type(sequence_settings, "audio", list):
             self.audio = self._create_components(audio_components, AudioComponent)
 
-        if wait_components := get_type(sequence_settings, "wait_components", list):
+        if wait_components := get_type(sequence_settings, "wait", list):
             self.wait = self._create_components(wait_components, WaitComponent)
 
         if (response := get_type(sequence_settings, "response", dict)) is not None:
-            if "correct_key" in get_type(response, "variable", dict, {}):
+            if response.get("correct", False):
                 self.response = CorrectResponseComponent(response)
             else:
                 self.response = ResponseComponent(response)
@@ -262,7 +267,7 @@ class BaseSequence:
 
         self.reset_clock(new_t=new_t)
         InputDevice.reset_clock(new_t=new_t)
-        # Keyboard.reset_events()
+        InputDevice.reset_events()
 
     def _run_frame(self, early_quit=[]) -> None:
         self._base_sequence_should_not_be_run()
@@ -301,8 +306,6 @@ class BaseSequence:
 
         # If sequence has a response component check for it
         if self.response:
-            # if self.response.not_started():
-            #     Keyboard.reset_events()
             if self.response.started():
                 self.response.check()
 
@@ -318,11 +321,11 @@ class BaseSequence:
         if self.timed and time_flip >= self.timer:
             keep_running = STOP_RUNNING
 
-        # Flip window
-        Window.flip()
-
         if keep_running == STOP_RUNNING:
             self._stop_all_components(time, time_flip, time_global_flip)
+        
+        # Flip window
+        Window.flip()
 
         # Continue sequence or not
         return keep_running
@@ -355,8 +358,29 @@ class BaseSequence:
 
         if self.marker:
             self.send_marker_value(self.marker_end + self.marker_addition)
+        
+        if self.post_trial_interval != 0.0:
+            t = self.clock.getTime() + self.post_trial_interval
+            while self.clock.getTime() <= t - FRAMETOLERANCE:
+                pass
 
         return True
+    
+    def start_persistent(self):
+        if self.persistent:
+            time = self.clock.getTime()
+            time_flip = Window.get_future_flip_time(clock=self.clock)
+            time_global_flip = Window.get_future_flip_time()
+            for persistent in self.persistent:
+                persistent.start(time, time_flip, time_global_flip)
+    
+    def stop_persistent(self):
+        if self.persistent:
+            time = self.clock.getTime()
+            time_flip = Window.get_future_flip_time(clock=self.clock)
+            time_global_flip = Window.get_future_flip_time()
+            for persistent in self.persistent:
+                persistent.stop(time, time_flip, time_global_flip)
 
     def get_data(self, prepend_key=True) -> dict:
         self._base_sequence_should_not_be_run()

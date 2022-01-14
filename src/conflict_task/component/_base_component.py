@@ -149,7 +149,7 @@ class BaseComponent:
 
         self._base_component_should_not_be_run()
 
-        if self.variable_factor:
+        if self.variable_factor is not None:
 
             for factor_name, factor_id in self.variable_factor.items():
                 true_or_fatal_exit(

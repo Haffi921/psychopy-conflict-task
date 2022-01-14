@@ -59,6 +59,13 @@ class Window:
             logging.warning(
                 "Window already started. 'Window.start' is called more than once."
             )
+    
+    @classmethod
+    def turnoff(cls):
+        cls._settings = DEFAULT_WINDOW_SETTINGS
+        cls._window.flip()
+        cls._window.close()
+        cls.started = False
 
     @classmethod
     def _error_if_window_not_started(cls):
@@ -79,6 +86,13 @@ class Window:
     @classmethod
     def pix2norm_pos(cls, pix: tuple[int, int]):
         return (cls.pix2norm_size(pix) * 2.0) - (1, 1)
+    
+    @classmethod
+    def pix2height_size(cls, pix: tuple[int, int]):
+        if cls._window.useRetina:
+            return (pix / cls._window.size[1]) * 2.0
+        else:
+            return pix / cls._window.size[1]
 
     @classmethod
     def pt2norm_size(cls, pt: int):
