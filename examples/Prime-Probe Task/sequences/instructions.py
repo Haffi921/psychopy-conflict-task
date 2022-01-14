@@ -54,8 +54,8 @@ instructions3_text = """
 Bitte lassen Sie Zeige- und Mittelfinger während der Experimentalblöcke auf den entsprechenden Tasten liegen:
 
 Linker Mittelfinger -> F-Taste
-Rechter Zeigefinger -> G-Taste
-Linker Zeigefinger -> N-Taste
+Linker Zeigefinger -> G-Taste
+Rechter Zeigefinger -> N-Taste
 Rechter Mittelfinger -> J-Taste
 """
 
