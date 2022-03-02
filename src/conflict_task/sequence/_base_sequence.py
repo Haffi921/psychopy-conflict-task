@@ -145,7 +145,9 @@ class BaseSequence:
         self._base_sequence_should_not_be_run()
 
         if persistent_components := get_type(sequence_settings, "persistent", list):
-            self.persistent = self._create_components(persistent_components, VisualComponent)
+            self.persistent = self._create_components(
+                persistent_components, VisualComponent
+            )
 
         if visual_components := get_type(sequence_settings, "visual", list):
             self.visual = self._create_components(visual_components, VisualComponent)
@@ -304,6 +306,10 @@ class BaseSequence:
             if not component.finished():
                 keep_running = KEEP_RUNNING
 
+        for visual_component in self.visual:
+            if visual_component.started():
+                visual_component._update(time_flip)
+
         # If sequence has a response component check for it
         if self.response:
             if self.response.started():
@@ -323,7 +329,7 @@ class BaseSequence:
 
         if keep_running == STOP_RUNNING:
             self._stop_all_components(time, time_flip, time_global_flip)
-        
+
         # Flip window
         Window.flip()
 
@@ -358,14 +364,14 @@ class BaseSequence:
 
         if self.marker:
             self.send_marker_value(self.marker_end + self.marker_addition)
-        
+
         if self.post_trial_interval != 0.0:
             t = self.clock.getTime() + self.post_trial_interval
             while self.clock.getTime() <= t - FRAMETOLERANCE:
                 pass
 
         return True
-    
+
     def start_persistent(self):
         if self.persistent:
             time = self.clock.getTime()
@@ -373,7 +379,7 @@ class BaseSequence:
             time_global_flip = Window.get_future_flip_time()
             for persistent in self.persistent:
                 persistent.start(time, time_flip, time_global_flip)
-    
+
     def stop_persistent(self):
         if self.persistent:
             time = self.clock.getTime()

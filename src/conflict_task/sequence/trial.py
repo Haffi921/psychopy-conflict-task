@@ -60,7 +60,7 @@ class Trial(Sequence):
 
             if not feedback_success:
                 return feedback_success
-        
+
         return trial_success
 
     def get_data(self, prepend_key: bool = True) -> dict:

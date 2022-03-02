@@ -49,7 +49,7 @@ class Window:
         if not cls.started:
             if window_settings:
                 cls.settings(window_settings)
-            
+
             cls._window = visual.Window(**cls._settings)
 
             cls._window.mouseVisible = cls._settings["allowGUI"]
@@ -59,7 +59,7 @@ class Window:
             logging.warning(
                 "Window already started. 'Window.start' is called more than once."
             )
-    
+
     @classmethod
     def turnoff(cls):
         cls._settings = DEFAULT_WINDOW_SETTINGS
@@ -71,22 +71,22 @@ class Window:
     def _error_if_window_not_started(cls):
         if not cls.started:
             logging.error(f"Remember to start window: 'Window.start()'")
-    
+
     @classmethod
     def size(cls):
         return cls._window.size
-    
+
     @classmethod
     def pix2norm_size(cls, pix: tuple[int, int]):
         if cls._window.useRetina:
             return (pix / cls._window.size) * 2.0
         else:
             return pix / cls._window.size
-        
+
     @classmethod
     def pix2norm_pos(cls, pix: tuple[int, int]):
         return (cls.pix2norm_size(pix) * 2.0) - (1, 1)
-    
+
     @classmethod
     def pix2height_size(cls, pix: tuple[int, int]):
         if cls._window.useRetina:

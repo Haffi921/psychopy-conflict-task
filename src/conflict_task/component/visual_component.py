@@ -1,3 +1,5 @@
+from types import FunctionType
+
 from psychopy import visual
 
 from conflict_task.devices import Window
@@ -68,6 +70,10 @@ class VisualComponent(BaseComponent):
         self.use_norm = get_type(component_settings, "use_norm", bool, False)
 
         self.create_visual_component(component_settings)
+
+        self.update_function = get_type(
+            component_settings, "update", FunctionType, None
+        )
         # true_or_fatal_exit(
         #     hasattr(visual, visual_type),
         #     f"{self.name}: There's no visual component type {visual_type}",
@@ -82,17 +88,19 @@ class VisualComponent(BaseComponent):
                 self.variable_factor["height"] = self.variable_factor["size"]
                 del self.variable_factor["size"]
             self.component = self.create_text_component(visual_spec)
-        
+
         elif self.type == "image":
             self.preload = None
             if "preload" in component_settings:
                 self.preload = {}
                 for image in component_settings["preload"]:
-                    self.preload[image] = self.create_image_component({
+                    self.preload[image] = self.create_image_component(
+                        {
                             **visual_spec,
                             "image": image,
-                        })
-            
+                        }
+                    )
+
             if "image" in visual_spec and self.preload:
                 if (image := visual_spec["image"]) in self.preload:
                     self.component = self.preload[image]
@@ -101,20 +109,20 @@ class VisualComponent(BaseComponent):
                     self.preload[image] = self.component
             else:
                 self.component = self.create_image_component(visual_spec)
-            
+
             if "image" in self.variable_factor and self.preload:
                 self.variable_image = self.variable_factor["image"]
                 del self.variable_factor["image"]
             else:
                 self.variable_image = None
-        
+
         else:
             if self.type == "shape":
                 self.type = "ShapeStim"
-            
+
             if not self.use_norm and "size" in visual_spec:
                 visual_spec["size"] = Window.pix2norm_size(visual_spec["size"])
-                
+
             self.component = self.create_other_component(self.type, visual_spec)
 
     @staticmethod
@@ -124,7 +132,6 @@ class VisualComponent(BaseComponent):
             del spec_settings["size"]
 
         return visual.TextStim(Window._window, **spec_settings)
-
 
     @staticmethod
     def create_image_component(spec_settings):
@@ -148,7 +155,7 @@ class VisualComponent(BaseComponent):
 
         super().refresh()
         self._turn_auto_draw_off()
-    
+
     def prepare(self, trial_values: dict) -> None:
         if self.variable_factor is not None:
             if self.type == "text":
@@ -160,7 +167,7 @@ class VisualComponent(BaseComponent):
             elif "size" in self.variable_factor:
                 if self.type in ["shape", "Rect", "Circle", "Polygon", "Line", "Pie"]:
                     trial_values["size"] = Window.pix2norm_size(trial_values["size"])
-            
+
             if self.type == "image":
                 if self.variable_image:
                     image = trial_values[self.variable_image]
@@ -168,10 +175,13 @@ class VisualComponent(BaseComponent):
                     super().prepare(trial_values)
                 else:
                     super().prepare(trial_values)
-            
+
             else:
                 super().prepare(trial_values)
 
+    def _update(self, time) -> None:
+        if self.update_function is not None:
+            self.update_function(self.component, time)
 
     def _turn_auto_draw_on(self) -> None:
         """
@@ -239,11 +249,11 @@ class TextComponent(VisualComponent):
 
         self.handle_size_height(self.variable_factor)
         self.handle_size_height(visual_spec, Window.pt2norm_size)
-        
+
         self.component = visual.TextStim(Window._window, **visual_spec)
 
     @staticmethod
-    def handle_size_height(dictionary: dict, func = None):
+    def handle_size_height(dictionary: dict, func=None):
         if dictionary and "size" in dictionary:
             size = dictionary["size"] if not func else func(dictionary["size"])
             dictionary["height"] = size
@@ -257,9 +267,9 @@ class TextComponent(VisualComponent):
 
         if "size" in self.variable_factor:
             trial_values["height"] = Window.pt2norm_size(trial_values["size"])
-        
+
         super().prepare(trial_values)
-    
+
 
 class ImageComponent(VisualComponent):
     def __init__(self, component_settings: dict) -> None:
@@ -271,11 +281,14 @@ class ImageComponent(VisualComponent):
         if "preload" in component_settings:
             self.preload = {}
             for image in component_settings["preload"]:
-                self.preload[image] = visual.ImageStim(Window._window, {
+                self.preload[image] = visual.ImageStim(
+                    Window._window,
+                    {
                         **visual_spec,
                         "image": image,
-                    })
-        
+                    },
+                )
+
         if "image" in visual_spec and self.preload:
             if (image := visual_spec["image"]) in self.preload:
                 self.component = self.preload[image]
@@ -307,14 +320,14 @@ class ShapeComponent(VisualComponent):
             self.type = "ShapeStim"
             visual_spec["vertices"] = "cross"
         visual_spec["size"] = Window.pix2norm_size(visual_spec["size"])
-        
+
         if hasattr(visual, self.type):
             self.component = getattr(visual, self.type)(Window._window, **visual_spec)
         else:
             fatal_exit(f"No component named {type}")
-    
+
     def prepare(self, trial_values: dict) -> None:
         if "size" in self.variable_factor:
             trial_values["size"] = Window.pix2norm_size(trial_values["size"])
-        
+
         super().prepare(trial_values)

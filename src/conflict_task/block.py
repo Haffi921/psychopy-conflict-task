@@ -71,7 +71,7 @@ class Block:
                 EMGConnector.send_marker(self.marker[0] + block, t=0.5, t_after=0.5)
 
             self.trial.start_persistent()
-            
+
             for trial in range(self.nr_trials):
                 trial_values = {
                     **block_data,
@@ -85,7 +85,7 @@ class Block:
 
             if self.marker:
                 EMGConnector.send_marker(self.marker[1] + block, t=0.5, t_before=0.5)
-            
+
             self.trial.stop_persistent()
 
         if self.post:
